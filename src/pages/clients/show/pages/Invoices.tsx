@@ -1,0 +1,83 @@
+/**
+ * Invoice Ninja (https://invoiceninja.com).
+ *
+ * @link https://github.com/invoiceninja/invoiceninja source repository
+ *
+ * @copyright Copyright (c) 2022. Invoice Ninja LLC (https://invoiceninja.com)
+ *
+ * @license https://www.elastic.co/licensing/elastic-license
+ */
+
+import { route } from '$app/common/helpers/route';
+import { DataTable } from '$app/components/DataTable';
+import { useParams } from 'react-router-dom';
+import { useInvoiceColumns } from '$app/pages/invoices/common/hooks/useInvoiceColumns';
+import { useActions } from '$app/pages/invoices/edit/components/Actions';
+import { useCustomBulkActions } from '$app/pages/invoices/common/hooks/useCustomBulkActions';
+import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { permission } from '$app/common/guards/guards/permission';
+import { useFooterColumns } from '$app/pages/invoices/common/hooks/useFooterColumns';
+import { useSetAtom } from 'jotai';
+import { confirmActionModalAtom } from '$app/pages/recurring-invoices/common/components/ConfirmActionModal';
+import { useState } from 'react';
+import { DeleteInvoicesConfirmationModal } from '$app/pages/invoices/common/components/DeleteInvoicesConfirmationModal';
+import { useCompanyVerifactu } from '$app/common/hooks/useCompanyVerifactu';
+import { InvoiceStatus } from '$app/common/enums/invoice-status';
+
+export default function Invoices() {
+  const { id } = useParams();
+
+  const hasPermission = useHasPermission();
+
+  const { actions } = useActions();
+  const columns = useInvoiceColumns();
+  const { footerColumns } = useFooterColumns();
+  const customBulkActions = useCustomBulkActions();
+
+  const setIsConfirmActionModalOpen = useSetAtom(confirmActionModalAtom);
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<string[]>([]);
+
+  const verifactuEnabled = useCompanyVerifactu();
+
+  return (
+    <>
+      <DataTable
+        resource="invoice"
+        endpoint={route(
+          '/api/v1/invoices?include=client.group_settings,project&client_id=:id&sort=id|desc',
+          { id }
+        )}
+        columns={columns}
+        footerColumns={footerColumns}
+        customActions={actions}
+        customBulkActions={customBulkActions}
+        withResourcefulActions
+        withoutDefaultBulkActions
+        bulkRoute="/api/v1/invoices/bulk"
+        linkToCreate={route('/invoices/create?client=:id', { id })}
+        linkToEdit="/invoices/:id/edit"
+        excludeColumns={['client_id']}
+        linkToCreateGuards={[permission('create_invoice')]}
+        hideEditableOptions={!hasPermission('edit_invoice')}
+        onDeleteBulkAction={(selected) => {
+          setSelectedInvoiceIds(selected);
+          setIsConfirmActionModalOpen(true);
+        }}
+        withoutPageAsPreference
+        showDelete={(invoice) =>
+          Boolean(!verifactuEnabled) ||
+          (verifactuEnabled && invoice.status_id === InvoiceStatus.Draft)
+        }
+        showRestore={(invoice) =>
+          Boolean(!verifactuEnabled) ||
+          (verifactuEnabled && invoice.status_id === InvoiceStatus.Draft)
+        }
+      />
+
+      <DeleteInvoicesConfirmationModal
+        selectedInvoiceIds={selectedInvoiceIds}
+        setSelectedInvoiceIds={setSelectedInvoiceIds}
+      />
+    </>
+  );
+}

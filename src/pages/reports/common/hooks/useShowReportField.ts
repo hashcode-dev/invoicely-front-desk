@@ -1,0 +1,149 @@
+/**
+ * Invoice Ninja (https://invoiceninja.com).
+ *
+ * @link https://github.com/invoiceninja/invoiceninja source repository
+ *
+ * @copyright Copyright (c) 2022. Invoice Ninja LLC (https://invoiceninja.com)
+ *
+ * @license https://www.elastic.co/licensing/elastic-license
+ */
+
+import { Identifier } from '../useReports';
+
+type Field =
+  | 'document_email_attachment'
+  | 'is_expense_billed'
+  | 'is_income_billed'
+  | 'include_tax'
+  | 'status'
+  | 'product_key'
+  | 'clients'
+  | 'vendors'
+  | 'projects'
+  | 'categories'
+  | 'include_deleted'
+  | 'client'
+  | 'pdf_email_attachment'
+  | 'template_id'
+  | 'activity_type_id';
+
+const ReportFields: Record<Identifier, Field[]> = {
+  client: [
+    'document_email_attachment', 
+    'include_deleted',
+    'template_id',
+  ],
+  invoice: [
+    'document_email_attachment',
+    'status',
+    'include_deleted',
+    'client',
+    'pdf_email_attachment',
+    'template_id',
+  ],
+  invoice_item: [
+    'document_email_attachment',
+    'product_key',
+    'include_deleted',
+    'status',
+    'client',
+    'template_id',
+  ],
+  quote: [
+    'document_email_attachment',
+    'include_deleted',
+    'status',
+    'client',
+    'pdf_email_attachment',
+    'template_id',
+  ],
+  quote_item: [
+    'document_email_attachment',
+    'include_deleted',
+    'status',
+    'client',
+    'product_key',
+    'template_id',
+  ],
+  credit: [
+    'document_email_attachment',
+    'include_deleted',
+    'status',
+    'client',
+    'pdf_email_attachment',
+    'template_id',
+  ],
+  document: ['document_email_attachment'],
+  payment: [
+    'document_email_attachment', 
+    'status', 
+    'client',
+    'template_id',
+  ],
+  expense: [
+    'document_email_attachment',
+    'clients',
+    'vendors',
+    'projects',
+    'categories',
+    'include_deleted',
+    'status',
+    'template_id',
+  ],
+  task: [
+    'document_email_attachment', 
+    'include_deleted', 
+    'status', 
+    'client',
+    'template_id',
+  ],
+  product: ['document_email_attachment', 'template_id'],
+  vendor: ['document_email_attachment', 'template_id'],
+  purchase_order: [
+    'document_email_attachment',
+    'include_deleted',
+    'status',
+    'pdf_email_attachment',
+    'template_id',
+  ],
+  purchase_order_item: [
+    'document_email_attachment',
+    'include_deleted',
+    'status',
+    'product_key',
+    'template_id',
+  ],
+  project: ['clients', 'projects'],
+  activity: ['activity_type_id'],
+  contact: [],
+  recurring_invoice: ['include_deleted', 'status', 'client', 'template_id'],
+  recurring_invoice_item: [
+    'document_email_attachment',
+    'product_key',
+    'include_deleted',
+    'status',
+    'client',
+    'template_id',
+  ],
+  product_sales: ['product_key', 'client'],
+  aged_receivable_detailed_report: [],
+  aged_receivable_summary_report: [],
+  client_balance_report: [],
+  client_sales_report: [],
+  profitloss: ['is_expense_billed', 'is_income_billed', 'include_tax'],
+  tax_summary_report: [],
+  tax_period_report: ['is_income_billed'],
+  user_sales_report: [],
+};
+
+interface Params {
+  report: Identifier;
+}
+
+export function useShowReportField(params: Params) {
+  const { report } = params;
+
+  return (field: Field) => {
+    return Boolean(ReportFields[report].includes(field));
+  };
+}
