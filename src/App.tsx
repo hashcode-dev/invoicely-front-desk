@@ -12,6 +12,8 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
   { label: 'Invoices', path: '/invoices', icon: 'receipt_long' },
   { label: 'Customers', path: '/customers', icon: 'group' },
+  { label: 'Products', path: '/products', icon: 'inventory_2' },
+  { label: 'Services', path: '/services', icon: 'design_services' },
   { label: 'Reports', path: '/reports', icon: 'analytics' },
   { label: 'Settings', path: '/settings', icon: 'settings' },
 ];
@@ -380,6 +382,24 @@ function ReportsPage() {
   );
 }
 
+function ProductsPage() {
+  return (
+    <section className="panel">
+      <h4>Products</h4>
+      <p>Manage your product catalog — add, edit, and organise physical or digital products used in invoices.</p>
+    </section>
+  );
+}
+
+function ServicesPage() {
+  return (
+    <section className="panel">
+      <h4>Services</h4>
+      <p>Define billable services and hourly rates to quickly attach them to invoices and quotes.</p>
+    </section>
+  );
+}
+
 function SettingsPage() {
   return (
     <section className="panel">
@@ -398,6 +418,8 @@ export function App() {
         <Route element={<InvoiceListPage />} path="/invoices" />
         <Route element={<NewInvoicePage />} path="/invoices/new" />
         <Route element={<CustomersPage />} path="/customers" />
+        <Route element={<ProductsPage />} path="/products" />
+        <Route element={<ServicesPage />} path="/services" />
         <Route element={<ReportsPage />} path="/reports" />
         <Route element={<SettingsPage />} path="/settings" />
       </Routes>
