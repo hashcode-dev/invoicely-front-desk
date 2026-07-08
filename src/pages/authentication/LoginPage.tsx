@@ -90,6 +90,14 @@ export function LoginPage() {
 
       {/* ── Right form panel ── */}
       <div className="login-form-panel">
+        <button
+          type="button"
+          className="login-back-home"
+          onClick={() => navigate('/')}
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+          Back to Home
+        </button>
         <div className="login-form-card">
           <div className="login-form-header">
             <h2 className="login-form-title">Welcome back</h2>
@@ -199,6 +207,18 @@ export function LoginPage() {
             Don&apos;t have an account?{' '}
             <button type="button" className="login-register-link">
               Request access
+            </button>
+          </p>
+
+          <p className="login-register-prompt" style={{ marginTop: '12px' }}>
+            <button
+              type="button"
+              className="login-register-link"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              onClick={() => navigate('/')}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>home</span>
+              Go back to homepage
             </button>
           </p>
         </div>
