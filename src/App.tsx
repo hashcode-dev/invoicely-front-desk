@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { atom } from 'jotai';
 import { useAuth } from './common/context/AuthContext';
 import { LoginPage } from './pages/authentication/LoginPage';
+import { LandingPage } from './pages/landing/LandingPage';
 
 type NavItem = {
   label: string;
@@ -434,7 +435,10 @@ function SettingsPage() {
 export function App() {
   return (
     <Routes>
-      {/* Public route */}
+      {/* Landing page — public marketing route */}
+      <Route element={<LandingPage />} path="/" />
+
+      {/* Auth routes */}
       <Route element={<LoginPage />} path="/login" />
 
       {/* Protected routes — wrapped in Shell + RequireAuth */}
