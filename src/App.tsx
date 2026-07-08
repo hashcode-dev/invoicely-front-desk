@@ -1,6 +1,8 @@
 import { FormEvent } from 'react';
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { atom } from 'jotai';
+import { useAuth } from './common/context/AuthContext';
+import { LoginPage } from './pages/authentication/LoginPage';
 
 type NavItem = {
   label: string;
@@ -38,7 +40,20 @@ export const refreshEntityDataBannerAtom = atom({
   visible: false,
 });
 
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate replace to="/login" />;
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -87,11 +102,18 @@ function Shell({ children }: { children: React.ReactNode }) {
             </button>
             <div className="profile-chip">
               <div>
-                <strong>Alex Sterling</strong>
-                <small>Finance Lead</small>
+                <strong>{user?.name ?? 'User'}</strong>
+                <small>{user?.email ?? ''}</small>
               </div>
-              <div className="avatar">AS</div>
+              {user?.picture ? (
+                <img src={user.picture} className="avatar" alt={user.name} style={{ objectFit: 'cover' }} />
+              ) : (
+                <div className="avatar">{user?.avatar ?? 'U'}</div>
+              )}
             </div>
+            <button className="icon-btn" type="button" title="Sign out" onClick={handleLogout}>
+              <span className="material-symbols-outlined">logout</span>
+            </button>
           </div>
         </header>
 
@@ -411,18 +433,31 @@ function SettingsPage() {
 
 export function App() {
   return (
-    <Shell>
-      <Routes>
-        <Route element={<Navigate replace to="/dashboard" />} path="/" />
-        <Route element={<DashboardPage />} path="/dashboard" />
-        <Route element={<InvoiceListPage />} path="/invoices" />
-        <Route element={<NewInvoicePage />} path="/invoices/new" />
-        <Route element={<CustomersPage />} path="/customers" />
-        <Route element={<ProductsPage />} path="/products" />
-        <Route element={<ServicesPage />} path="/services" />
-        <Route element={<ReportsPage />} path="/reports" />
-        <Route element={<SettingsPage />} path="/settings" />
-      </Routes>
-    </Shell>
+    <Routes>
+      {/* Public route */}
+      <Route element={<LoginPage />} path="/login" />
+
+      {/* Protected routes — wrapped in Shell + RequireAuth */}
+      <Route
+        path="/*"
+        element={
+          <RequireAuth>
+            <Shell>
+              <Routes>
+                <Route element={<Navigate replace to="/dashboard" />} path="/" />
+                <Route element={<DashboardPage />} path="/dashboard" />
+                <Route element={<InvoiceListPage />} path="/invoices" />
+                <Route element={<NewInvoicePage />} path="/invoices/new" />
+                <Route element={<CustomersPage />} path="/customers" />
+                <Route element={<ProductsPage />} path="/products" />
+                <Route element={<ServicesPage />} path="/services" />
+                <Route element={<ReportsPage />} path="/reports" />
+                <Route element={<SettingsPage />} path="/settings" />
+              </Routes>
+            </Shell>
+          </RequireAuth>
+        }
+      />
+    </Routes>
   );
 }
