@@ -1,0 +1,16 @@
+export const useBuilderStore = (selector?: any) => (selector ? selector({}) : {});
+export const useWebSocketSubscription = () => {};
+export const Builder = () => null;
+export const SignatorySelectorProps = {};
+export const DocumentCreationDropZone = () => null;
+export const ElementPropertiesPanel = () => null;
+export const ElementToolbox = () => null;
+export const PageThumbnails = () => null;
+export const RecipientPanel = () => null;
+export const SignatureDialog = () => null;
+export const getPasswordForPdf = () => '';
+export const isPdfPasswordProtected = () => false;
+export const BuilderContext = () => null;
+export const Sign = () => null;
+export const SignContext = () => null;
+export default {};

@@ -8,18 +8,18 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { endpoint } from '$app/common/helpers';
-import { request } from '$app/common/helpers/request';
-import { Expense } from '$app/common/interfaces/expense';
-import { useQuery, useQueryClient } from 'react-query';
-import { route } from '$app/common/helpers/route';
-import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
-import { Params } from './common/params.interface';
-import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai';
 import { invalidationQueryAtom } from '$app/common/atoms/data-table';
+import { endpoint } from '$app/common/helpers';
+import { request } from '$app/common/helpers/request';
+import { route } from '$app/common/helpers/route';
 import { toast } from '$app/common/helpers/toast/toast';
+import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { Expense } from '$app/common/interfaces/expense';
+import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
 import { $refetch } from '../hooks/useRefetch';
+import { Params } from './common/params.interface';
 
 interface BlankQueryParams {
   enabled?: boolean;
@@ -28,17 +28,18 @@ interface BlankQueryParams {
 export function useBlankExpenseQuery(params: BlankQueryParams) {
   const hasPermission = useHasPermission();
 
-  return useQuery<Expense>(
-    route('/api/v1/expenses/create'),
-    () =>
+  return useQuery({
+    queryKey: [route('/api/v1/expenses/create')],
+
+    queryFn: () =>
       request('GET', endpoint('/api/v1/expenses/create')).then(
         (response) => response.data.data
       ),
-    {
-      enabled: hasPermission('create_expense') ? params.enabled ?? true : false,
-      staleTime: Infinity,
-    }
-  );
+
+    enabled: hasPermission('create_expense') ? (params.enabled ?? true) : false,
+
+    staleTime: Infinity,
+  });
 }
 
 interface ExpenseParams {
@@ -47,31 +48,38 @@ interface ExpenseParams {
 }
 
 export function useExpenseQuery(params: ExpenseParams) {
-  return useQuery<Expense>(
-    ['/api/v1/expenses', params.id],
-    () =>
+  return useQuery({
+    queryKey: ['/api/v1/expenses', params.id],
+
+    queryFn: () =>
       request(
         'GET',
-        endpoint('/api/v1/expenses/:id?include=category', { id: params.id })
+        endpoint('/api/v1/expenses/:id?include=category,vendor,client', {
+          id: params.id,
+        })
       ).then((response) => response.data.data),
-    { enabled: params.enabled ?? true, staleTime: Infinity }
-  );
+
+    enabled: (params.enabled ?? true) && Boolean(params.id),
+    staleTime: Infinity,
+  });
 }
 
 interface ExpensesParams extends Params {
   enabled?: boolean;
   matchTransactions?: boolean;
   include?: string;
+  with?: string;
 }
 
 export function useExpensesQuery(params: ExpensesParams) {
-  return useQuery<Expense[]>(
-    ['/api/v1/expenses', params],
-    () =>
+  return useQuery({
+    queryKey: ['/api/v1/expenses', params],
+
+    queryFn: () =>
       request(
         'GET',
         endpoint(
-          '/api/v1/expenses?filter=:filter&per_page=:per_page&status=:status&page=:page&match_transactions=:match_transactions&include=:include',
+          '/api/v1/expenses?filter=:filter&per_page=:per_page&status=:status&page=:page&match_transactions=:match_transactions&include=:include&with=:with',
           {
             per_page: params.perPage ?? '100',
             page: params.currentPage ?? '1',
@@ -80,14 +88,17 @@ export function useExpensesQuery(params: ExpensesParams) {
             match_transactions: params.matchTransactions ?? false,
             includes: 'category',
             include: params.include || '',
+            with: params.with || '',
           }
         )
       ).then(
         (response: GenericSingleResourceResponse<Expense[]>) =>
           response.data.data
       ),
-    { enabled: params.enabled ?? true, staleTime: Infinity }
-  );
+
+    enabled: params.enabled ?? true,
+    staleTime: Infinity,
+  });
 }
 
 const successMessages = {
@@ -122,7 +133,9 @@ export function useBulk() {
       toast.success(message);
 
       invalidateQueryValue &&
-        queryClient.invalidateQueries([invalidateQueryValue]);
+        queryClient.invalidateQueries({
+          queryKey: [invalidateQueryValue],
+        });
 
       $refetch(['expenses']);
     });

@@ -8,6 +8,10 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MdControlPointDuplicate } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 import { useColorScheme } from '$app/common/colors';
 import { route } from '$app/common/helpers/route';
 import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
@@ -18,12 +22,9 @@ import { CreditCard } from '$app/components/icons/CreditCard';
 import { Files } from '$app/components/icons/Files';
 import { Icon } from '$app/components/icons/Icon';
 import { Invoice } from '$app/components/icons/Invoice';
+import { Refresh } from '$app/components/icons/Refresh';
 import { Wallet } from '$app/components/icons/Wallet';
 import { Modal } from '$app/components/Modal';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { MdControlPointDuplicate } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
 
 interface Props {
   client: Client;
@@ -45,6 +46,16 @@ export function EntityCreationModalAction({ client, dropdown }: Props) {
 
     setTimeout(() => {
       navigate(route('/invoices/create?client=:id', { id: client.id }));
+    }, 150);
+  };
+
+  const handleCreateRecurringInvoice = () => {
+    setIsModalVisible(false);
+
+    setTimeout(() => {
+      navigate(
+        route('/recurring_invoices/create?client=:id', { id: client.id })
+      );
     }, 150);
   };
 
@@ -100,6 +111,14 @@ export function EntityCreationModalAction({ client, dropdown }: Props) {
                 label={t('invoice')}
                 iconElement={<Invoice size="1.1rem" color={colors.$3} />}
                 onClick={handleCreateInvoice}
+              />
+            )}
+
+            {hasPermission('create_recurring_invoice') && (
+              <CloneOption
+                label={t('recurring_invoice')}
+                iconElement={<Refresh size="1.1rem" color={colors.$3} />}
+                onClick={handleCreateRecurringInvoice}
               />
             )}
 

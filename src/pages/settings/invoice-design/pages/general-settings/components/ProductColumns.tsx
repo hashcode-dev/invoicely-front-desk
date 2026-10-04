@@ -7,16 +7,17 @@
  *
  * @license https://www.elastic.co/licensing/elastic-license
  */
-import { Card, Element } from '$app/components/cards';
+
 import { useTranslation } from 'react-i18next';
-import { SortableVariableList } from './SortableVariableList';
+import { useColorScheme } from '$app/common/colors';
+import { useCompanyChanges } from '$app/common/hooks/useCompanyChanges';
+import { useCustomField } from '$app/components/CustomField';
+import { Card, Element } from '$app/components/cards';
 import { Divider } from '$app/components/cards/Divider';
 import Toggle from '$app/components/forms/Toggle';
-import { useHandleSettingsValueChange } from '$app/pages/settings/invoice-design/common/hooks';
-import { useCustomField } from '$app/components/CustomField';
-import { useCompanyChanges } from '$app/common/hooks/useCompanyChanges';
-import { useColorScheme } from '$app/common/colors';
 import { Cube } from '$app/components/icons/Cube';
+import { useHandleSettingsValueChange } from '$app/pages/settings/invoice-design/common/hooks';
+import { SortableVariableList } from './SortableVariableList';
 
 export default function ProductColumns() {
   const [t] = useTranslation();
@@ -27,11 +28,12 @@ export default function ProductColumns() {
   const customField = useCustomField();
   const handleValueChange = useHandleSettingsValueChange();
 
-  let defaultVariables = [
+  const defaultVariables = [
     { value: '$product.item', label: t('item') },
     { value: '$product.description', label: t('description') },
     { value: '$product.quantity', label: t('quantity') },
     { value: '$product.unit_cost', label: t('unit_cost') },
+    { value: '$product.net_cost', label: t('unit_cost') },
     { value: '$product.tax', label: t('tax') },
     { value: '$product.discount', label: t('discount') },
     { value: '$product.line_total', label: t('line_total') },
@@ -63,13 +65,9 @@ export default function ProductColumns() {
     { value: '$product.tax_amount', label: t('tax_amount') },
   ];
 
-  if (!company?.enabled_item_tax_rates) {
-    defaultVariables = defaultVariables.filter(
-      (variable) =>
-        variable.value !== '$product.tax_amount' &&
-        variable.value !== '$product.tax'
-    );
-  }
+  const excludedVariables = !company?.enabled_item_tax_rates
+    ? ['$product.tax_amount', '$product.tax']
+    : [];
 
   return (
     <Card
@@ -94,6 +92,7 @@ export default function ProductColumns() {
       <SortableVariableList
         for="product_columns"
         defaultVariables={defaultVariables}
+        excludedVariables={excludedVariables}
       />
 
       <div className="px-4 sm:px-6 py-4">

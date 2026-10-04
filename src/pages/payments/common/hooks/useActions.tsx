@@ -8,18 +8,6 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { EntityState } from '$app/common/enums/entity-state';
-import { getEntityState } from '$app/common/helpers';
-import { route } from '$app/common/helpers/route';
-import { useDisplayRunTemplateActions } from '$app/common/hooks/useDisplayRunTemplateActions';
-import { useEntityPageIdentifier } from '$app/common/hooks/useEntityPageIdentifier';
-import { Payment } from '$app/common/interfaces/payment';
-import { useBulk } from '$app/common/queries/payments';
-import { Divider } from '$app/components/cards/Divider';
-import { DropdownElement } from '$app/components/dropdown/DropdownElement';
-import { Icon } from '$app/components/icons/Icon';
-import { Action } from '$app/components/ResourceActions';
-import { useChangeTemplate } from '$app/pages/settings/invoice-design/pages/custom-designs/components/ChangeTemplate';
 import { useTranslation } from 'react-i18next';
 import {
   MdArchive,
@@ -31,6 +19,20 @@ import {
   MdSend,
   MdSettingsBackupRestore,
 } from 'react-icons/md';
+import { useLocation } from 'react-router-dom';
+import { EntityState } from '$app/common/enums/entity-state';
+import { getEntityState } from '$app/common/helpers';
+import { route } from '$app/common/helpers/route';
+import { useDisplayRunTemplateActions } from '$app/common/hooks/useDisplayRunTemplateActions';
+import { useEntityPageIdentifier } from '$app/common/hooks/useEntityPageIdentifier';
+import { PaymentStatus } from '$app/common/enums/payment-status';
+import { Payment } from '$app/common/interfaces/payment';
+import { useBulk } from '$app/common/queries/payments';
+import { Divider } from '$app/components/cards/Divider';
+import { DropdownElement } from '$app/components/dropdown/DropdownElement';
+import { Icon } from '$app/components/icons/Icon';
+import { Action } from '$app/components/ResourceActions';
+import { useChangeTemplate } from '$app/pages/settings/invoice-design/pages/custom-designs/components/ChangeTemplate';
 
 interface Params {
   showEditAction?: boolean;
@@ -38,6 +40,9 @@ interface Params {
 }
 export function useActions(params?: Params) {
   const [t] = useTranslation();
+  const location = useLocation();
+
+  const bulk = useBulk();
 
   const { showEditAction, showCommonBulkAction } = params || {};
 
@@ -54,8 +59,6 @@ export function useActions(params?: Params) {
       'activity',
     ],
   });
-
-  const bulk = useBulk();
 
   const {
     setChangeTemplateVisible,
@@ -75,6 +78,7 @@ export function useActions(params?: Params) {
       ),
     () => Boolean(showEditAction) && <Divider withoutPadding />,
     (resource: Payment) =>
+      !location.pathname.includes('/apply') &&
       resource.amount - resource.applied > 0 &&
       !resource.is_deleted && (
         <DropdownElement
@@ -85,7 +89,9 @@ export function useActions(params?: Params) {
         </DropdownElement>
       ),
     (resource: Payment) =>
+      !location.pathname.includes('/refund') &&
       resource.amount !== resource.refunded &&
+      resource.status_id !== PaymentStatus.Pending &&
       !resource.is_deleted && (
         <DropdownElement
           to={route('/payments/:id/refund', { id: resource.id })}

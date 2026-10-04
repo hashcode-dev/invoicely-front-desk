@@ -8,17 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { debounce } from 'lodash';
+import { useEffect, useRef, useState } from 'react';
 import { previewEndpoint } from '$app/common/helpers';
 import { Credit } from '$app/common/interfaces/credit';
 import { Invoice } from '$app/common/interfaces/invoice';
 import { PurchaseOrder } from '$app/common/interfaces/purchase-order';
 import { Quote } from '$app/common/interfaces/quote';
 import { RecurringInvoice } from '$app/common/interfaces/recurring-invoice';
-import { useEffect, useRef, useState } from 'react';
+import { RemoveLogoCTA } from '$app/components/RemoveLogoCTA';
 import { InvoiceViewer } from './InvoiceViewer';
 import { RelationType } from './ProductsTable';
-import { RemoveLogoCTA } from '$app/components/RemoveLogoCTA';
-import { debounce } from 'lodash';
 
 export type Resource =
   | Invoice
@@ -156,18 +156,20 @@ export function InvoicePreview(props: Props) {
   ) {
     return (
       <div className="flex flex-col space-y-3">
-        <InvoiceViewer
-          link={previewEndpoint(
-            '/api/v1/live_preview/purchase_order?entity=:entity&entity_id=:id',
-            {
-              entity: props.entity,
-              id: debouncedResource?.id,
-            }
-          )}
-          resource={debouncedResource}
-          method="POST"
-          enabled={props.observable ? isIntersecting : true}
-        />
+        <div ref={divRef}>
+          <InvoiceViewer
+            link={previewEndpoint(
+              '/api/v1/live_preview/purchase_order?entity=:entity&entity_id=:id',
+              {
+                entity: props.entity,
+                id: debouncedResource?.id,
+              }
+            )}
+            resource={debouncedResource}
+            method="POST"
+            enabled={props.observable ? isIntersecting : true}
+          />
+        </div>
 
         {props.withRemoveLogoCTA && <RemoveLogoCTA />}
       </div>

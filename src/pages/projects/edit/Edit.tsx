@@ -8,21 +8,23 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Card, Element } from '$app/components/cards';
-import { InputField } from '$app/components/forms';
-import { Project } from '$app/common/interfaces/project';
-import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { useProjectQuery } from '$app/common/queries/projects';
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext, useParams } from 'react-router-dom';
-import { UserSelector } from '$app/components/users/UserSelector';
-import { EntityStatus } from '$app/components/EntityStatus';
-import { CustomField } from '$app/components/CustomField';
-import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
-import { ClientActionButtons } from '$app/pages/invoices/common/components/ClientActionButtons';
-import { NumberInputField } from '$app/components/forms/NumberInputField';
 import { useColorScheme } from '$app/common/colors';
+import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
+import { Project } from '$app/common/interfaces/project';
+import { TAG_ENTITY_TYPES } from '$app/common/interfaces/tag';
+import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { useProjectQuery } from '$app/common/queries/projects';
+import { CustomField } from '$app/components/CustomField';
+import { Card, Element } from '$app/components/cards';
+import { EntityStatus } from '$app/components/EntityStatus';
+import { InputField } from '$app/components/forms';
+import { NumberInputField } from '$app/components/forms/NumberInputField';
+import { TagPillSelector } from '$app/components/tags/TagPillSelector';
+import { UserSelector } from '$app/components/users/UserSelector';
+import { ClientActionButtons } from '$app/pages/invoices/common/components/ClientActionButtons';
 
 interface Context {
   errors: ValidationBag | undefined;
@@ -95,6 +97,15 @@ export default function Edit() {
           onChange={(user) => handleChange('assigned_user_id', user.id)}
           onClearButtonClick={() => handleChange('assigned_user_id', '')}
           errorMessage={errors?.errors.assigned_user_id}
+        />
+      </Element>
+
+      <Element leftSide={t('tags')}>
+        <TagPillSelector
+          entityType={TAG_ENTITY_TYPES.project}
+          value={project?.tags || []}
+          onChange={(tags) => handleChange('tags', tags)}
+          errorMessage={errors?.errors.tags}
         />
       </Element>
 

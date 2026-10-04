@@ -35,6 +35,7 @@ import {
 } from '$app/common/helpers/html-string';
 import classNames from 'classnames';
 import { normalizeColumnName } from '$app/common/helpers/data-table';
+import { TagPills } from '$app/components/tags/TagPills';
 
 export const defaultColumns: string[] = [
   'name',
@@ -91,6 +92,7 @@ export function useAllClientColumns() {
     'vat_number',
     'website',
     'city',
+    'tags',
   ] as const;
 
   return clientColumns.map((column) => normalizeColumnName(column));
@@ -194,7 +196,7 @@ export function useClientColumns() {
     },
     {
       column: 'contact_email',
-      id: 'id',
+      id: 'contact_email',
       label: t('contact_email'),
       format: (value, client) =>
         client.contacts.length > 0 && (
@@ -436,6 +438,12 @@ export function useClientColumns() {
       column: 'city',
       id: 'city',
       label: t('city'),
+    },
+    {
+      column: 'tags',
+      id: 'client_tag_ids',
+      label: t('tags'),
+      format: (value, client) => <TagPills tags={client.tags} />,
     },
   ];
 

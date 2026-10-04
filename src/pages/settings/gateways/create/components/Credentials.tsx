@@ -8,30 +8,31 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Element } from '$app/components/cards';
-import { Button, Link } from '$app/components/forms';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { useColorScheme } from '$app/common/colors';
+import { endpoint, isHosted } from '$app/common/helpers';
+import { request } from '$app/common/helpers/request';
+import { toast } from '$app/common/helpers/toast/toast';
+import { useAccentColor } from '$app/common/hooks/useAccentColor';
 import { CompanyGateway } from '$app/common/interfaces/company-gateway';
 import { Gateway } from '$app/common/interfaces/statics';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { useTranslation } from 'react-i18next';
-import { formatLabel } from '../helpers/format-label';
-import { useResolveInputField } from '../hooks/useResolveInputField';
-import { StripeConnect } from './gateways/StripeConnect';
-import { WePay } from './gateways/WePay';
-import { PayPalPPCP } from './gateways/PayPalPPCP';
+import { Element } from '$app/components/cards';
 import { Divider } from '$app/components/cards/Divider';
-import { request } from '$app/common/helpers/request';
-import { endpoint, isHosted } from '$app/common/helpers';
-import { toast } from '$app/common/helpers/toast/toast';
-import { useState } from 'react';
+import { Button, Link } from '$app/components/forms';
 import { Modal } from '$app/components/Modal';
-import { GoCardlessOAuth2 } from './gateways/GoCardlessOAuth2';
-import { SquareOAuth } from './gateways/SquareOAuth';
 import { useHandleGoCardless } from '$app/pages/settings/gateways/create/hooks/useHandleGoCardless';
 import { useResolveConfigValue } from '$app/pages/settings/gateways/create/hooks/useResolveConfigValue';
-import { useLocation } from 'react-router-dom';
-import { useAccentColor } from '$app/common/hooks/useAccentColor';
-import { useColorScheme } from '$app/common/colors';
+import { formatLabel } from '../helpers/format-label';
+import { useResolveInputField } from '../hooks/useResolveInputField';
+import { GoCardlessOAuth2 } from './gateways/GoCardlessOAuth2';
+import { PayPalPPCP } from './gateways/PayPalPPCP';
+import { Payware } from './gateways/Payware';
+import { SquareOAuth } from './gateways/SquareOAuth';
+import { StripeConnect } from './gateways/StripeConnect';
+import { WePay } from './gateways/WePay';
 
 interface Props {
   gateway: Gateway;
@@ -63,8 +64,9 @@ export function Credentials(props: Props) {
   const PAYPAL_PPCP = '80af24a6a691230bbec33e930ab40666';
   const GOCARDLESS = 'b9886f9257f0c6ee7c302f1c74475f6c';
   const SQUARE = '65faab2ab6e3223dbe848b1686490baz';
+  const PAYWARE = 'b0a6294fca4488c2bab58f3e11e3c623';
 
-  const hostedGateways = [STRIPE_CONNECT, WEPAY, PAYPAL_PPCP];
+  const hostedGateways = [STRIPE_CONNECT, WEPAY, PAYPAL_PPCP, PAYWARE];
 
   if (
     isHosted() &&
@@ -122,6 +124,15 @@ export function Credentials(props: Props) {
 
       {props.gateway && props.gateway.key === PAYPAL_PPCP && (
         <PayPalPPCP
+          gateway={props.gateway}
+          companyGateway={props.companyGateway}
+          setCompanyGateway={props.setCompanyGateway}
+          errors={props.errors}
+        />
+      )}
+
+      {props.gateway && props.gateway.key === PAYWARE && (
+        <Payware
           gateway={props.gateway}
           companyGateway={props.companyGateway}
           setCompanyGateway={props.setCompanyGateway}

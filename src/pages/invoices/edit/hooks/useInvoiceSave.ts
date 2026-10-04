@@ -8,18 +8,18 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { endpoint } from '$app/common/helpers';
-import { Invoice } from '$app/common/interfaces/invoice';
-import { request } from '$app/common/helpers/request';
-import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { toast } from '$app/common/helpers/toast/toast';
 import { useSetAtom } from 'jotai';
-import { isDeleteActionTriggeredAtom } from '../../common/components/ProductsTable';
-import { useHandleCompanySave } from '$app/pages/settings/common/hooks/useHandleCompanySave';
-import { $refetch } from '$app/common/hooks/useRefetch';
 import { Dispatch, SetStateAction } from 'react';
-import { useRefreshCompanyUsers } from '$app/common/hooks/useRefreshCompanyUsers';
 import { useSearchParams } from 'react-router-dom';
+import { endpoint } from '$app/common/helpers';
+import { request } from '$app/common/helpers/request';
+import { toast } from '$app/common/helpers/toast/toast';
+import { $refetch } from '$app/common/hooks/useRefetch';
+import { useRefreshCompanyUsers } from '$app/common/hooks/useRefreshCompanyUsers';
+import { Invoice } from '$app/common/interfaces/invoice';
+import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { useHandleCompanySave } from '$app/pages/settings/common/hooks/useHandleCompanySave';
+import { isDeleteActionTriggeredAtom } from '../../common/components/ProductsTable';
 
 interface Params {
   isDefaultTerms: boolean;
@@ -65,7 +65,11 @@ export function useHandleSave(params: Params) {
       apiEndpoint += 'save_default_footer=true';
     }
 
-    request('PUT', endpoint(apiEndpoint, { id: invoice.id }), invoice)
+    const invoicePayload = { ...invoice };
+
+    delete invoicePayload.paymentables;
+
+    request('PUT', endpoint(apiEndpoint, { id: invoice.id }), invoicePayload)
       .then(async () => {
         if (isDefaultTerms || isDefaultFooter) {
           await refreshCompanyUsers();

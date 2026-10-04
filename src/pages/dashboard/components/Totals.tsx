@@ -8,31 +8,43 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { SelectField } from '$app/components/forms';
-import { endpoint } from '$app/common/helpers';
-import { Chart } from '$app/pages/dashboard/components/Chart';
-import { useEffect, useState } from 'react';
-import { Spinner } from '$app/components/Spinner';
-import { DropdownDateRangePicker } from '../../../components/DropdownDateRangePicker';
-import { Card } from '$app/components/cards';
+import { useQuery } from '@tanstack/react-query';
+import { ConfigProvider } from 'antd';
+import collect from 'collect.js';
+import dayjs from 'dayjs';
+import { useAtomValue } from 'jotai';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useColorScheme } from '$app/common/colors';
+import { endpoint } from '$app/common/helpers';
+import {
+  type DayjsRange,
+  serializeOrderedDateRange,
+} from '$app/common/helpers/dateRange';
 import { request } from '$app/common/helpers/request';
 import { useFormatMoney } from '$app/common/hooks/money/useFormatMoney';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
-import { Badge } from '$app/components/Badge';
+import { useCurrentCompanyDateFormats } from '$app/common/hooks/useCurrentCompanyDateFormats';
+import { usePreferences } from '$app/common/hooks/usePreferences';
 import {
   ChartsDefaultView,
   useReactSettings,
 } from '$app/common/hooks/useReactSettings';
-import { usePreferences } from '$app/common/hooks/usePreferences';
-import collect from 'collect.js';
-import { useColorScheme } from '$app/common/colors';
+import { Badge } from '$app/components/Badge';
 import { CurrencySelector } from '$app/components/CurrencySelector';
-import { useQuery } from 'react-query';
-import dayjs from 'dayjs';
-import styled from 'styled-components';
-import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
+import { Card } from '$app/components/cards';
+import { antdLocaleAtom } from '$app/components/DropdownDateRangePicker';
+import { SelectField } from '$app/components/forms';
 import Toggle from '$app/components/forms/Toggle';
+import { Spinner } from '$app/components/Spinner';
+import { Chart } from '$app/pages/dashboard/components/Chart';
+import {
+  DropdownDateRangePicker,
+  StyledRangePicker,
+} from '../../../components/DropdownDateRangePicker';
+import { DashboardCardSelector } from './DashboardCardSelector';
+import { PreferenceCardsGrid } from './PreferenceCardsGrid';
 
 interface TotalsRecord {
   revenue: { paid_to_date: string; code: string };
@@ -47,26 +59,10 @@ interface Currency {
 }
 
 export interface ChartData {
-  invoices: {
-    total: string;
-    date: string;
-    currency: string;
-  }[];
-  payments: {
-    total: string;
-    date: string;
-    currency: string;
-  }[];
-  outstanding: {
-    total: string;
-    date: string;
-    currency: string;
-  }[];
-  expenses: {
-    total: string;
-    date: string;
-    currency: string;
-  }[];
+  invoices: { total: string; date: string; currency: string }[];
+  payments: { total: string; date: string; currency: string }[];
+  outstanding: { total: string; date: string; currency: string }[];
+  expenses: { total: string; date: string; currency: string }[];
 }
 
 export enum TotalColors {
@@ -128,31 +124,47 @@ const GLOBAL_DATE_RANGES: Record<string, { start: string; end: string }> = {
 export function Totals() {
   const [t] = useTranslation();
 
-  const settings = useReactSettings();
-
-  const { Preferences, update } = usePreferences();
-
   const formatMoney = useFormatMoney();
+  const { Preferences, update, preferences } = usePreferences();
 
   const colors = useColorScheme();
   const company = useCurrentCompany();
-  const currentUser = useCurrentUser();
+  const settings = useReactSettings();
+  const { dateFormat } = useCurrentCompanyDateFormats();
+  const antdLocale = useAtomValue(antdLocaleAtom);
 
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [totalsData, setTotalsData] = useState<TotalsRecord[]>([]);
 
-  const chartScale =
-    settings?.preferences?.dashboard_charts?.default_view || 'month';
-  const currency = settings?.preferences?.dashboard_charts?.currency || 1;
-  const dateRange =
-    settings?.preferences?.dashboard_charts?.range || 'this_month';
-  const includeDrafts =
-    settings?.preferences?.dashboard_charts?.include_drafts || false;
+  const chartScale = preferences.dashboard_charts?.default_view || 'month';
+  const currency = preferences.dashboard_charts?.currency || 1;
+  const dateRange = preferences.dashboard_charts?.range || 'this_month';
+  const includeDrafts = preferences.dashboard_charts?.include_drafts || false;
+  const customStartDate = preferences.dashboard_charts?.custom_start_date;
+  const customEndDate = preferences.dashboard_charts?.custom_end_date;
+  const currentDashboardFields = settings?.dashboard_fields ?? [];
+
+  const resolvedRange = useMemo(() => {
+    if (dateRange === 'custom') {
+      return {
+        start: customStartDate || dayjs().startOf('month').format('YYYY-MM-DD'),
+        end: customEndDate || dayjs().endOf('month').format('YYYY-MM-DD'),
+      };
+    }
+
+    return {
+      start:
+        GLOBAL_DATE_RANGES[dateRange]?.start ||
+        GLOBAL_DATE_RANGES.this_month.start,
+      end:
+        GLOBAL_DATE_RANGES[dateRange]?.end || GLOBAL_DATE_RANGES.this_month.end,
+    };
+  }, [dateRange, customStartDate, customEndDate]);
 
   const [dates, setDates] = useState<{ start_date: string; end_date: string }>({
-    start_date: GLOBAL_DATE_RANGES[dateRange]?.start || '',
-    end_date: GLOBAL_DATE_RANGES[dateRange]?.end || '',
+    start_date: resolvedRange.start,
+    end_date: resolvedRange.end,
   });
 
   const [body, setBody] = useState<{
@@ -160,33 +172,38 @@ export function Totals() {
     end_date: string;
     date_range: string;
   }>({
-    start_date: GLOBAL_DATE_RANGES[dateRange]?.start || '',
-    end_date: GLOBAL_DATE_RANGES[dateRange]?.end || '',
+    start_date: resolvedRange.start,
+    end_date: resolvedRange.end,
     date_range: dateRange,
   });
 
   useEffect(() => {
-    setBody((current) => ({
-      ...current,
-      date_range: dateRange,
-    }));
-  }, [settings?.preferences?.dashboard_charts?.range]);
-
-  const handleDateChange = (DateSet: string) => {
-    const [startDate, endDate] = DateSet.split(',');
-    if (new Date(startDate) > new Date(endDate)) {
+    if (dateRange === 'custom') {
       setBody({
-        start_date: endDate,
-        end_date: startDate,
+        start_date: resolvedRange.start,
+        end_date: resolvedRange.end,
         date_range: 'custom',
       });
     } else {
-      setBody({
-        start_date: startDate,
-        end_date: endDate,
-        date_range: 'custom',
-      });
+      setBody((current) => ({ ...current, date_range: dateRange }));
     }
+  }, [dateRange, customStartDate, customEndDate]);
+
+  const handleDateChange = (currentDataSet: string) => {
+    const [startDate, endDate] = currentDataSet.split(',');
+
+    const [normalizedStart, normalizedEnd] = dayjs(startDate).isAfter(endDate)
+      ? [endDate, startDate]
+      : [startDate, endDate];
+
+    setBody({
+      start_date: normalizedStart,
+      end_date: normalizedEnd,
+      date_range: 'custom',
+    });
+
+    update('preferences.dashboard_charts.custom_start_date', normalizedStart);
+    update('preferences.dashboard_charts.custom_end_date', normalizedEnd);
   };
 
   const totals = useQuery({
@@ -209,9 +226,7 @@ export function Totals() {
         'POST',
         endpoint(
           '/api/v1/charts/chart_summary_v2?include_drafts=:includeDrafts',
-          {
-            includeDrafts,
-          }
+          { includeDrafts }
         ),
         body
       ).then((response) => response.data),
@@ -223,7 +238,6 @@ export function Totals() {
       setTotalsData(totals.data);
 
       const currencies: Currency[] = [];
-
       Object.entries(totals.data.currencies).map(([id, name]) => {
         currencies.push({ value: id, label: name as unknown as string });
       });
@@ -247,25 +261,22 @@ export function Totals() {
         start_date: chart.data.start_date,
         end_date: chart.data.end_date,
       });
-
       setChartData(chart.data);
     }
   }, [chart.data]);
 
-  useEffect(() => {
-    return () => {
-      if (settings?.preferences?.dashboard_charts?.range === 'custom') {
-        const currentRange =
-          currentUser?.company_user?.react_settings?.preferences
-            ?.dashboard_charts?.range;
+  const handlePreferencesCustomRangeChange = (value: DayjsRange) => {
+    const range = serializeOrderedDateRange(value);
 
-        update(
-          'preferences.dashboard_charts.range',
-          currentRange || 'this_month'
-        );
-      }
-    };
-  }, []);
+    if (!range) {
+      return;
+    }
+
+    const [start, end] = range;
+
+    update('preferences.dashboard_charts.custom_start_date', start);
+    update('preferences.dashboard_charts.custom_end_date', end);
+  };
 
   return (
     <>
@@ -275,7 +286,6 @@ export function Totals() {
         </div>
       )}
 
-      {/* Quick date, currency & date picker. */}
       <div className="flex items-center justify-end lg:justify-between">
         <span className="hidden lg:inline-block text-sm text-gray-500">
           {t('account_login_text')}
@@ -297,7 +307,6 @@ export function Totals() {
                 dismissable={false}
               >
                 <option value="999">{t('all')}</option>
-
                 {currencies.map((currency, index) => (
                   <option key={index} value={currency.value}>
                     {currency.label}
@@ -364,7 +373,7 @@ export function Totals() {
               </ChartScaleBox>
             </div>
 
-            <div className="flex flex-auto justify-center sm:col-start-3 ">
+            <div className="flex flex-auto justify-center sm:col-start-3">
               <DropdownDateRangePicker
                 handleDateChange={handleDateChange}
                 startDate={dates.start_date}
@@ -374,6 +383,13 @@ export function Totals() {
                 }
                 value={body.date_range}
               />
+            </div>
+
+            <div
+              className="flex items-center justify-center rounded-lg border shadow-sm px-2.5 py-1.5"
+              style={{ borderColor: colors.$24, backgroundColor: colors.$1 }}
+            >
+              <DashboardCardSelector />
             </div>
 
             <Preferences>
@@ -417,7 +433,47 @@ export function Totals() {
                 <option value="this_year">{t('this_year')}</option>
                 <option value="last_year">{t('last_year')}</option>
                 <option value={'last365_days'}>{`${t('last365_days')}`}</option>
+                <option value="custom">{t('custom_range')}</option>
               </SelectField>
+
+              {dateRange === 'custom' && (
+                <div
+                  className="flex flex-col space-y-2"
+                  style={
+                    {
+                      '--accent-color': colors.$3,
+                      '--active-state-bg': colors.$4,
+                      '--calendar-bg': colors.$2,
+                      '--input-text-color': colors.$3,
+                      '--picker-border-color': colors.$5,
+                      '--picker-bg': colors.$1,
+                    } as React.CSSProperties
+                  }
+                >
+                  <span
+                    className="text-sm"
+                    style={{ color: colors.$3, fontWeight: 500 }}
+                  >
+                    {t('custom_range')}
+                  </span>
+
+                  <ConfigProvider locale={antdLocale ?? undefined}>
+                    <StyledRangePicker
+                      size="large"
+                      className="rounded-md"
+                      style={{ width: '100%' }}
+                      value={[
+                        dayjs(resolvedRange.start),
+                        dayjs(resolvedRange.end),
+                      ]}
+                      format={dateFormat}
+                      onChange={handlePreferencesCustomRangeChange}
+                      separator={<span style={{ color: colors.$4 }}>—</span>}
+                      allowClear={false}
+                    />
+                  </ConfigProvider>
+                </div>
+              )}
 
               <Toggle
                 label={t('include_drafts')}
@@ -430,6 +486,20 @@ export function Totals() {
           </div>
         </div>
       </div>
+
+      {currentDashboardFields.length > 0 && (
+        <div className="mt-6 w-full">
+          <PreferenceCardsGrid
+            key={currentDashboardFields.join(',')}
+            currentDashboardFields={currentDashboardFields}
+            dateRange={dateRange}
+            startDate={dates.start_date}
+            endDate={dates.end_date}
+            currencyId={currency.toString()}
+            layoutBreakpoint="lg"
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-10 mt-4 gap-8">
         {company && (
@@ -448,7 +518,6 @@ export function Totals() {
                 style={{ borderColor: colors.$21 }}
               >
                 <span className="text-gray-500">{t('invoices')}</span>
-
                 <Badge style={{ backgroundColor: '#2176FF26' }}>
                   <span
                     className="text-base font-mono"
@@ -456,7 +525,7 @@ export function Totals() {
                   >
                     {formatMoney(
                       totalsData[currency]?.invoices?.invoiced_amount || 0,
-                      company.settings.country_id,
+                      company?.settings?.country_id || '840',
                       currency.toString(),
                       2
                     )}
@@ -469,7 +538,6 @@ export function Totals() {
                 style={{ borderColor: colors.$21 }}
               >
                 <span className="text-gray-500">{t('payments')}</span>
-
                 <Badge style={{ backgroundColor: '#22C55E26' }}>
                   <span
                     className="text-base font-mono"
@@ -477,7 +545,7 @@ export function Totals() {
                   >
                     {formatMoney(
                       totalsData[currency]?.revenue?.paid_to_date || 0,
-                      company.settings.country_id,
+                      company?.settings?.country_id || '840',
                       currency.toString(),
                       2
                     )}
@@ -490,7 +558,6 @@ export function Totals() {
                 style={{ borderColor: colors.$21 }}
               >
                 <span className="text-gray-500">{t('expenses')}</span>
-
                 <Badge style={{ backgroundColor: '#A1A1AA26' }}>
                   <span
                     className="text-base font-mono"
@@ -498,7 +565,7 @@ export function Totals() {
                   >
                     {formatMoney(
                       totalsData[currency]?.expenses?.amount || 0,
-                      company.settings.country_id,
+                      company?.settings?.country_id || '840',
                       currency.toString(),
                       2
                     )}
@@ -511,7 +578,6 @@ export function Totals() {
                 style={{ borderColor: colors.$21 }}
               >
                 <span className="text-gray-500">{t('outstanding')}</span>
-
                 <Badge style={{ backgroundColor: '#EF444426' }}>
                   <span
                     className="text-base font-mono"
@@ -519,7 +585,7 @@ export function Totals() {
                   >
                     {formatMoney(
                       totalsData[currency]?.outstanding?.amount || 0,
-                      company.settings.country_id,
+                      company?.settings?.country_id || '840',
                       currency.toString(),
                       2
                     )}
@@ -531,7 +597,6 @@ export function Totals() {
                 <span className="text-gray-500">
                   {t('total_invoices_outstanding')}
                 </span>
-
                 <Badge
                   variant="transparent"
                   className="border"

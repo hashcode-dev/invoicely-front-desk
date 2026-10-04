@@ -8,14 +8,14 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { scheduleParametersAtom } from '$app/pages/settings/schedules/common/components/EmailStatement';
-import { DEFAULT_SCHEDULE_PARAMETERS } from '$app/pages/settings/schedules/common/hooks/useHandleChange';
+import collect from 'collect.js';
 import { useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
-import { Report } from '../useReports';
-import collect from 'collect.js';
-import { reportColumn } from '../components/SortableColumns';
 import { usePreferences } from '$app/common/hooks/usePreferences';
+import { scheduleParametersAtom } from '$app/pages/settings/schedules/common/components/EmailStatement';
+import { DEFAULT_SCHEDULE_PARAMETERS } from '$app/pages/settings/schedules/common/hooks/useHandleChange';
+import { reportColumn } from '../components/SortableColumns';
+import { Report } from '../useReports';
 
 const DATE_RANGES_ALIASES = {
   last7: 'last7_days',
@@ -28,10 +28,19 @@ export function useScheduleReport() {
 
   const setScheduleParameters = useSetAtom(scheduleParametersAtom);
 
-  return (report: Report, showCustomColumns: boolean) => {
+  return (
+    report: Report,
+    showCustomColumns: boolean,
+    customReportKeys?: string[]
+  ) => {
     let reportKeys: string[] = [];
 
-    if (report.identifier in preferences.reports.columns && showCustomColumns) {
+    if (showCustomColumns && customReportKeys) {
+      reportKeys = customReportKeys;
+    } else if (
+      showCustomColumns &&
+      report.identifier in preferences.reports.columns
+    ) {
       reportKeys = collect(
         preferences.reports.columns[report.identifier][reportColumn]
       )
@@ -41,7 +50,7 @@ export function useScheduleReport() {
 
     setScheduleParameters({
       ...DEFAULT_SCHEDULE_PARAMETERS,
-      report_name: report.identifier,
+      report_name: report.schedule_identifier || report.identifier,
       start_date: report.payload.start_date,
       end_date: report.payload.end_date,
       client_id: report.payload.client_id || '',
@@ -60,11 +69,13 @@ export function useScheduleReport() {
       clients: report.payload.clients ? report.payload.clients.split(',') : [],
       vendors: report.payload.vendors || '',
       projects: report.payload.projects || '',
+      tag_ids: report.payload.tag_ids || '',
       categories: report.payload.categories || '',
       report_keys: reportKeys,
       include_deleted: report.payload.include_deleted ?? false,
       pdf_email_attachment: report.payload.pdf_email_attachment ?? false,
       template_id: report.payload.template_id || '',
+      group_by: report.payload.group_by || '',
     });
 
     navigate('/settings/schedules/create?template=email_report');

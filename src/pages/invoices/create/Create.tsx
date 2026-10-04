@@ -8,9 +8,18 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useAtom } from 'jotai';
+import { cloneDeep } from 'lodash';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Outlet, useSearchParams } from 'react-router-dom';
 import { blankInvitation } from '$app/common/constants/blank-invitation';
+import { InvoiceSum } from '$app/common/helpers/invoices/invoice-sum';
+import { InvoiceSumInclusive } from '$app/common/helpers/invoices/invoice-sum-inclusive';
 import { useClientResolver } from '$app/common/hooks/clients/useClientResolver';
+import { useAtomWithPrevent } from '$app/common/hooks/useAtomWithPrevent';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
+import { useSaveKeyboardShortcut } from '$app/common/hooks/useSaveKeyboardShortcut';
 import { useTitle } from '$app/common/hooks/useTitle';
 import { Client } from '$app/common/interfaces/client';
 import { Invoice } from '$app/common/interfaces/invoice';
@@ -19,20 +28,13 @@ import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { useBlankInvoiceQuery } from '$app/common/queries/invoices';
 import { Page } from '$app/components/Breadcrumbs';
 import { Default } from '$app/components/layouts/Default';
+import { QuickbooksDepositDisabledAlert } from '$app/components/QuickbooksDepositDisabledAlert';
 import { Spinner } from '$app/components/Spinner';
-import { useAtom } from 'jotai';
-import { cloneDeep } from 'lodash';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Outlet, useSearchParams } from 'react-router-dom';
+import { Tab, Tabs } from '$app/components/Tabs';
 import { invoiceAtom, invoiceSumAtom } from '../common/atoms';
+import { AddUninvoicedItemsButton } from '../common/components/AddUninvoicedItemsButton';
 import { useHandleCreate } from './hooks/useHandleCreate';
 import { useInvoiceUtilities } from './hooks/useInvoiceUtilities';
-import { Tab, Tabs } from '$app/components/Tabs';
-import { InvoiceSum } from '$app/common/helpers/invoices/invoice-sum';
-import { InvoiceSumInclusive } from '$app/common/helpers/invoices/invoice-sum-inclusive';
-import { AddUninvoicedItemsButton } from '../common/components/AddUninvoicedItemsButton';
-import { useAtomWithPrevent } from '$app/common/hooks/useAtomWithPrevent';
 
 export type ChangeHandler = <T extends keyof Invoice>(
   property: T,
@@ -245,6 +247,11 @@ export default function Create() {
     invoice && calculateInvoiceSum(invoice);
   }, [invoice]);
 
+  useSaveKeyboardShortcut({
+    isEnabled: Boolean(invoice && invoice.client_id.length > 0 && !isFormBusy),
+    onSave: () => save(invoice as Invoice),
+  });
+
   return (
     <>
       <Default
@@ -252,6 +259,9 @@ export default function Create() {
         breadcrumbs={pages}
         onSaveClick={() => save(invoice as Invoice)}
         disableSaveButton={invoice?.client_id.length === 0 || isFormBusy}
+        aboveMainContainer={
+          invoice && <QuickbooksDepositDisabledAlert resource={invoice} />
+        }
       >
         {!isLoading ? (
           <div className="space-y-4">

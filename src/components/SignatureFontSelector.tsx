@@ -9,8 +9,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { useSignStore } from '$app/_builder/SignStore';
 import { useTranslation } from 'react-i18next';
+import { useSignStore } from '$app/_builder/SignStore';
 import { compressSignature } from '$app/common/helpers/image-compression';
 
 import '@fontsource/dancing-script';
@@ -19,8 +19,8 @@ import '@fontsource/pacifico';
 import '@fontsource/satisfy';
 import '@fontsource/alex-brush';
 import classNames from 'classnames';
-import { Modal } from './Modal';
 import { Button, InputField } from './forms';
+import { Modal } from './Modal';
 
 const SIGNATURE_FONTS = [
   {
@@ -142,11 +142,13 @@ function FontPreviewCard({
 type SignatureFontSelectorProps = {
   onSignatureCreated?: (signatureImage: string) => void;
   triggerButtonText?: string;
+  type?: string;
 };
 
 export function SignatureFontSelector({
   onSignatureCreated,
   triggerButtonText,
+  type,
 }: SignatureFontSelectorProps) {
   const [t] = useTranslation();
   const [text, setText] = useState('');
@@ -294,6 +296,11 @@ export function SignatureFontSelector({
     return { top, bottom, left, right };
   }
 
+  const titles: Record<string, string> = {
+    signature: t('create_signature'),
+    initials: t('enter_initials'),
+  };
+
   return (
     <>
       <Button behavior="button" onClick={() => setIsOpen(true)}>
@@ -301,7 +308,7 @@ export function SignatureFontSelector({
       </Button>
 
       <Modal
-        title={t('create_signature')}
+        title={type ? titles[type] : t('create_signature')}
         visible={isOpen}
         onClose={() => setIsOpen(false)}
       >

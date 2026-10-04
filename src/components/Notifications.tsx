@@ -8,36 +8,43 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Bell } from 'react-feather';
-import { Slider } from './cards/Slider';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { atomWithStorage } from 'jotai/utils';
-import { useAtom } from 'jotai';
-import { GenericMessage, useSocketEvent } from '$app/common/queries/sockets';
-import { Invoice } from '$app/common/interfaces/invoice';
-import { route } from '$app/common/helpers/route';
-import { date, isHosted, isSelfHosted, trans } from '$app/common/helpers';
-import { NonClickableElement } from './cards/NonClickableElement';
-import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
-import { Credit } from '$app/common/interfaces/credit';
-import { Payment } from '$app/common/interfaces/payment';
+import { useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
-import { useSockets } from '$app/common/hooks/useSockets';
-import { useReactSettings } from '$app/common/hooks/useReactSettings';
-import { Icon } from './icons/Icon';
-import { useColorScheme } from '$app/common/colors';
-import { Button, Link } from './forms';
-import { useReplaceVariables } from '$app/common/hooks/useReplaceTranslationVariables';
-import { CardCheck } from './icons/CardCheck';
-import { GoDotFill } from 'react-icons/go';
-import { CardChange } from './icons/CardChange';
-import { FileSearch } from './icons/FileSearch';
-import { FileAdd } from './icons/FileAdd';
-import { FileEdit } from './icons/FileEdit';
 import dayjs from 'dayjs';
+import { useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
+import { useEffect, useState } from 'react';
+import { Bell } from 'react-feather';
+import { useTranslation } from 'react-i18next';
+import { GoDotFill } from 'react-icons/go';
+import { useColorScheme } from '$app/common/colors';
+import { date, isHosted, isSelfHosted, trans } from '$app/common/helpers';
+import { route } from '$app/common/helpers/route';
 import { useCompanyTimeFormat } from '$app/common/hooks/useCompanyTimeFormat';
 import { useCurrentCompanyDateFormats } from '$app/common/hooks/useCurrentCompanyDateFormats';
+import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
+import { useReactSettings } from '$app/common/hooks/useReactSettings';
+import { $refetch } from '$app/common/hooks/useRefetch';
+import { useReplaceVariables } from '$app/common/hooks/useReplaceTranslationVariables';
+import { useSockets } from '$app/common/hooks/useSockets';
+import { Credit } from '$app/common/interfaces/credit';
+import { Invoice } from '$app/common/interfaces/invoice';
+import { Payment } from '$app/common/interfaces/payment';
+import {
+  GenericMessage,
+  socketId,
+  useSocketEvent,
+  WithSocketId,
+} from '$app/common/queries/sockets';
+import { NonClickableElement } from './cards/NonClickableElement';
+import { Slider } from './cards/Slider';
+import { Button, Link } from './forms';
+import { CardChange } from './icons/CardChange';
+import { CardCheck } from './icons/CardCheck';
+import { FileAdd } from './icons/FileAdd';
+import { FileEdit } from './icons/FileEdit';
+import { FileSearch } from './icons/FileSearch';
+import { Icon } from './icons/Icon';
 
 type NotificationType =
   | 'invoiceWasPaid'
@@ -75,6 +82,8 @@ export const notificationsAtom = atomWithStorage<Notification[]>(
 
 export function Notifications() {
   const [t] = useTranslation();
+
+  const queryClient = useQueryClient();
 
   const replaceVariables = useReplaceVariables();
 
@@ -283,8 +292,6 @@ export function Notifications() {
       'App\\Events\\Payment\\PaymentWasUpdated',
     ],
     callback: ({ event, data }) => {
-      console.log(event, data);
-
       if (event === 'App\\Events\\Invoice\\InvoiceWasPaid') {
         const $invoice = data as Invoice;
 
@@ -307,6 +314,25 @@ export function Notifications() {
           notifications.some((n) => n.link === notification.link)
         ) {
           return;
+        }
+
+        if (
+          socketId()?.toString() !==
+          (data as WithSocketId<Invoice>)['x-socket-id']
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: ['/api/v1/invoices', 'detail', $invoice.id],
+          });
+
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const key = query.queryKey as string[];
+
+              return (
+                key.includes('/api/v1/invoices') && !key.includes('detail')
+              );
+            },
+          });
         }
 
         setNotifications((notifications) => [...notifications, notification]);
@@ -344,6 +370,13 @@ export function Notifications() {
           notifications.some((n) => n.link === notification.link)
         ) {
           return;
+        }
+
+        if (
+          socketId()?.toString() !==
+          (data as WithSocketId<Invoice>)['x-socket-id']
+        ) {
+          $refetch(['invoices']);
         }
 
         setNotifications((notifications) => [...notifications, notification]);

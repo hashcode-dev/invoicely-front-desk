@@ -7,12 +7,13 @@
  *
  * @license https://www.elastic.co/licensing/elastic-license
  */
-import { Card } from '$app/components/cards';
+
 import { useTranslation } from 'react-i18next';
-import { SortableVariableList } from './SortableVariableList';
-import { useCustomField } from '$app/components/CustomField';
 import { useColorScheme } from '$app/common/colors';
+import { useCustomField } from '$app/components/CustomField';
+import { Card } from '$app/components/cards';
 import { Calculator } from '$app/components/icons/Calculator';
+import { SortableVariableList } from './SortableVariableList';
 
 export default function TotalFields() {
   const [t] = useTranslation();
@@ -23,8 +24,8 @@ export default function TotalFields() {
 
   const defaultVariables = [
     { value: '$subtotal', label: t('subtotal') },
-    { value: '$net_subtotal', label: t('net_subtotal') },
     { value: '$discount', label: t('discount') },
+    { value: '$net_subtotal', label: t('net_subtotal') },
     { value: '$line_taxes', label: t('line_taxes') },
     { value: '$total_taxes', label: t('total_taxes') },
     {

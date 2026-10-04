@@ -8,9 +8,9 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
-import { useState, useEffect } from 'react';
 import { clone } from 'lodash';
+import { useEffect, useState } from 'react';
+import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 
 // The function is used to find the index of a column within the given array (pdfColumns).
 // If it doesn't exist within the array, then the columnIndex will be the position after the last element in the array.
@@ -206,6 +206,11 @@ export function useProductColumns() {
 
       updatedVariables.push('$product.line_total');
     }
+
+    // Editor only: net cost is a read-only label on the unit cost column (see useResolveInputField).
+    updatedVariables = updatedVariables.filter(
+      (variable) => variable !== '$product.net_cost'
+    );
 
     setColumns(updatedVariables);
   }, [company]);

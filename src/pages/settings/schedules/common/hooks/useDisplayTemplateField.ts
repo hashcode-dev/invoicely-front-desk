@@ -8,7 +8,12 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-export type Template = 'email_statement' | 'email_record' | 'email_report' | 'invoice_outstanding_tasks' | 'payment_schedule';
+export type Template =
+  | 'email_statement'
+  | 'email_record'
+  | 'email_report'
+  | 'invoice_outstanding_tasks'
+  | 'payment_schedule';
 
 type TemplateField = 'template' | 'next_run' | 'frequency' | 'remaining_cycles';
 
@@ -16,7 +21,7 @@ const TEMPLATE_FIELDS: Record<Template, TemplateField[]> = {
   email_statement: ['template', 'next_run', 'frequency', 'remaining_cycles'],
   email_record: ['template', 'next_run'],
   email_report: ['template', 'next_run', 'frequency', 'remaining_cycles'],
-  invoice_outstanding_tasks: ['template', 'next_run'],
+  invoice_outstanding_tasks: ['template', 'frequency', 'next_run'],
   payment_schedule: ['template'],
 };
 

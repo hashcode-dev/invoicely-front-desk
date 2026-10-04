@@ -10,24 +10,22 @@
 
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
+import { Fallback } from '$app/components/Fallback';
 import { useAuthenticated } from '../common/hooks/useAuthenticated';
 import { RootState } from '../common/stores/store';
-import { LoadingScreen } from './LoadingScreen';
-import { Fallback } from '$app/components/Fallback';
 
 export function PrivateRoute() {
   const authenticated = useAuthenticated();
   const user = useSelector((state: RootState) => state.user);
+  const demoSession = sessionStorage.getItem('invoicely_auth_user');
 
-  return authenticated ? (
-    user.user.id ? (
+  if (demoSession || authenticated || user.user?.id) {
+    return (
       <Fallback>
         <Outlet />
       </Fallback>
-    ) : (
-      <LoadingScreen />
-    )
-  ) : (
-    <Navigate to="/login" />
-  );
+    );
+  }
+
+  return <Navigate to="/login" />;
 }

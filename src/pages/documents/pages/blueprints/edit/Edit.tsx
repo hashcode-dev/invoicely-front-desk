@@ -8,18 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { useColorScheme } from '$app/common/colors';
 import { route } from '$app/common/helpers/route';
-import { Blueprint } from '$app/common/interfaces/docuninja/blueprints';
 import { useBlueprintQuery } from '$app/common/queries/docuninja/blueprints';
 import { Page } from '$app/components/Breadcrumbs';
 import { Card, Element } from '$app/components/cards';
 import { Default } from '$app/components/layouts/Default';
 import { ResourceActions } from '$app/components/ResourceActions';
 import { Spinner } from '$app/components/Spinner';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { useActions } from '../common/hooks/useActions';
 import { EditBlueprintModal } from './components/EditBlueprintModal';
 
@@ -29,12 +28,12 @@ export default function Edit() {
   const { id } = useParams();
   const colors = useColorScheme();
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+
   const { data: blueprintResponse, isLoading } = useBlueprintQuery({ id });
-  
+
   const actions = useActions({
-    onSettingsClick: (blueprint: Blueprint) => {
+    onSettingsClick: () => {
       setIsEditModalOpen(true);
     },
   });
@@ -51,21 +50,13 @@ export default function Edit() {
     },
   ];
 
-  const [blueprint, setBlueprint] = useState<Blueprint>();
-
-  useEffect(() => {
-    if (blueprintResponse) {
-      setBlueprint(blueprintResponse.data.data);
-    }
-  }, [blueprintResponse]);
-
   return (
     <Default
       title={t('edit_template')}
       breadcrumbs={pages}
       navigationTopRight={
         <ResourceActions
-          resource={blueprint}
+          resource={blueprintResponse?.data?.data}
           actions={actions}
         />
       }
@@ -84,19 +75,32 @@ export default function Edit() {
           ) : (
             <div className="space-y-4">
               <Element leftSide={t('name')}>
-                <div className="text-sm text-gray-600">{blueprint?.name}</div>
+                <div className="text-sm text-gray-600">
+                  {blueprintResponse?.data.data.name}
+                </div>
               </Element>
               <Element leftSide={t('description')}>
-                <div className="text-sm text-gray-600">{blueprint?.description || t('no_description')}</div>
+                <div className="text-sm text-gray-600">
+                  {blueprintResponse?.data.data.description ||
+                    t('no_description')}
+                </div>
               </Element>
               <Element leftSide={t('created_at')}>
                 <div className="text-sm text-gray-600">
-                  {blueprint?.created_at ? new Date(blueprint.created_at).toLocaleDateString() : '-'}
+                  {blueprintResponse?.data.data.created_at
+                    ? new Date(
+                        blueprintResponse?.data.data.created_at
+                      ).toLocaleDateString()
+                    : '-'}
                 </div>
               </Element>
               <Element leftSide={t('updated_at')}>
                 <div className="text-sm text-gray-600">
-                  {blueprint?.updated_at ? new Date(blueprint.updated_at).toLocaleDateString() : '-'}
+                  {blueprintResponse?.data.data.updated_at
+                    ? new Date(
+                        blueprintResponse?.data.data.updated_at
+                      ).toLocaleDateString()
+                    : '-'}
                 </div>
               </Element>
             </div>
@@ -104,9 +108,9 @@ export default function Edit() {
         </Card>
       </div>
 
-      {blueprint && (
+      {blueprintResponse && (
         <EditBlueprintModal
-          blueprint={blueprint}
+          blueprint={blueprintResponse.data.data}
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
         />

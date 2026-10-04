@@ -8,13 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { route } from '$app/common/helpers/route';
-import { DataTable } from '$app/components/DataTable';
 import { useParams } from 'react-router-dom';
-import { useActions, useQuoteColumns } from '$app/pages/quotes/common/hooks';
-import { useCustomBulkActions } from '$app/pages/quotes/common/hooks/useCustomBulkActions';
-import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
 import { permission } from '$app/common/guards/guards/permission';
+import { route } from '$app/common/helpers/route';
+import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { DataTable } from '$app/components/DataTable';
+import {
+  useActions,
+  useQuoteColumns,
+  useQuoteFilters,
+} from '$app/pages/quotes/common/hooks';
+import { useCustomBulkActions } from '$app/pages/quotes/common/hooks/useCustomBulkActions';
 import { useFooterColumns } from '$app/pages/quotes/common/hooks/useFooterColumns';
 
 export default function Quotes() {
@@ -24,6 +28,7 @@ export default function Quotes() {
 
   const actions = useActions();
   const columns = useQuoteColumns();
+  const filters = useQuoteFilters();
   const { footerColumns } = useFooterColumns();
   const customBulkActions = useCustomBulkActions();
 
@@ -38,6 +43,8 @@ export default function Quotes() {
       footerColumns={footerColumns}
       customActions={actions}
       customBulkActions={customBulkActions}
+      customFilters={filters}
+      customFilterPlaceholder="status"
       withResourcefulActions
       bulkRoute="/api/v1/quotes/bulk"
       linkToCreate={route('/quotes/create?client=:id', { id })}
@@ -46,6 +53,7 @@ export default function Quotes() {
       linkToCreateGuards={[permission('create_quote')]}
       hideEditableOptions={!hasPermission('edit_quote')}
       withoutPageAsPreference
+      withRecordScopedFilters
     />
   );
 }

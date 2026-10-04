@@ -10,16 +10,15 @@
 import classNames from 'classnames';
 import currency from 'currency.js';
 import { useEffect, useState } from 'react';
-
-import CommonProps from '../../common/interfaces/common-props.interface';
-import { useColorScheme } from '$app/common/colors';
-import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 import { NumericFormat } from 'react-number-format';
 import { useDebounce } from 'react-use';
-import { InputLabel } from './InputLabel';
+import { useColorScheme } from '$app/common/colors';
+import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 import { useReactSettings } from '$app/common/hooks/useReactSettings';
-import { InputField } from './InputField';
+import CommonProps from '../../common/interfaces/common-props.interface';
 import { ErrorMessage } from '../ErrorMessage';
+import { InputField } from './InputField';
+import { InputLabel } from './InputLabel';
 
 interface Props extends CommonProps {
   id?: string;
@@ -41,14 +40,14 @@ export function NumberInputField(props: Props) {
   const colors = useColorScheme();
   const company = useCurrentCompany();
 
-  const reactSettings = useReactSettings({ overwrite: false });
+  const reactSettings = useReactSettings();
 
   const [currentValue, setCurrentValue] = useState<number | undefined>(
     typeof props.value === 'number'
       ? props.value
       : props.value
-      ? parseFloat(String(props.value))
-      : undefined
+        ? parseFloat(String(props.value))
+        : undefined
   );
 
   const getDecimalSeparator = () => {
@@ -156,6 +155,7 @@ export function NumberInputField(props: Props) {
 
       <div className="relative">
         <NumericFormat
+          data-cy={props.cypressRef}
           className={classNames(
             `w-full py-2 px-3 rounded-md text-sm disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-0 ${props.className}`,
             {

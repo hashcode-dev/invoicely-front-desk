@@ -10,11 +10,11 @@
 
 import axios, { AxiosError, AxiosRequestConfig, Method } from 'axios';
 import { defaultHeaders } from '$app/common/queries/common/headers';
-import { ValidationBag } from '../interfaces/validation-bag';
-import { toast } from './toast/toast';
-import { $refetch } from '../hooks/useRefetch';
 import { checkJsonObject } from '../helpers';
+import { $refetch } from '../hooks/useRefetch';
+import { ValidationBag } from '../interfaces/validation-bag';
 import { clearLocalStorage } from './local-storage';
+import { toast } from './toast/toast';
 
 const client = axios.create();
 
@@ -42,6 +42,11 @@ client.interceptors.response.use(
   },
   (error: AxiosError<ValidationBag>) => {
     const url = error.response?.config.url;
+
+    if (error.code === 'ERR_NETWORK') {
+      toast.error('server_not_reachable');
+      return Promise.reject(error);
+    }
 
     if (url?.endsWith('/api/v1/login') && error.response?.status === 401) {
       return Promise.reject(error);
@@ -83,7 +88,7 @@ client.interceptors.response.use(
     }
 
     if (error.response?.status === 404) {
-      toast.error('not_found');
+      toast.error('record_not_found');
       return;
     }
 

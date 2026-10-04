@@ -9,14 +9,14 @@
  */
 
 import { Dialog, Transition } from '@headlessui/react';
-import { CompanySwitcher } from '$app/components/CompanySwitcher';
 import { Fragment } from 'react';
 import { X } from 'react-feather';
+import { useColorScheme } from '$app/common/colors';
+import { useReactSettings } from '$app/common/hooks/useReactSettings';
+import { CompanySwitcher } from '$app/components/CompanySwitcher';
+import { HelpSidebarIcons } from '$app/components/HelpSidebarIcons';
 import { NavigationItem } from './DesktopSidebar';
 import { SidebarItem } from './SidebarItem';
-import { useColorScheme } from '$app/common/colors';
-import { useInjectUserChanges } from '$app/common/hooks/useInjectUserChanges';
-import { HelpSidebarIcons } from '$app/components/HelpSidebarIcons';
 
 interface Props {
   navigation: NavigationItem[];
@@ -26,11 +26,9 @@ interface Props {
 
 export function MobileSidebar(props: Props) {
   const colors = useColorScheme();
-  const user = useInjectUserChanges();
+  const reactSettings = useReactSettings();
 
-  const isMiniSidebar = Boolean(
-    user?.company_user?.react_settings.show_mini_sidebar
-  );
+  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
 
   return (
     <Transition.Root show={props.sidebarOpen} as={Fragment}>

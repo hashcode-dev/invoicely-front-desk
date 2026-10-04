@@ -9,6 +9,7 @@
  */
 
 import { Schedule } from '$app/common/interfaces/schedule';
+import { TAG_ENTITY_TYPES } from '$app/common/interfaces/tag';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { Element } from '$app/components/cards';
 import { InputField, SelectField } from '$app/components/forms';
@@ -22,8 +23,11 @@ import { ClientSelector } from '$app/components/clients/ClientSelector';
 import { MultiClientSelector } from '$app/pages/reports/common/components/MultiClientSelector';
 import { MultiVendorSelector } from '$app/pages/reports/common/components/MultiVendorSelector';
 import { MultiProjectSelector } from '$app/pages/reports/common/components/MultiProjectSelector';
+import { MultiTagSelector } from '$app/pages/reports/common/components/MultiTagSelector';
+import { REPORT_TAG_ENTITY_TYPES } from '$app/pages/reports/common/hooks/useShowReportField';
 import { MultiExpenseCategorySelector } from '$app/pages/reports/common/components/MultiExpenseCategorySelector';
 import { TemplateSelector } from '$app/pages/reports/common/components/TemplateSelector';
+import { useGroupByOptions } from '$app/pages/reports/common/hooks/useGroupByOptions';
 
 interface Props {
   schedule: Schedule;
@@ -50,10 +54,12 @@ type ReportFiled =
   | 'vendors'
   | 'categories'
   | 'projects'
+  | 'tags'
   | 'report_keys'
   | 'include_deleted'
   | 'template_id'
-  | 'pdf_email_attachment';
+  | 'pdf_email_attachment'
+  | 'group_by';
 
 export const DEFAULT_REPORT_FIELDS: ReportFiled[] = [
   'send_email',
@@ -72,6 +78,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'client',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
   invoice_item: [
     ...DEFAULT_REPORT_FIELDS,
@@ -82,13 +89,15 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'include_deleted',
     'client',
     'template_id',
+    'group_by',
   ],
-  product_sales: [...DEFAULT_REPORT_FIELDS, 'products', 'client'],
+  product_sales: [...DEFAULT_REPORT_FIELDS, 'products', 'client', 'group_by'],
   profitloss: [
     ...DEFAULT_REPORT_FIELDS,
     'expense_billed',
     'income_billed',
     'include_tax',
+    'group_by',
   ],
   client: [
     ...DEFAULT_REPORT_FIELDS,
@@ -96,8 +105,9 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'report_keys',
     'include_deleted',
     'template_id',
+    'group_by',
   ],
-  contact: [...DEFAULT_REPORT_FIELDS, 'report_keys', 'template_id'],
+  contact: [...DEFAULT_REPORT_FIELDS, 'report_keys', 'template_id', 'group_by'],
   recurring_invoice: [
     ...DEFAULT_REPORT_FIELDS,
     'report_keys',
@@ -105,6 +115,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'include_deleted',
     'client',
     'template_id',
+    'group_by',
   ],
   quote: [
     ...DEFAULT_REPORT_FIELDS,
@@ -115,6 +126,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'client',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
   quote_item: [
     ...DEFAULT_REPORT_FIELDS,
@@ -124,6 +136,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'include_deleted',
     'client',
     'template_id',
+    'group_by',
   ],
   credit: [
     ...DEFAULT_REPORT_FIELDS,
@@ -134,8 +147,9 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'client',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
-  document: [...DEFAULT_REPORT_FIELDS, 'document_email_attachment'],
+  document: [...DEFAULT_REPORT_FIELDS, 'document_email_attachment', 'group_by'],
   payment: [
     ...DEFAULT_REPORT_FIELDS,
     'document_email_attachment',
@@ -143,6 +157,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'status',
     'client',
     'template_id',
+    'group_by',
   ],
   expense: [
     ...DEFAULT_REPORT_FIELDS,
@@ -155,6 +170,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'status',
     'include_deleted',
     'template_id',
+    'group_by',
   ],
   task: [
     ...DEFAULT_REPORT_FIELDS,
@@ -163,14 +179,29 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'status',
     'include_deleted',
     'client',
+    'tags',
     'template_id',
+    'group_by',
   ],
-  product: [...DEFAULT_REPORT_FIELDS, 'document_email_attachment', 'template_id'],
+  project: [
+    ...DEFAULT_REPORT_FIELDS,
+    'clients',
+    'projects',
+    'tags',
+    'group_by',
+  ],
+  product: [
+    ...DEFAULT_REPORT_FIELDS,
+    'document_email_attachment',
+    'template_id',
+    'group_by',
+  ],
   vendor: [
     ...DEFAULT_REPORT_FIELDS,
     'document_email_attachment',
     'report_keys',
     'template_id',
+    'group_by',
   ],
   purchase_order: [
     ...DEFAULT_REPORT_FIELDS,
@@ -180,6 +211,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'include_deleted',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
   purchase_order_item: [
     ...DEFAULT_REPORT_FIELDS,
@@ -188,6 +220,7 @@ export const REPORTS_FIELDS: Record<string, ReportFiled[]> = {
     'status',
     'include_deleted',
     'template_id',
+    'group_by',
   ],
 };
 
@@ -197,7 +230,18 @@ export function EmailReport(props: Props) {
 
   const { schedule, handleChange, errors } = props;
 
+  const groupByOptions = useGroupByOptions(
+    schedule.parameters.report_name as Identifier
+  );
+
   const showReportFiled = (field: ReportFiled) => {
+    if (field === 'tags') {
+      return (
+        (schedule.parameters.report_name as Identifier) in
+        REPORT_TAG_ENTITY_TYPES
+      );
+    }
+
     return (
       REPORTS_FIELDS[schedule.parameters.report_name] || DEFAULT_REPORT_FIELDS
     ).includes(field);
@@ -455,6 +499,21 @@ export function EmailReport(props: Props) {
         />
       )}
 
+      {showReportFiled('tags') && (
+        <MultiTagSelector
+          entityType={
+            REPORT_TAG_ENTITY_TYPES[
+              schedule.parameters.report_name as Identifier
+            ] ?? TAG_ENTITY_TYPES.invoice
+          }
+          value={schedule.parameters.tag_ids}
+          onValueChange={(tagIds) =>
+            handleChange('parameters.tag_ids' as keyof Schedule, tagIds)
+          }
+          errorMessage={errors?.errors['parameters.tag_ids']}
+        />
+      )}
+
       {showReportFiled('categories') && (
         <MultiExpenseCategorySelector
           value={schedule.parameters.categories}
@@ -473,15 +532,39 @@ export function EmailReport(props: Props) {
           <TemplateSelector
             value={schedule.parameters.template_id}
             onChange={(design) =>
-              handleChange('parameters.template_id' as keyof Schedule, design.id)
+              handleChange(
+                'parameters.template_id' as keyof Schedule,
+                design.id
+              )
             }
             clearButton
-            onClearButtonClick={() => handleChange('parameters.template_id' as keyof Schedule, '')}
+            onClearButtonClick={() =>
+              handleChange('parameters.template_id' as keyof Schedule, '')
+            }
             entity={schedule.parameters.report_name as Identifier}
           />
         </Element>
       )}
 
+      {showReportFiled('group_by') && groupByOptions.length > 0 && (
+        <Element leftSide={t('group_by')}>
+          <SelectField
+            value={schedule.parameters.group_by || ''}
+            onValueChange={(value) =>
+              handleChange('parameters.group_by' as keyof Schedule, value)
+            }
+            customSelector
+            dismissable={false}
+          >
+            <option value="">{t('none')}</option>
+            {groupByOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </SelectField>
+        </Element>
+      )}
     </>
   );
 }

@@ -8,9 +8,9 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useTranslation } from 'react-i18next';
 import { isHosted } from '$app/common/helpers';
 import { Tab } from '$app/components/Tabs';
-import { useTranslation } from 'react-i18next';
 
 export function useUserDetailsTabs() {
   const { t } = useTranslation();
@@ -45,6 +45,10 @@ export function useUserDetailsTabs() {
     {
       name: t('preferences'),
       href: '/settings/user_details/preferences',
+    },
+    {
+      name: t('keyboard_shortcuts'),
+      href: '/settings/user_details/keyboard_shortcuts',
     },
   ];
 

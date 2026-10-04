@@ -8,23 +8,23 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Card, Element } from '$app/components/cards';
-import { Button, InputField } from '$app/components/forms';
-import { useAccentColor } from '$app/common/hooks/useAccentColor';
-import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
-import { ClientContact } from '$app/common/interfaces/client-contact';
-import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { CustomField } from '$app/components/CustomField';
-import Toggle from '$app/components/forms/Toggle';
+import classNames from 'classnames';
 import { set } from 'lodash';
 import { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 } from 'uuid';
 import { useColorScheme } from '$app/common/colors';
-import { UserUnsubscribedTooltip } from '../../common/components/UserUnsubscribedTooltip';
+import { useAccentColor } from '$app/common/hooks/useAccentColor';
+import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
+import { ClientContact } from '$app/common/interfaces/client-contact';
+import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { CustomField } from '$app/components/CustomField';
+import { Card, Element } from '$app/components/cards';
+import { Button, InputField } from '$app/components/forms';
+import Toggle from '$app/components/forms/Toggle';
 import { Plus } from '$app/components/icons/Plus';
 import { Trash } from '$app/components/icons/Trash';
-import classNames from 'classnames';
+import { UserUnsubscribedTooltip } from '../../common/components/UserUnsubscribedTooltip';
 
 interface Props {
   contacts: Partial<ClientContact>[];
@@ -76,6 +76,7 @@ export function Contacts(props: Props) {
       phone: '',
       send_email: false,
       can_sign: false,
+      cc_only: false,
     });
 
     props.setContacts(contacts);
@@ -219,22 +220,42 @@ export function Contacts(props: Props) {
                     contact.contact_key as string
                   )
                 }
+                disabled={Boolean(contact?.cc_only)}
+              />
+            </Element>
+
+            <Element leftSide={t('cc_only')} noExternalPadding>
+              <Toggle
+                checked={Boolean(contact?.cc_only)}
+                onChange={(value) => {
+                  handleChange(value, 'cc_only', contact.contact_key as string);
+
+                  if (value) {
+                    setTimeout(() => {
+                      handleChange(
+                        false,
+                        'send_email',
+                        contact.contact_key as string
+                      );
+                    }, 100);
+                  }
+                }}
               />
             </Element>
 
             {company?.enable_modules && (
-            <Element leftSide={t('authorized_to_sign')} noExternalPadding>
-              <Toggle
-                checked={Boolean(contact?.can_sign)}
-                onChange={(value) =>
-                  handleChange(
-                    value,
-                    'can_sign',
-                    contact.contact_key as string
-                  )
-                }
-              />
-            </Element>
+              <Element leftSide={t('authorized_to_sign')} noExternalPadding>
+                <Toggle
+                  checked={Boolean(contact?.can_sign)}
+                  onChange={(value) =>
+                    handleChange(
+                      value,
+                      'can_sign',
+                      contact.contact_key as string
+                    )
+                  }
+                />
+              </Element>
             )}
 
             {company?.custom_fields?.contact1 && (

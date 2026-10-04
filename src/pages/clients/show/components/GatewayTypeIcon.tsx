@@ -9,25 +9,26 @@
  */
 
 import { CSSProperties } from 'react';
-import visaLogo from '/gateway-card-images/visa.png';
-import authorizeLogo from '/gateway-card-images/authorize-net.png';
-import americanExpressLogo from '/gateway-card-images/american-express.png';
-import masterCardLogo from '/gateway-card-images/mastercard.png';
-import paypalLogo from '/gateway-card-images/paypal.png';
-import braintreeLogo from '/gateway-card-images/braintree.svg.png';
-import checkoutcomLogo from '/gateway-card-images/checkout.jpg';
-import goCardlessLogo from '/gateway-card-images/gocardless.png';
 import { MollieIcon } from '$app/components/icons/MollieIcon';
+import americanExpressLogo from '/gateway-card-images/american-express.png';
+import authorizeLogo from '/gateway-card-images/authorize-net.png';
+import BlockonomicsLogo from '/gateway-card-images/blockonomics.svg';
+import braintreeLogo from '/gateway-card-images/braintree.svg.png';
+import BTCPayLogo from '/gateway-card-images/btcpay.png';
+import checkoutcomLogo from '/gateway-card-images/checkout.jpg';
+import ewayLogo from '/gateway-card-images/eway.png';
+import forteLogo from '/gateway-card-images/forte.png';
+import goCardlessLogo from '/gateway-card-images/gocardless.png';
+import masterCardLogo from '/gateway-card-images/mastercard.png';
 import payfastLogo from '/gateway-card-images/payfast.png';
+import paypalLogo from '/gateway-card-images/paypal.png';
 import paytraceLogo from '/gateway-card-images/paytrace.svg';
+import paywareLogo from '/gateway-card-images/payware-logo.svg';
 import razorpayLogo from '/gateway-card-images/razorpay.png';
 import squareLogo from '/gateway-card-images/square.svg.png';
 import stripeLogo from '/gateway-card-images/stripe.svg';
-import ewayLogo from '/gateway-card-images/eway.png';
-import forteLogo from '/gateway-card-images/forte.png';
+import visaLogo from '/gateway-card-images/visa.png';
 import wepayLogo from '/gateway-card-images/wepay.svg';
-import BTCPayLogo from '/gateway-card-images/btcpay.png';
-import BlockonomicsLogo from '/gateway-card-images/blockonomics.svg';
 
 export const availableGatewayLogos = [
   'paypal_ppcp',
@@ -51,6 +52,7 @@ export const availableGatewayLogos = [
   'paypal_rest',
   'btcpay',
   'blockonomics',
+  'payware',
 ];
 
 export type GatewayLogoName =
@@ -74,7 +76,8 @@ export type GatewayLogoName =
   | 'forte'
   | 'paypal_rest'
   | 'btcpay'
-  | 'blockonomics';
+  | 'blockonomics'
+  | 'payware';
 
 interface Props {
   name: GatewayLogoName;
@@ -267,6 +270,15 @@ export function GatewayTypeIcon(props: Props) {
           src={BlockonomicsLogo}
           alt="Blockonomics"
           style={props.style || { width: 30, height: 30 }}
+        />
+      );
+
+    case 'payware':
+      return (
+        <img
+          src={paywareLogo}
+          alt="payware"
+          style={props.style || { width: 40, height: 40 }}
         />
       );
 

@@ -8,30 +8,32 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { AxiosError, AxiosResponse } from 'axios';
+import classNames from 'classnames';
+import { useFormik } from 'formik';
+import { get } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Check } from 'react-feather';
+import { useTranslation } from 'react-i18next';
 import { useColorScheme } from '$app/common/colors';
 import { endpoint, isHosted, isSelfHosted } from '$app/common/helpers';
+import { Classification } from '$app/common/helpers/peppol-countries';
 import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
 import { useAccentColor } from '$app/common/hooks/useAccentColor';
 import { useCurrentAccount } from '$app/common/hooks/useCurrentAccount';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
+import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
 import { useIsWhitelabelled } from '$app/common/hooks/usePaidOrSelfhost';
 import { useRefreshCompanyUsers } from '$app/common/hooks/useRefreshCompanyUsers';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { Element } from '$app/components/cards';
 import { CountrySelector } from '$app/components/CountrySelector';
+import { Element } from '$app/components/cards';
 import { ErrorMessage } from '$app/components/ErrorMessage';
 import { Button, InputField, Link } from '$app/components/forms';
 import Toggle from '$app/components/forms/Toggle';
 import { Modal } from '$app/components/Modal';
 import { Spinner } from '$app/components/Spinner';
-import { AxiosError } from 'axios';
-import classNames from 'classnames';
-import { useFormik } from 'formik';
-import { get } from 'lodash';
-import { useEffect, useState } from 'react';
-import { Check } from 'react-feather';
-import { useTranslation } from 'react-i18next';
 
 export type Step =
   | 'plan_check'
@@ -63,11 +65,21 @@ export function Onboarding() {
   const accentColor = useAccentColor();
 
   const { t } = useTranslation();
+  const account = useCurrentAccount();
+  const company = useCurrentCompany();
+
+  const isSingapore = company?.settings?.country_id === '702';
+  const hasEInvoiceCredits = Number(account?.e_invoice_quota) > 0;
 
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState<Step>('plan_check');
-  const [steps, setSteps] = useState<Step[]>(defaultSteps);
-  const [businessType, setBusinessType] = useState<'individual' | 'business'>();
+  const [businessType, setBusinessType] = useState<Classification>();
+
+  const steps = defaultSteps.filter(
+    (step) =>
+      !(isHosted() && step === 'token') &&
+      !(hasEInvoiceCredits && step === 'buy_credits')
+  );
 
   useEffect(() => {
     if (step === 'completed') {
@@ -76,12 +88,6 @@ export function Onboarding() {
       toast.success(t('peppol_successfully_configured')!);
     }
   }, [step]);
-
-  useEffect(() => {
-    if (isHosted()) {
-      setSteps((c) => c.filter((s) => s !== 'token'));
-    }
-  }, [steps]);
 
   const next = () => {
     const next = steps[steps.indexOf(step) + 1];
@@ -143,7 +149,9 @@ export function Onboarding() {
                         {t('step')} {i + 1}
                       </span>
                       <h4 className="text-base lg:text-lg text-gray-900">
-                        {t(translations[s])}
+                        {s === 'vat_check' && isSingapore
+                          ? t('classification')
+                          : t(translations[s])}
                       </h4>
                     </a>
                   </li>
@@ -162,6 +170,7 @@ export function Onboarding() {
                 setBusinessType={setBusinessType}
                 onContinue={next}
                 step={step}
+                isSingapore={isSingapore}
               />
             ) : null}
 
@@ -174,6 +183,7 @@ export function Onboarding() {
                 step={step}
                 onContinue={next}
                 businessType={businessType!}
+                isSingapore={isSingapore}
               />
             ) : null}
           </div>
@@ -193,8 +203,6 @@ function PlanCheck({ onContinue }: StepProps) {
   const isWhitelabelled = useIsWhitelabelled();
   const accentColor = useAccentColor();
 
-  const [hasValidLicense, setHasValidLicense] = useState(false);
-
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -208,18 +216,10 @@ function PlanCheck({ onContinue }: StepProps) {
   const form = useFormik({
     initialValues: {},
     onSubmit(_, { setSubmitting }) {
-      if (import.meta.env.DEV) {
-        setHasValidLicense(true);
-
-        onContinue();
-
-        return;
-      }
-
-      request('POST', endpoint('/api/v1/check_license'))
+      request('POST', endpoint('/api/v1/check_license'), undefined, {
+        skipIntercept: true,
+      })
         .then(() => {
-          setHasValidLicense(true);
-
           onContinue();
         })
         .catch((e: AxiosError<ValidationBag>) => {
@@ -283,39 +283,81 @@ function PlanCheck({ onContinue }: StepProps) {
       ) : null}
 
       <div className="flex justify-end">
-        {hasValidLicense ? (
-          <Button behavior="button" type="primary" onClick={() => onContinue()}>
-            {t('continue')}
-          </Button>
-        ) : (
-          <Button
-            form="checkLicenseForm"
-            type="primary"
-            onClick={form.submitForm}
-            disabled={form.isSubmitting}
-          >
-            {t('verify')}
-          </Button>
-        )}
+        <Button
+          form="checkLicenseForm"
+          type="primary"
+          onClick={form.submitForm}
+          disabled={form.isSubmitting}
+        >
+          {t('verify')}
+        </Button>
       </div>
     </div>
   );
 }
 
 function Token({ onContinue }: StepProps) {
-  const generate = () => {
-    request('POST', endpoint(`/api/v1/einvoice/token/update`))
-      .then(() => {
-        onContinue();
-      })
-      .catch(() => toast.error());
-  };
+  const { t } = useTranslation();
+  const hasStarted = useRef(false);
+  const [hasError, setHasError] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generate = useCallback(async () => {
+    setHasError(false);
+    setIsGenerating(true);
+
+    try {
+      await request(
+        'POST',
+        endpoint('/api/v1/einvoice/token/update'),
+        undefined,
+        { skipIntercept: true }
+      );
+
+      await request(
+        'GET',
+        endpoint('/api/v1/einvoice/health_check'),
+        undefined,
+        { skipIntercept: true }
+      );
+
+      onContinue();
+    } catch (error) {
+      console.error(error);
+      setHasError(true);
+      toast.error(t('token_regeneration_failed')!);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [onContinue, t]);
 
   useEffect(() => {
-    generate();
-  }, []);
+    if (!hasStarted.current) {
+      hasStarted.current = true;
+      generate();
+    }
+  }, [generate]);
 
-  return <Spinner />;
+  if (!hasError) {
+    return <Spinner />;
+  }
+
+  return (
+    <div className="space-y-5">
+      <ErrorMessage>{t('token_regeneration_failed')}</ErrorMessage>
+
+      <div className="flex justify-end">
+        <Button
+          behavior="button"
+          type="primary"
+          onClick={generate}
+          disabled={isGenerating}
+        >
+          {t('regenerate_token')}
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 function BuyCredits({ onContinue }: StepProps) {
@@ -363,14 +405,17 @@ function BuyCredits({ onContinue }: StepProps) {
 }
 
 type FormProps = StepProps & {
-  businessType: 'individual' | 'business';
+  businessType: Classification;
+  isSingapore: boolean;
 };
 
-function Form({ onContinue, businessType }: FormProps) {
+function Form({ onContinue, businessType, isSingapore }: FormProps) {
   const { t } = useTranslation();
   const company = useCurrentCompany();
   const refresh = useRefreshCompanyUsers();
-  const account = useCurrentAccount();
+  const user = useCurrentUser();
+
+  const isFrance = company?.settings?.country_id === '250';
 
   const [errors, setErrors] = useState<ValidationBag | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -383,11 +428,15 @@ function Form({ onContinue, businessType }: FormProps) {
       city: company?.settings?.city || '',
       county: company?.settings?.state || '',
       zip: company?.settings?.postal_code || '',
-      country: company?.settings?.country_id || '',
+      country: isSingapore ? '702' : company?.settings?.country_id || '',
       acts_as_sender: true,
       acts_as_receiver: true,
       vat_number: company?.settings?.vat_number || '',
       id_number: company?.settings.id_number || '',
+      c5_signer_name: isSingapore
+        ? `${user?.first_name || ''} ${user?.last_name || ''}`.trim()
+        : '',
+      c5_signer_email: isSingapore ? user?.email || '' : '',
     },
     onSubmit: (values, { setSubmitting }) => {
       toast.processing();
@@ -397,10 +446,17 @@ function Form({ onContinue, businessType }: FormProps) {
       request('POST', endpoint('/api/v1/einvoice/peppol/setup'), {
         ...values,
         tenant_id: company?.company_key,
-        e_invoicing_token: account?.e_invoicing_token,
         classification: businessType,
       })
-        .then(() => {
+        .then((response: AxiosResponse) => {
+          const corppassUrl = response.data?.corppass_url;
+
+          if (corppassUrl) {
+            toast.success('Redirecting to CorpPass for verification...');
+            window.location.href = corppassUrl;
+            return;
+          }
+
           toast.success('peppol_successfully_configured');
 
           onContinue();
@@ -452,31 +508,63 @@ function Form({ onContinue, businessType }: FormProps) {
           errorMessage={get(errors, 'errors.party_name')}
         />
 
-        {businessType === 'business' ? (
-          <InputField
-            value={form.values.vat_number}
-            onChange={form.handleChange}
-            label={t('vat_number')}
-            id="vat_number"
-            errorMessage={get(errors, 'errors.vat_number')}
-          />
-        ) : null}
+        {isSingapore ? (
+          <>
+            <InputField
+              value={form.values.id_number}
+              onChange={form.handleChange}
+              label="UEN (Unique Entity Number)"
+              id="id_number"
+              placeholder="e.g. 12345678A"
+              errorMessage={get(errors, 'errors.id_number')}
+            />
 
-        {businessType === 'individual' ? (
-          <InputField
-            value={form.values.id_number}
-            onChange={form.handleChange}
-            label={t('id_number')}
-            id="id_number"
-            errorMessage={get(errors, 'errors.id_number')}
-          />
-        ) : null}
+            <InputField
+              value={form.values.c5_signer_name}
+              onChange={form.handleChange}
+              label={t('name')}
+              id="c5_signer_name"
+              errorMessage={get(errors, 'errors.c5_signer_name')}
+            />
+
+            <InputField
+              value={form.values.c5_signer_email}
+              onChange={form.handleChange}
+              label={t('email')}
+              id="c5_signer_email"
+              errorMessage={get(errors, 'errors.c5_signer_email')}
+            />
+          </>
+        ) : (
+          <>
+            {businessType === 'business' ? (
+              <InputField
+                value={form.values.vat_number}
+                onChange={form.handleChange}
+                label={t('vat_number')}
+                id="vat_number"
+                errorMessage={get(errors, 'errors.vat_number')}
+              />
+            ) : null}
+
+            {businessType === 'individual' || businessType === 'business' ? (
+              <InputField
+                value={form.values.id_number}
+                onChange={form.handleChange}
+                label={isFrance ? 'SIRET' : t('id_number')}
+                id="id_number"
+                errorMessage={get(errors, 'errors.id_number')}
+              />
+            ) : null}
+          </>
+        )}
 
         <CountrySelector
           value={form.values.country}
           label={t('country')}
           onChange={(e) => form.setFieldValue('country', e)}
           errorMessage={get(errors, 'errors.country')}
+          disabled={isSingapore}
         />
 
         <InputField
@@ -544,19 +632,83 @@ function Form({ onContinue, businessType }: FormProps) {
 }
 
 type VatCheckProps = StepProps & {
-  businessType: 'business' | 'individual' | undefined;
-  setBusinessType: (businessType: 'business' | 'individual') => void;
+  businessType: Classification | undefined;
+  setBusinessType: (businessType: Classification) => void;
+  isSingapore: boolean;
 };
 
 function VatCheck({
   businessType,
   setBusinessType,
   onContinue,
+  isSingapore,
 }: VatCheckProps) {
   const { t } = useTranslation();
 
   const accentColor = useAccentColor();
   const colors = useColorScheme();
+
+  if (isSingapore) {
+    return (
+      <div>
+        <p className="text-lg">Select your entity classification</p>
+
+        <div className="my-5 space-y-2">
+          <button
+            className="rounded w-full p-3 text-left border flex justify-between items-center"
+            style={{
+              backgroundColor: colors.$1,
+              borderColor:
+                businessType === 'business' ? accentColor : colors.$5,
+            }}
+            onClick={() => setBusinessType('business')}
+          >
+            <p>{t('business')}</p>
+
+            <Check
+              size={18}
+              color={accentColor}
+              className={classNames({
+                hidden: businessType !== 'business',
+              })}
+            />
+          </button>
+
+          <button
+            className="rounded w-full p-3 text-left border flex justify-between items-center"
+            style={{
+              backgroundColor: colors.$1,
+              borderColor:
+                businessType === 'government' ? accentColor : colors.$5,
+            }}
+            onClick={() => setBusinessType('government')}
+          >
+            <p>{t('government')}</p>
+
+            <Check
+              size={18}
+              color={accentColor}
+              className={classNames({
+                hidden: businessType !== 'government',
+              })}
+            />
+          </button>
+        </div>
+
+        <div className="flex justify-end">
+          <Button
+            behavior="button"
+            type="primary"
+            disabled={!businessType}
+            disableWithoutIcon
+            onClick={() => onContinue()}
+          >
+            {t('continue')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -611,7 +763,7 @@ function VatCheck({
           disableWithoutIcon
           onClick={() => onContinue()}
         >
-          {t('Continue')}
+          {t('continue')}
         </Button>
       </div>
     </div>

@@ -8,41 +8,39 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useAtomValue } from 'jotai';
+import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useEnabled } from '$app/common/guards/guards/enabled';
+import { useOpenFeedbackSlider } from '$app/common/hooks/useOpenFeedbackSlider';
+import { reactSettingsAtom } from '$app/common/hooks/useReactSettings';
 import { useTitle } from '$app/common/hooks/useTitle';
 import { Activity } from '$app/pages/dashboard/components/Activity';
 import { PastDueInvoices } from '$app/pages/dashboard/components/PastDueInvoices';
 import { RecentPayments } from '$app/pages/dashboard/components/RecentPayments';
 import { Totals } from '$app/pages/dashboard/components/Totals';
 import { UpcomingInvoices } from '$app/pages/dashboard/components/UpcomingInvoices';
-import { useTranslation } from 'react-i18next';
 import { Default } from '../../components/layouts/Default';
+import { ModuleBitmask } from '../settings';
 import { ExpiredQuotes } from './components/ExpiredQuotes';
 import { UpcomingQuotes } from './components/UpcomingQuotes';
-import { useEnabled } from '$app/common/guards/guards/enabled';
-import { ModuleBitmask } from '../settings';
 import { UpcomingRecurringInvoices } from './components/UpcomingRecurringInvoices';
-import { useSocketEvent } from '$app/common/queries/sockets';
-import { $refetch } from '$app/common/hooks/useRefetch';
-import { useOpenFeedbackSlider } from '$app/common/hooks/useOpenFeedbackSlider';
-import { useEffect } from 'react';
 
 export default function Dashboard() {
   useTitle('dashboard');
 
   const [t] = useTranslation();
-
   const enabled = useEnabled();
-
   const openFeedbackSlider = useOpenFeedbackSlider();
-
-  useSocketEvent({
-    on: 'App\\Events\\Invoice\\InvoiceWasPaid',
-    callback: () => $refetch(['invoices']),
-  });
+  // Try opening feedback once after settings hydrate.
+  const isReactSettingsHydrated = useAtomValue(reactSettingsAtom) !== null;
+  const feedbackTriedRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (!isReactSettingsHydrated || feedbackTriedRef.current) return;
+    feedbackTriedRef.current = true;
     openFeedbackSlider();
-  }, []);
+  }, [isReactSettingsHydrated, openFeedbackSlider]);
 
   return (
     <Default title={t('dashboard')} breadcrumbs={[]}>

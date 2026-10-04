@@ -8,13 +8,14 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { route } from '$app/common/helpers/route';
-import { DataTable } from '$app/components/DataTable';
 import { useParams } from 'react-router-dom';
-import { useActions, useCreditColumns } from '$app/pages/credits/common/hooks';
-import { useCustomBulkActions } from '$app/pages/credits/common/hooks/useCustomBulkActions';
 import { permission } from '$app/common/guards/guards/permission';
+import { route } from '$app/common/helpers/route';
 import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { DataTable } from '$app/components/DataTable';
+import { useActions, useCreditColumns } from '$app/pages/credits/common/hooks';
+import { useCreditsFilters } from '$app/pages/credits/common/hooks/useCreditsFilters';
+import { useCustomBulkActions } from '$app/pages/credits/common/hooks/useCustomBulkActions';
 
 export default function Credits() {
   const { id } = useParams();
@@ -22,6 +23,8 @@ export default function Credits() {
   const hasPermission = useHasPermission();
 
   const columns = useCreditColumns();
+
+  const filters = useCreditsFilters();
 
   const actions = useActions();
 
@@ -37,6 +40,8 @@ export default function Credits() {
       columns={columns}
       customActions={actions}
       customBulkActions={customBulkActions}
+      customFilters={filters}
+      customFilterPlaceholder="status"
       withResourcefulActions
       bulkRoute="/api/v1/credits/bulk"
       linkToCreate={route('/credits/create?client=:id', { id })}
@@ -45,6 +50,7 @@ export default function Credits() {
       linkToCreateGuards={[permission('create_credit')]}
       hideEditableOptions={!hasPermission('edit_credit')}
       withoutPageAsPreference
+      withRecordScopedFilters
     />
   );
 }

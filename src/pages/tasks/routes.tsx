@@ -8,14 +8,14 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { lazy } from 'react';
+import { Route } from 'react-router-dom';
 import { Guard } from '$app/common/guards/Guard';
 import { assigned } from '$app/common/guards/guards/assigned';
 import { enabled } from '$app/common/guards/guards/enabled';
 import { or } from '$app/common/guards/guards/or';
 import { permission } from '$app/common/guards/guards/permission';
 import { ModuleBitmask } from '$app/pages/settings/account-management/component';
-import { Route } from 'react-router-dom';
-import { lazy } from 'react';
 import Import from './import/Import';
 
 const Tasks = lazy(() => import('$app/pages/tasks/index/Tasks'));
@@ -24,6 +24,9 @@ const Create = lazy(() => import('$app/pages/tasks/create/Create'));
 const Task = lazy(() => import('$app/pages/tasks/Task'));
 const Edit = lazy(() => import('$app/pages/tasks/edit/Edit'));
 const Documents = lazy(() => import('$app/pages/tasks/documents/Documents'));
+const Daily = lazy(() => import('$app/pages/tasks/daily/Daily'));
+const Weekly = lazy(() => import('$app/pages/tasks/weekly/Weekly'));
+const Calendar = lazy(() => import('$app/pages/tasks/calendar/Calendar'));
 
 export const taskRoutes = (
   <Route path="/tasks">
@@ -53,6 +56,42 @@ export const taskRoutes = (
             or(permission('view_task'), permission('edit_task')),
           ]}
           component={<Kanban />}
+        />
+      }
+    />
+    <Route
+      path="daily"
+      element={
+        <Guard
+          guards={[
+            enabled(ModuleBitmask.Tasks),
+            or(permission('view_task'), permission('edit_task')),
+          ]}
+          component={<Daily />}
+        />
+      }
+    />
+    <Route
+      path="weekly"
+      element={
+        <Guard
+          guards={[
+            enabled(ModuleBitmask.Tasks),
+            or(permission('view_task'), permission('edit_task')),
+          ]}
+          component={<Weekly />}
+        />
+      }
+    />
+    <Route
+      path="calendar"
+      element={
+        <Guard
+          guards={[
+            enabled(ModuleBitmask.Tasks),
+            or(permission('view_task'), permission('edit_task')),
+          ]}
+          component={<Calendar />}
         />
       }
     />

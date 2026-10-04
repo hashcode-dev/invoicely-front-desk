@@ -93,6 +93,17 @@ export interface Company {
   session_timeout?: number;
   quickbooks?: Quickbooks;
   enable_modules?: number;
+  sync?: Sync;
+}
+
+export interface Sync {
+  qb_id: string;
+  invitations: string[];
+  dn_completed: boolean;
+  dn_document_hashed_id: string;
+  qb_status: string;
+  qb_sync_token: string;
+  qb_status_message: string;
 }
 
 export interface Settings {
@@ -324,6 +335,8 @@ export interface Settings {
   e_invoice_type: string;
   default_expense_payment_type_id: string;
   enable_e_invoice: boolean;
+  france_reporting_enabled: boolean;
+  france_reporting_schedule: 'ten_day' | 'monthly';
   send_email_on_mark_paid: boolean;
   classification: string;
   payment_email_all_contacts: boolean;
@@ -348,6 +361,11 @@ export interface Settings {
   ses_region: string;
   ses_topic_arn: string;
   ses_from_address: string;
+  e_invoice_forward_email: string;
+  e_expense_forward_email: string;
+  skip_automatic_email_with_peppol: boolean;
+  global_tag_inheritance: boolean;
+  documents_public_by_default: boolean;
 }
 
 export interface TaxData {
@@ -363,8 +381,29 @@ export interface Regions {
   EU: EURegion;
   AU: AURegion;
   UK: UKRegion;
+  AD: AndorraRegion;
+  SG: SGRegion;
+}
+export interface AndorraRegion {
+  has_sales_above_threshold: boolean;
+  tax_all_subregions: boolean;
+  tax_threshold: number;
+  subregions: AndorraSubregion;
+}
+export interface AndorraSubregion {
+  AD: TaxSetting;
 }
 
+export interface SGRegion {
+  has_sales_above_threshold: boolean;
+  tax_all_subregions: boolean;
+  tax_threshold: number;
+  subregions: SGSubregion;
+}
+
+export interface SGSubregion {
+  SG: TaxSetting;
+}
 export interface USRegion {
   has_sales_above_threshold: boolean;
   tax_all_subregions: boolean;

@@ -28,6 +28,7 @@ import {
   MdDelete,
   MdDesignServices,
   MdDownload,
+  MdEdit,
   MdRestore,
   MdTextSnippet,
 } from 'react-icons/md';
@@ -56,6 +57,7 @@ import { useFormatNumber } from '$app/common/hooks/useFormatNumber';
 import classNames from 'classnames';
 import { normalizeColumnName } from '$app/common/helpers/data-table';
 import { useDisplayRunTemplateActions } from '$app/common/hooks/useDisplayRunTemplateActions';
+import { TagPills } from '$app/components/tags/TagPills';
 
 export const defaultColumns: string[] = [
   'name',
@@ -83,11 +85,11 @@ export function useAllProjectColumns() {
     'budgeted_hours',
     'entity_state',
     'archived_at',
-    //   'assigned_to', @Todo: Need to resolve translation
+    'assigned_to',
     //   'client_id_number', @Todo: Need to resolve translation
     //   'client_number', @Todo: Need to resolve translation
     'created_at',
-    //   'created_by', @Todo: Need to resolve translation
+    'user',
     firstCustom,
     secondCustom,
     thirdCustom,
@@ -97,6 +99,7 @@ export function useAllProjectColumns() {
     'number',
     'updated_at',
     'total_hours',
+    'tags',
   ] as const;
 
   return projectColumns.map((column) => normalizeColumnName(column));
@@ -244,10 +247,25 @@ export function useProjectColumns() {
       format: (value) => date(value, dateFormat),
     },
     {
+      column: 'assigned_to',
+      id: 'assigned_user_id',
+      label: t('assigned_to'),
+      format: (value, project) =>
+        project.assigned_user &&
+        `${project.assigned_user.first_name} ${project.assigned_user.last_name}`,
+    },
+    {
       column: 'created_at',
       id: 'created_at',
       label: t('created_at'),
       format: (value) => date(value, dateFormat),
+    },
+    {
+      column: 'user',
+      id: 'user_id',
+      label: t('user'),
+      format: (value, project) =>
+        project.user && `${project.user.first_name} ${project.user.last_name}`,
     },
     {
       column: firstCustom,
@@ -296,6 +314,12 @@ export function useProjectColumns() {
       label: t('updated_at'),
       format: (value) => date(value, dateFormat),
     },
+    {
+      column: 'tags',
+      id: 'project_tag_ids',
+      label: t('tags'),
+      format: (value, project) => <TagPills tags={project.tags} />,
+    },
   ];
 
   const list: string[] =
@@ -310,8 +334,15 @@ export function useProjectColumns() {
     );
 }
 
-export function useActions() {
+interface ActionsParams {
+  showEditAction?: boolean;
+  showCommonBulkAction?: boolean;
+}
+
+export function useActions(params?: ActionsParams) {
   const [t] = useTranslation();
+
+  const { showEditAction, showCommonBulkAction } = params || {};
 
   const bulk = useBulkAction();
   const navigate = useNavigate();
@@ -345,6 +376,16 @@ export function useActions() {
   } = useChangeTemplate();
 
   const actions = [
+    (project: Project) =>
+      Boolean(showEditAction) && (
+        <DropdownElement
+          to={route('/projects/:id/edit', { id: project.id })}
+          icon={<Icon element={MdEdit} />}
+        >
+          {t('edit')}
+        </DropdownElement>
+      ),
+    () => Boolean(showEditAction) && <Divider withoutPadding />,
     (project: Project) =>
       hasPermission('create_invoice') && (
         <DropdownElement
@@ -388,10 +429,13 @@ export function useActions() {
           {t('run_template')}
         </DropdownElement>
       ),
-    () => isEditOrShowPage && <Divider withoutPadding />,
+    () =>
+      (isEditOrShowPage || Boolean(showCommonBulkAction)) && (
+        <Divider withoutPadding />
+      ),
     (project: Project) =>
       getEntityState(project) === EntityState.Active &&
-      isEditOrShowPage && (
+      (isEditOrShowPage || Boolean(showCommonBulkAction)) && (
         <DropdownElement
           onClick={() => bulk([project.id], 'archive')}
           icon={<Icon element={MdArchive} />}
@@ -402,7 +446,7 @@ export function useActions() {
     (project: Project) =>
       (getEntityState(project) === EntityState.Archived ||
         getEntityState(project) === EntityState.Deleted) &&
-      isEditOrShowPage && (
+      (isEditOrShowPage || Boolean(showCommonBulkAction)) && (
         <DropdownElement
           onClick={() => bulk([project.id], 'restore')}
           icon={<Icon element={MdRestore} />}
@@ -413,7 +457,7 @@ export function useActions() {
     (project: Project) =>
       (getEntityState(project) === EntityState.Active ||
         getEntityState(project) === EntityState.Archived) &&
-      isEditOrShowPage && (
+      (isEditOrShowPage || Boolean(showCommonBulkAction)) && (
         <DropdownElement
           onClick={() => bulk([project.id], 'delete')}
           icon={<Icon element={MdDelete} />}

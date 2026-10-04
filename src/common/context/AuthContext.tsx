@@ -30,11 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function login(u: AuthUser) {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(u));
+    localStorage.setItem('X-NINJA-TOKEN', 'demo-token');
     setUser(u);
   }
 
   function logout() {
     sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem('X-NINJA-TOKEN');
     setUser(null);
   }
 

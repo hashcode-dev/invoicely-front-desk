@@ -10,11 +10,60 @@
 
 import { Client } from '../interfaces/client';
 import { Settings } from '../interfaces/company.interface';
+import { GroupSettings } from '../interfaces/group-settings';
 import { useGroupSettingsQuery } from '../queries/group-settings';
 import { useCurrentCompany } from './useCurrentCompany';
 
 interface Props {
   withoutCompanySettingsFallback?: boolean;
+}
+
+function resolveSetting(
+  client: Client | undefined,
+  propertyKey: keyof Settings,
+  groupSettings: GroupSettings[] | undefined,
+  company: { settings: Settings },
+  withoutCompanySettingsFallback: boolean
+) {
+  if (!groupSettings || !client) {
+    return { value: undefined, level: null };
+  }
+
+  if (client.settings[propertyKey] !== undefined) {
+    return { value: client.settings[propertyKey], level: 'Client' };
+  }
+
+  if (
+    client.group_settings &&
+    client.group_settings.settings[propertyKey] !== undefined
+  ) {
+    return {
+      value: client.group_settings.settings[propertyKey],
+      level: 'Group',
+    };
+  }
+
+  if (client.group_settings_id && !client.group_settings) {
+    const currentGroupSettings = groupSettings.find(
+      ({ id }) => id === client.group_settings_id
+    );
+
+    if (
+      currentGroupSettings &&
+      currentGroupSettings.settings[propertyKey] !== undefined
+    ) {
+      return {
+        value: currentGroupSettings.settings[propertyKey],
+        level: 'Group',
+      };
+    }
+  }
+
+  if (withoutCompanySettingsFallback) {
+    return { value: undefined, level: null };
+  }
+
+  return { value: company.settings[propertyKey], level: 'Company' };
 }
 
 export function useGetSetting({
@@ -25,54 +74,22 @@ export function useGetSetting({
   const { data: groupSettings } = useGroupSettingsQuery({ perPage: 1000 });
 
   return (client: Client | undefined, propertyKey: keyof Settings) => {
-    if (groupSettings && client) {
-      if (client.settings[propertyKey] !== undefined) {
-        if (import.meta.env.VITE_IS_TEST === 'true') {
-          return `Client: ${client.settings[propertyKey]}`;
-        }
+    return resolveSetting(
+      client,
+      propertyKey,
+      groupSettings,
+      company,
+      withoutCompanySettingsFallback
+    ).value;
+  };
+}
 
-        return client.settings[propertyKey];
-      }
+export function useGetSettingWithLevel() {
+  const company = useCurrentCompany();
 
-      if (
-        client.group_settings &&
-        client.group_settings.settings[propertyKey] !== undefined
-      ) {
-        if (import.meta.env.VITE_IS_TEST === 'true') {
-          return `Group: ${client.group_settings.settings[propertyKey]}`;
-        }
+  const { data: groupSettings } = useGroupSettingsQuery({ perPage: 1000 });
 
-        return client.group_settings.settings[propertyKey];
-      }
-
-      if (client.group_settings_id && !client.group_settings) {
-        const currentGroupSettings = groupSettings.find(
-          ({ id }) => id === client.group_settings_id
-        );
-
-        if (
-          currentGroupSettings &&
-          currentGroupSettings.settings[propertyKey] !== undefined
-        ) {
-          if (import.meta.env.VITE_IS_TEST === 'true') {
-            return `Group: ${currentGroupSettings.settings[propertyKey]}`;
-          }
-
-          return currentGroupSettings.settings[propertyKey];
-        }
-      }
-
-      if (import.meta.env.VITE_IS_TEST === 'true') {
-        return `Company: ${company.settings[propertyKey]}`;
-      }
-
-      if (withoutCompanySettingsFallback) {
-        return undefined;
-      }
-
-      return company.settings[propertyKey];
-    }
-
-    return undefined;
+  return (client: Client | undefined, propertyKey: keyof Settings) => {
+    return resolveSetting(client, propertyKey, groupSettings, company, false);
   };
 }

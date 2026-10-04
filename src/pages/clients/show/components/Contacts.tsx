@@ -8,20 +8,29 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useTranslation } from 'react-i18next';
+import { useColorScheme } from '$app/common/colors';
+import { route } from '$app/common/helpers/route';
+import { useFormatCustomFieldValue } from '$app/common/hooks/useFormatCustomFieldValue';
 import { Client } from '$app/common/interfaces/client';
 import { ClientContact } from '$app/common/interfaces/client-contact';
-import { useTranslation } from 'react-i18next';
-import { UserUnsubscribedTooltip } from '../../common/components/UserUnsubscribedTooltip';
-import { Tooltip } from '$app/components/Tooltip';
 import { CopyToClipboardIconOnly } from '$app/components/CopyToClipBoardIconOnly';
-import { route } from '$app/common/helpers/route';
+import { CustomFields, useCustomField } from '$app/components/CustomField';
 import { Link } from '$app/components/forms';
-import { useColorScheme } from '$app/common/colors';
 import { InfoCard } from '$app/components/InfoCard';
+import { Tooltip } from '$app/components/Tooltip';
+import { UserUnsubscribedTooltip } from '../../common/components/UserUnsubscribedTooltip';
 
 interface Props {
   client: Client;
 }
+
+const contactCustomFieldKeys: CustomFields[] = [
+  'contact1',
+  'contact2',
+  'contact3',
+  'contact4',
+];
 
 export function Contacts(props: Props) {
   const [t] = useTranslation();
@@ -29,6 +38,19 @@ export function Contacts(props: Props) {
   const colors = useColorScheme();
 
   const { client } = props;
+
+  const customField = useCustomField();
+  const formatCustomFieldValue = useFormatCustomFieldValue();
+
+  const hasAnyContactCustomField = (contact: ClientContact) => {
+    return contactCustomFieldKeys.some((field) => {
+      const label = customField(field).label();
+      const value =
+        contact[`custom_value${field.slice(-1)}` as keyof ClientContact];
+
+      return Boolean(label && value);
+    });
+  };
 
   return (
     <>
@@ -46,7 +68,8 @@ export function Contacts(props: Props) {
                   contact.first_name ||
                     contact.last_name ||
                     contact.phone ||
-                    contact.email
+                    contact.email ||
+                    hasAnyContactCustomField(contact)
                 ) && (
                   <div
                     key={index}
@@ -91,6 +114,38 @@ export function Contacts(props: Props) {
                           </Tooltip>
                         </div>
                       )}
+
+                      {contactCustomFieldKeys.map((field) => {
+                        const label = customField(field).label();
+                        const value =
+                          contact[
+                            `custom_value${field.slice(
+                              -1
+                            )}` as keyof ClientContact
+                          ];
+
+                        if (!label || !value) {
+                          return null;
+                        }
+
+                        return (
+                          <div key={field} className="flex space-x-1">
+                            <span
+                              className="font-medium"
+                              style={{ color: colors.$22 }}
+                            >
+                              {label}:
+                            </span>
+
+                            <span
+                              className="font-medium"
+                              style={{ color: colors.$3 }}
+                            >
+                              {formatCustomFieldValue(field, value as string)}
+                            </span>
+                          </div>
+                        );
+                      })}
 
                       <div className="flex items-center space-x-2">
                         <Link

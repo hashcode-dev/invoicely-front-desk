@@ -8,16 +8,19 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Link } from '$app/components/forms';
+import { useTranslation } from 'react-i18next';
+import { route } from '$app/common/helpers/route';
 import { ExpenseCategory } from '$app/common/interfaces/expense-category';
 import { DataTable, DataTableColumns } from '$app/components/DataTable';
-import { route } from '$app/common/helpers/route';
+import { Link } from '$app/components/forms';
 
 export function ExpenseCategories() {
+  const [t] = useTranslation();
+
   const columns: DataTableColumns<ExpenseCategory> = [
     {
-      id: 'category',
-      label: 'name',
+      id: 'name',
+      label: t('name'),
       format: (value, expenseCategory) => (
         <Link
           to={route('/settings/expense_categories/:id/edit', {
@@ -30,7 +33,7 @@ export function ExpenseCategories() {
     },
     {
       id: 'color',
-      label: 'color',
+      label: t('color'),
       format: (value) => (
         <div
           style={{ backgroundColor: value as string }}

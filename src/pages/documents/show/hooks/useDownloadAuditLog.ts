@@ -1,10 +1,10 @@
+import type { AxiosError } from 'axios';
+import { useState } from 'react';
 import { docuNinjaEndpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
 import { Document } from '$app/common/interfaces/docuninja/api';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import type { AxiosError } from 'axios';
-import { useState } from 'react';
 
 interface Params {
   doc: Document | undefined;
@@ -62,7 +62,7 @@ export function useDownloadAuditLog({ doc }: Params) {
           if (error.response?.status === 422) {
             toast.error(error.response.data.message || 'something_went_wrong');
           } else if (error.response?.status === 400) {
-            toast.error('audit_log_not_ready_for_download');
+            toast.error('not_ready_for_download');
           } else {
             toast.error('something_went_wrong');
           }

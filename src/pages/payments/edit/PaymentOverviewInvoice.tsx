@@ -8,16 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { useFormatMoney } from '$app/common/hooks/money/useFormatMoney';
 import { useTranslation } from 'react-i18next';
-import { Payment, Paymentable } from '$app/common/interfaces/payment';
-import { Invoice } from '$app/common/interfaces/invoice';
-import { useCurrentCompanyDateFormats } from '$app/common/hooks/useCurrentCompanyDateFormats';
-import { date as formatDate } from '$app/common/helpers';
 import { Link } from 'react-router-dom';
-import { route } from '$app/common/helpers/route';
 import { useColorScheme } from '$app/common/colors';
+import { dateUTC } from '$app/common/helpers/payment';
+import { route } from '$app/common/helpers/route';
+import { useFormatMoney } from '$app/common/hooks/money/useFormatMoney';
+import { useAccentColor } from '$app/common/hooks/useAccentColor';
+import { useCurrentCompanyDateFormats } from '$app/common/hooks/useCurrentCompanyDateFormats';
 import { Credit } from '$app/common/interfaces/credit';
+import { Invoice } from '$app/common/interfaces/invoice';
+import { Payment, Paymentable } from '$app/common/interfaces/payment';
 import { ExternalLink } from '$app/components/icons/ExternalLink';
 
 interface Props {
@@ -51,6 +52,7 @@ export function PaymentOverviewInvoice(props: Props) {
   const formatMoney = useFormatMoney();
 
   const colors = useColorScheme();
+  const accentColor = useAccentColor();
   const { dateFormat } = useCurrentCompanyDateFormats();
 
   return (
@@ -76,7 +78,7 @@ export function PaymentOverviewInvoice(props: Props) {
                   <span>{setLabel(props.payment, props.paymentable)}</span>
 
                   <div>
-                    <ExternalLink color="#0062FF" size="1.1rem" />
+                    <ExternalLink color={accentColor} size="1.1rem" />
                   </div>
                 </div>
               </Link>
@@ -93,10 +95,7 @@ export function PaymentOverviewInvoice(props: Props) {
             </span>
 
             <span style={{ color: colors.$3 }}>
-              {formatDate(
-                new Date(props.paymentable.created_at * 1000).toString(),
-                dateFormat
-              )}
+              {dateUTC(props.paymentable.created_at, dateFormat)}
             </span>
 
             {props.paymentable.refunded > 0 && (
@@ -139,7 +138,7 @@ export function PaymentOverviewInvoice(props: Props) {
                   </span>
 
                   <div>
-                    <ExternalLink color="#0062FF" size="1.1rem" />
+                    <ExternalLink color={accentColor} size="1.1rem" />
                   </div>
                 </div>
               </Link>
@@ -156,10 +155,7 @@ export function PaymentOverviewInvoice(props: Props) {
             </span>
 
             <span style={{ color: colors.$3 }}>
-              {formatDate(
-                new Date(props.paymentable.created_at * 1000).toString(),
-                dateFormat
-              )}
+              {dateUTC(props.paymentable.created_at, dateFormat)}
             </span>
 
             {props.paymentable.refunded > 0 && (

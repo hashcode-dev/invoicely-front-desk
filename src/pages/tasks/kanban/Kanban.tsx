@@ -8,67 +8,65 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Link } from '$app/components/forms';
-import { useTitle } from '$app/common/hooks/useTitle';
-import { useTaskStatusesQuery } from '$app/common/queries/task-statuses';
-import { useTasksQuery } from '$app/common/queries/tasks';
-import { Default } from '$app/components/layouts/Default';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { BsTable } from 'react-icons/bs';
-import { calculateHours } from '../common/helpers/calculate-time';
-import collect from 'collect.js';
-import { toast } from '$app/common/helpers/toast/toast';
-import { request } from '$app/common/helpers/request';
-import { endpoint } from '$app/common/helpers';
-import { route } from '$app/common/helpers/route';
 import {
   DragDropContext,
   Draggable,
   DraggableLocation,
   DraggableProvided,
-  DropResult,
   Droppable,
   DroppableProvided,
+  DropResult,
 } from '@hello-pangea/dnd';
-import { cloneDeep } from 'lodash';
 import { arrayMoveImmutable } from 'array-move';
-import { Task } from '$app/common/interfaces/task';
+import collect from 'collect.js';
 import { useAtom } from 'jotai';
-import { ViewSlider } from './components/ViewSlider';
+import { cloneDeep } from 'lodash';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useColorScheme } from '$app/common/colors';
+import { endpoint } from '$app/common/helpers';
+import { request } from '$app/common/helpers/request';
+import { route } from '$app/common/helpers/route';
+import { toast } from '$app/common/helpers/toast/toast';
+import {
+  useAdmin,
+  useHasPermission,
+} from '$app/common/hooks/permissions/useHasPermission';
+import { useEntityAssigned } from '$app/common/hooks/useEntityAssigned';
+import { $refetch } from '$app/common/hooks/useRefetch';
+import { useTitle } from '$app/common/hooks/useTitle';
+import { Task } from '$app/common/interfaces/task';
+import { useTaskStatusesQuery } from '$app/common/queries/task-statuses';
+import { useTasksQuery } from '$app/common/queries/tasks';
+import { Slider } from '$app/components/cards/Slider';
+import { MediaPause } from '$app/components/icons/MediaPause';
+import { MediaPlay } from '$app/components/icons/MediaPlay';
+import { Pencil } from '$app/components/icons/Pencil';
+import { Plus } from '$app/components/icons/Plus';
+import { Default } from '$app/components/layouts/Default';
+import { CreateTaskStatusModal } from '$app/pages/settings/task-statuses/components/CreateTaskStatusModal';
+import {
+  CreateTaskModal,
+  TaskDetails,
+} from '../common/components/CreateTaskModal';
+import { TaskHeaderControls } from '../common/components/TaskHeaderControls';
+import { useTaskUserFilters } from '../common/components/TaskUserFilters';
 import { isTaskRunning } from '../common/helpers/calculate-entity-state';
+import { calculateHours } from '../common/helpers/calculate-time';
+import { shouldShowStartTaskButton } from '../common/helpers/task';
+import { useStart } from '../common/hooks/useStart';
+import { useStop } from '../common/hooks/useStop';
 import {
   currentTaskAtom,
   currentTaskIdAtom,
   isKanbanViewSliderVisibleAtom,
 } from './common/atoms';
 import { useFormatTimeLog, useHandleCurrentTask } from './common/hooks';
-import { useStart } from '../common/hooks/useStart';
-import { useStop } from '../common/hooks/useStop';
-import { Slider } from '$app/components/cards/Slider';
 import { EditSlider } from './components/EditSlider';
-import { useNavigate } from 'react-router-dom';
-import { Card } from '$app/components/cards';
-import { ProjectSelector } from '$app/components/projects/ProjectSelector';
-import { Inline } from '$app/components/Inline';
-import { CreateTaskStatusModal } from '$app/pages/settings/task-statuses/components/CreateTaskStatusModal';
-import {
-  CreateTaskModal,
-  TaskDetails,
-} from '../common/components/CreateTaskModal';
-import { $refetch } from '$app/common/hooks/useRefetch';
-import { useColorScheme } from '$app/common/colors';
-import {
-  useAdmin,
-  useHasPermission,
-} from '$app/common/hooks/permissions/useHasPermission';
-import { useEntityAssigned } from '$app/common/hooks/useEntityAssigned';
 import { TaskClock } from './components/TaskClock';
-import styled from 'styled-components';
-import { Pencil } from '$app/components/icons/Pencil';
-import { MediaPlay } from '$app/components/icons/MediaPlay';
-import { MediaPause } from '$app/components/icons/MediaPause';
-import { Plus } from '$app/components/icons/Plus';
+import { ViewSlider } from './components/ViewSlider';
 
 const Container = styled.div`
   min-width: ${(props) => props.theme.minWidth}px;
@@ -120,17 +118,16 @@ export default function Kanban() {
   const entityAssigned = useEntityAssigned();
 
   const formatTimeLog = useFormatTimeLog();
+  const userFilters = useTaskUserFilters();
 
   const pages = [
     { name: t('tasks'), href: '/tasks' },
     { name: t('kanban'), href: '/tasks/kanban' },
   ];
 
-  const [apiEndpoint, setApiEndpoint] = useState(
-    '/api/v1/tasks?per_page=1000&status=active&without_deleted_clients=true'
-  );
+  const projectId = userFilters.projectId;
+  const apiEndpoint = `/api/v1/tasks?per_page=1000&status=active&without_deleted_clients=true${userFilters.queryString}`;
   const [board, setBoard] = useState<Board>();
-  const [projectId, setProjectId] = useState<string>();
   const [taskDetails, setTaskDetails] = useState<TaskDetails>();
   const [sliderType, setSliderType] = useState<SliderType>('view');
   const [isTaskModalOpened, setIsTaskModalOpened] = useState<boolean>(false);
@@ -163,8 +160,10 @@ export default function Kanban() {
       );
 
       tasks.data
-        .filter(({ invoice_id }) => !invoice_id)
-        .map((task) => {
+        .filter(
+          ({ invoice_id }: { invoice_id: string | undefined }) => !invoice_id
+        )
+        .map((task: Task) => {
           const index = columns.findIndex(
             (column) => column.id === task.status_id
           );
@@ -317,33 +316,11 @@ export default function Kanban() {
     setCurrentTaskId(undefined);
   };
 
-  useEffect(() => {
-    projectId
-      ? setApiEndpoint(
-          route(
-            '/api/v1/tasks?project_tasks=:projectId&per_page=1000&status=active&without_deleted_clients=true',
-            {
-              projectId,
-            }
-          )
-        )
-      : setApiEndpoint(
-          '/api/v1/tasks?per_page=1000&status=active&without_deleted_clients=true'
-        );
-  }, [projectId]);
-
   return (
     <Default
       title={documentTitle}
       breadcrumbs={pages}
-      navigationTopRight={
-        <Link to="/tasks">
-          <Inline>
-            <BsTable size={20} />
-            <span>{t('tasks')}</span>
-          </Inline>
-        </Link>
-      }
+      topRight={<TaskHeaderControls />}
     >
       <Slider
         title={
@@ -399,7 +376,7 @@ export default function Kanban() {
             </button> */}
 
             {currentTask &&
-              !isTaskRunning(currentTask) &&
+              shouldShowStartTaskButton(currentTask) &&
               (hasPermission('edit_task') || entityAssigned(currentTask)) && (
                 <Box
                   className="flex justify-center items-center text-sm p-4 space-x-2 w-full cursor-pointer focus:outline-none focus:ring-0"
@@ -459,26 +436,6 @@ export default function Kanban() {
         {sliderType === 'view' && <ViewSlider />}
         {sliderType === 'edit' && <EditSlider />}
       </Slider>
-
-      <Card
-        className="w-full xl:w-2/5 rounded-sm shadow-sm"
-        style={{
-          borderColor: colors.$21,
-        }}
-      >
-        <div className="flex flex-col items-start md:flex-row md:items-center px-4 md:px-6 py-4 md:space-x-10 md:justify-between">
-          <span className="text-sm font-medium mb-1 md:mb-0">
-            {t('project')}
-          </span>
-
-          <ProjectSelector
-            value={projectId}
-            onChange={(project) => setProjectId(project.id)}
-            onClearButtonClick={() => setProjectId(undefined)}
-            clearButton
-          />
-        </div>
-      </Card>
 
       {board && (
         <div
@@ -657,7 +614,7 @@ export default function Kanban() {
                                         </button>
                                       )}
 
-                                    {!isTaskRunning(card.task) &&
+                                    {shouldShowStartTaskButton(card.task) &&
                                       (hasPermission('edit_task') ||
                                         entityAssigned(currentTask)) && (
                                         <button
@@ -789,7 +746,9 @@ export default function Kanban() {
                                                 </button>
                                               )}
 
-                                            {!isTaskRunning(card.task) &&
+                                            {shouldShowStartTaskButton(
+                                              card.task
+                                            ) &&
                                               (hasPermission('edit_task') ||
                                                 entityAssigned(
                                                   currentTask

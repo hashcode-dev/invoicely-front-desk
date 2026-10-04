@@ -8,6 +8,13 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import dayjs from 'dayjs';
+import { useSetAtom } from 'jotai';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MdControlPointDuplicate } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+import { useColorScheme } from '$app/common/colors';
 import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
 import { useCompanyChanges } from '$app/common/hooks/useCompanyChanges';
 import { PurchaseOrder } from '$app/common/interfaces/purchase-order';
@@ -15,24 +22,17 @@ import { Quote } from '$app/common/interfaces/quote';
 import { RecurringInvoice } from '$app/common/interfaces/recurring-invoice';
 import { CloneOption } from '$app/components/CloneOption';
 import { EntityActionElement } from '$app/components/EntityActionElement';
+import { FileClock } from '$app/components/icons/FileClock';
+import { Files } from '$app/components/icons/Files';
+import { Invoice as InvoiceIcon } from '$app/components/icons/Invoice';
+import { Refresh } from '$app/components/icons/Refresh';
+import { Wallet } from '$app/components/icons/Wallet';
 import { Modal } from '$app/components/Modal';
 import { creditAtom } from '$app/pages/credits/common/atoms';
 import { invoiceAtom } from '$app/pages/invoices/common/atoms';
 import { purchaseOrderAtom } from '$app/pages/purchase-orders/common/atoms';
 import { recurringInvoiceAtom } from '$app/pages/recurring-invoices/common/atoms';
-import dayjs from 'dayjs';
-import { Invoice as InvoiceIcon } from '$app/components/icons/Invoice';
-import { useSetAtom } from 'jotai';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { MdControlPointDuplicate } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
 import { quoteAtom } from '../atoms';
-import { Files } from '$app/components/icons/Files';
-import { useColorScheme } from '$app/common/colors';
-import { Wallet } from '$app/components/icons/Wallet';
-import { Refresh } from '$app/components/icons/Refresh';
-import { FileClock } from '$app/components/icons/FileClock';
 
 interface Props {
   quote: Quote;
@@ -72,6 +72,9 @@ export function CloneOptionsModal({ quote, dropdown }: Props) {
       status_id: '',
       vendor_id: '',
       paid_to_date: 0,
+      partial_due_date: '',
+      invoice_id: '',
+      client: undefined,
     });
 
     setIsModalVisible(false);
@@ -99,6 +102,7 @@ export function CloneOptionsModal({ quote, dropdown }: Props) {
       vendor_id: '',
       paid_to_date: 0,
       design_id: company.settings.credit_design_id,
+      client: undefined,
     });
 
     setIsModalVisible(false);
@@ -125,6 +129,7 @@ export function CloneOptionsModal({ quote, dropdown }: Props) {
       due_date: '',
       partial_due_date: '',
       design_id: company.settings.invoice_design_id,
+      client: undefined,
     });
 
     setIsModalVisible(false);
@@ -151,6 +156,7 @@ export function CloneOptionsModal({ quote, dropdown }: Props) {
       due_date: '',
       partial_due_date: '',
       design_id: company.settings.purchase_order_design_id,
+      vendor: undefined,
     });
 
     setIsModalVisible(false);
@@ -178,6 +184,7 @@ export function CloneOptionsModal({ quote, dropdown }: Props) {
       paid_to_date: 0,
       partial_due_date: '',
       design_id: company.settings.invoice_design_id,
+      client: undefined,
     });
 
     setIsModalVisible(false);

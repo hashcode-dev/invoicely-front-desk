@@ -8,23 +8,27 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Card, Element } from '$app/components/cards';
-import { CurrencySelector } from '$app/components/CurrencySelector';
+import { cloneDeep, set } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { ClientContext } from '../../edit/Edit';
 import { useOutletContext } from 'react-router-dom';
-import { cloneDeep } from 'lodash';
-import { set } from 'lodash';
+import { useColorScheme } from '$app/common/colors';
+import {
+  isUniquePaymentTerm,
+  shouldPaymentTermBeVisible,
+} from '$app/common/helpers/payment-terms/payment-term-filters';
 import { useCurrencies } from '$app/common/hooks/useCurrencies';
 import { useLanguages } from '$app/common/hooks/useLanguages';
-import { SelectField } from '$app/components/forms/SelectField';
-import { usePaymentTermsQuery } from '$app/common/queries/payment-terms';
-import { LanguageSelector } from '$app/components/LanguageSelector';
 import { PaymentTerm } from '$app/common/interfaces/payment-term';
-import { NumberInputField } from '$app/components/forms/NumberInputField';
-import { MarkdownEditor } from '$app/components/forms/MarkdownEditor';
+import { usePaymentTermsQuery } from '$app/common/queries/payment-terms';
 import { useStaticsQuery } from '$app/common/queries/statics';
-import { useColorScheme } from '$app/common/colors';
+import { CurrencySelector } from '$app/components/CurrencySelector';
+import { Card, Element } from '$app/components/cards';
+import { Link } from '$app/components/forms';
+import { MarkdownEditor } from '$app/components/forms/MarkdownEditor';
+import { NumberInputField } from '$app/components/forms/NumberInputField';
+import { SelectField } from '$app/components/forms/SelectField';
+import { LanguageSelector } from '$app/components/LanguageSelector';
+import { ClientContext } from '../../edit/Edit';
 
 export default function Settings() {
   const [t] = useTranslation();
@@ -87,7 +91,23 @@ export default function Settings() {
         )}
 
         {paymentTermsResponse && (
-          <Element leftSide={t('payment_terms')}>
+          <Element
+            leftSide={
+              <div className="flex items-center space-x-1 whitespace-nowrap">
+                <span>{t('payment_terms')}</span>
+
+                <div className="flex">
+                  <span style={{ color: colors.$3 }}>(</span>
+
+                  <Link to="/settings/payment_terms/create">
+                    {t('configure')}
+                  </Link>
+
+                  <span style={{ color: colors.$3 }}>)</span>
+                </div>
+              </div>
+            }
+          >
             <SelectField
               id="settings.payment_terms"
               value={client?.settings?.payment_terms || ''}
@@ -98,13 +118,19 @@ export default function Settings() {
               withBlank
               customSelector
             >
-              {paymentTermsResponse.data.data.map(
-                (paymentTerm: PaymentTerm, index: number) => (
+              {paymentTermsResponse.data.data
+                .filter((paymentTerm: PaymentTerm) =>
+                  shouldPaymentTermBeVisible(
+                    paymentTerm,
+                    client?.settings?.payment_terms
+                  )
+                )
+                .filter(isUniquePaymentTerm)
+                .map((paymentTerm: PaymentTerm, index: number) => (
                   <option key={index} value={paymentTerm.num_days.toString()}>
                     {paymentTerm.name}
                   </option>
-                )
-              )}
+                ))}
             </SelectField>
           </Element>
         )}
@@ -121,13 +147,19 @@ export default function Settings() {
               withBlank
               customSelector
             >
-              {paymentTermsResponse.data.data.map(
-                (paymentTerm: PaymentTerm, index: number) => (
+              {paymentTermsResponse.data.data
+                .filter((paymentTerm: PaymentTerm) =>
+                  shouldPaymentTermBeVisible(
+                    paymentTerm,
+                    client?.settings?.valid_until
+                  )
+                )
+                .filter(isUniquePaymentTerm)
+                .map((paymentTerm: PaymentTerm, index: number) => (
                   <option key={index} value={paymentTerm.num_days.toString()}>
                     {paymentTerm.name}
                   </option>
-                )
-              )}
+                ))}
             </SelectField>
           </Element>
         )}
@@ -149,8 +181,8 @@ export default function Settings() {
               client?.settings?.send_reminders === true
                 ? 'enabled'
                 : client?.settings?.send_reminders === false
-                ? 'disabled'
-                : ''
+                  ? 'disabled'
+                  : ''
             }
             onValueChange={(value) =>
               handleChange(

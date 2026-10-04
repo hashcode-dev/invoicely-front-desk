@@ -8,11 +8,11 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { v4 } from 'uuid';
 import {
   InvoiceItem,
   InvoiceItemType,
 } from '$app/common/interfaces/invoice-item';
-import { v4 } from 'uuid';
 
 export const blankLineItem = (): InvoiceItem => {
   return {
@@ -21,6 +21,7 @@ export const blankLineItem = (): InvoiceItem => {
     cost: 0,
     product_key: '',
     product_cost: 0,
+    net_cost: 0,
     notes: '',
     discount: 0,
     is_amount_discount: false,

@@ -8,6 +8,11 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { AxiosError } from 'axios';
+import { useState } from 'react';
+import { X } from 'react-feather';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useColorScheme } from '$app/common/colors';
 import { docuNinjaEndpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
@@ -17,17 +22,13 @@ import { $refetch } from '$app/common/hooks/useRefetch';
 import { Document } from '$app/common/interfaces/docuninja/api';
 import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { Badge } from '$app/components/Badge';
 import { Page } from '$app/components/Breadcrumbs';
 import { Card, Element } from '$app/components/cards';
 import { InputField } from '$app/components/forms';
 import { Default } from '$app/components/layouts/Default';
-import { Badge } from '$app/components/Badge';
-import { AxiosError } from 'axios';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { DocumentCreationDropZone } from '../common/components/DocumentCreationDropZone';
-import { X } from 'react-feather';
+import { getDocumentNameFromFile } from '../common/helpers';
 
 interface Payload {
   description: string;
@@ -131,7 +132,18 @@ export default function Create() {
 
           <Element>
             <DocumentCreationDropZone
-              onSelectFiles={(f) => setPayload({ ...payload, 'files[]': f })}
+              onSelectFiles={(f) =>
+                setPayload({
+                  ...payload,
+                  'files[]': f,
+                  description:
+                    payload.description === 'Untitled document'
+                      ? f[0]
+                        ? getDocumentNameFromFile(f[0])
+                        : payload.description
+                      : payload.description,
+                })
+              }
             />
           </Element>
 

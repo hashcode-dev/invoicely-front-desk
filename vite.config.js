@@ -1,9 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import path from 'path';
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
+  resolve: {
+    alias: {
+      '@docuninja/builder2.0': path.resolve(__dirname, './src/_builder/docuninja-stub.ts'),
+      'react-multi-email': path.resolve(__dirname, './src/_builder/react-multi-email-stub.tsx'),
+      'localized-address-format': path.resolve(__dirname, './src/_builder/localized-address-format-stub.ts'),
+    },
+  },
   server: {
     port: 3000,
   },

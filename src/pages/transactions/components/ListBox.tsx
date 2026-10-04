@@ -8,24 +8,24 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { TransactionDetails } from './TransactionMatchDetails';
+import classNames from 'classnames';
+import collect from 'collect.js';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useClientsQuery } from '$app/common/queries/clients';
+import { useTranslation } from 'react-i18next';
+import { useColorScheme } from '$app/common/colors';
+import { useFormatMoney } from '$app/common/hooks/money/useFormatMoney';
 import { Client } from '$app/common/interfaces/client';
 import CommonProps from '$app/common/interfaces/common-props.interface';
-import { SearchArea } from './SearchArea';
-import { ListBoxItem } from './ListBoxItem';
-import { useInvoicesQuery } from '$app/pages/invoices/common/queries';
-import { useVendorsQuery } from '$app/common/queries/vendor';
+import { useClientsQuery } from '$app/common/queries/clients';
 import { useExpenseCategoriesQuery } from '$app/common/queries/expense-categories';
-import { usePaymentsQuery } from '$app/common/queries/payments';
 import { useExpensesQuery } from '$app/common/queries/expenses';
-import { useColorScheme } from '$app/common/colors';
-import classNames from 'classnames';
-import { useTranslation } from 'react-i18next';
-import { useFormatMoney } from '$app/common/hooks/money/useFormatMoney';
-import collect from 'collect.js';
+import { usePaymentsQuery } from '$app/common/queries/payments';
+import { useVendorsQuery } from '$app/common/queries/vendor';
 import { Checkbox } from '$app/components/forms';
+import { useInvoicesQuery } from '$app/pages/invoices/common/queries';
+import { ListBoxItem } from './ListBoxItem';
+import { SearchArea } from './SearchArea';
+import { TransactionDetails } from './TransactionMatchDetails';
 
 export interface ResourceItem {
   id: string;
@@ -97,6 +97,7 @@ export function ListBox(props: Props) {
     filter: searchParams.searchTerm,
     clientId,
     enabled: isInvoicesDataKey,
+    with: props.selectedIds?.join(','),
   });
 
   const { data: vendorsResponse } = useVendorsQuery({
@@ -114,6 +115,7 @@ export function ListBox(props: Props) {
     filter: searchParams.searchTerm,
     enabled: isPaymentsDataKey,
     matchTransactions: true,
+    with: props.selectedIds?.join(','),
   });
 
   const { data: expensesResponse } = useExpensesQuery({
@@ -121,6 +123,7 @@ export function ListBox(props: Props) {
     filter: searchParams.searchTerm,
     enabled: isExpensesDataKey,
     matchTransactions: true,
+    with: props.selectedIds?.join(','),
   });
 
   const [resourceItems, setResourceItems] = useState<ResourceItem[]>();
@@ -159,7 +162,9 @@ export function ListBox(props: Props) {
       id: resourceItem.id,
       number: resourceItem.number,
       name: resourceItem.name,
-      clientName: resourceItem.client?.display_name || getClientName(resourceItem.client_id),
+      clientName:
+        resourceItem.client?.display_name ||
+        getClientName(resourceItem.client_id),
       statusId: resourceItem.status_id,
       amount: resourceItem.amount,
       date: resourceItem.date,
@@ -197,17 +202,31 @@ export function ListBox(props: Props) {
   useEffect(() => {
     setClients(clientsResponse);
 
+    let items: ResourceItem[] | undefined;
+
     if (isInvoicesDataKey) {
-      setResourceItems(getFormattedResourceList(invoicesResponse));
+      items = getFormattedResourceList(invoicesResponse);
     } else if (isVendorsDataKey) {
-      setResourceItems(getFormattedResourceList(vendorsResponse));
+      items = getFormattedResourceList(vendorsResponse);
     } else if (isExpenseCategoriesDataKey) {
-      setResourceItems(getFormattedResourceList(expenseCategoriesResponse));
+      items = getFormattedResourceList(expenseCategoriesResponse);
     } else if (isPaymentsDataKey) {
-      setResourceItems(getFormattedResourceList(paymentsResponse));
+      items = getFormattedResourceList(paymentsResponse);
     } else {
-      setResourceItems(getFormattedResourceList(expensesResponse));
+      items = getFormattedResourceList(expensesResponse);
     }
+
+    if (items && props.selectedIds?.length) {
+      const selectedSet = new Set(props.selectedIds);
+
+      items.sort((a, b) => {
+        const aSelected = selectedSet.has(a.id) ? 0 : 1;
+        const bSelected = selectedSet.has(b.id) ? 0 : 1;
+        return aSelected - bSelected;
+      });
+    }
+
+    setResourceItems(items);
   }, [
     props.dataKey,
     invoicesResponse,

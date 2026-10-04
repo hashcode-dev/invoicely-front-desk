@@ -8,43 +8,45 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import classNames from 'classnames';
+import { useAtomValue } from 'jotai';
 import { FormEvent, ReactElement, ReactNode, useState } from 'react';
-import { Menu as MenuIcon, Info } from 'react-feather';
-import CommonProps from '../../common/interfaces/common-props.interface';
+import { Info, Menu as MenuIcon } from 'react-feather';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Button, Link } from '$app/components/forms';
-import { Breadcrumbs, Page } from '$app/components/Breadcrumbs';
-import { DesktopSidebar } from './components/DesktopSidebar';
-import { MobileSidebar } from './components/MobileSidebar';
-import { QuickCreatePopover } from '$app/components/QuickCreatePopover';
+import { useColorScheme } from '$app/common/colors';
 import { isDemo, isHosted, isSelfHosted, trans } from '$app/common/helpers';
+import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
+import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
+import { usePreventNavigation } from '$app/common/hooks/usePreventNavigation';
+import { useReactSettings } from '$app/common/hooks/useReactSettings';
 import { useUnlockButtonForHosted } from '$app/common/hooks/useUnlockButtonForHosted';
 import { useUnlockButtonForSelfHosted } from '$app/common/hooks/useUnlockButtonForSelfHosted';
-import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
+import { Invoice } from '$app/common/interfaces/invoice';
+import { useSocketEvent } from '$app/common/queries/sockets';
+import { Breadcrumbs, Page } from '$app/components/Breadcrumbs';
 import { Dropdown } from '$app/components/dropdown/Dropdown';
 import { DropdownElement } from '$app/components/dropdown/DropdownElement';
+import { Button, Link } from '$app/components/forms';
 import {
   saveBtnAtom,
   useNavigationTopRightElement,
 } from '$app/components/layouts/common/hooks';
-import { VerifyEmail } from '../banners/VerifyEmail';
-import { ActivateCompany } from '../banners/ActivateCompany';
-import { VerifyPhone } from '../banners/VerifyPhone';
-import { useColorScheme } from '$app/common/colors';
+import { QuickCreatePopover } from '$app/components/QuickCreatePopover';
 import { Search } from '$app/pages/dashboard/components/Search';
-import { useInjectUserChanges } from '$app/common/hooks/useInjectUserChanges';
-import { useAtomValue } from 'jotai';
-import { usePreventNavigation } from '$app/common/hooks/usePreventNavigation';
-import { Notifications } from '../Notifications';
-import { useSocketEvent } from '$app/common/queries/sockets';
-import { Invoice } from '$app/common/interfaces/invoice';
-import toast from 'react-hot-toast';
+import CommonProps from '../../common/interfaces/common-props.interface';
+import { ActivateCompany } from '../banners/ActivateCompany';
 import { EInvoiceCredits } from '../banners/EInvoiceCredits';
-import classNames from 'classnames';
-import { Feedback } from '../Feedback';
 import { PriceIncreaseBanner } from '../banners/PriceIncrease';
+import { VerifyEmail } from '../banners/VerifyEmail';
+import { VerifyPhone } from '../banners/VerifyPhone';
+import { Feedback } from '../Feedback';
+import { Notifications } from '../Notifications';
+import { AccountPlanExpired } from '../banners/AccountPlanExpired';
 import { useNavigation } from './common/navigation';
+import { DesktopSidebar } from './components/DesktopSidebar';
+import { MobileSidebar } from './components/MobileSidebar';
 
 export interface SaveOption {
   label: string;
@@ -74,14 +76,17 @@ export function Default(props: Props) {
 
   const preventNavigation = usePreventNavigation();
 
-  const user = useInjectUserChanges();
+  const user = useCurrentUser();
   const companyUser = useCurrentCompanyUser();
+  const reactSettings = useReactSettings();
 
-  const isMiniSidebar = Boolean(
-    user?.company_user?.react_settings.show_mini_sidebar
-  );
+  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
+
+  const hostedUnlock = useUnlockButtonForHosted();
+  const selfHostedUnlock = useUnlockButtonForSelfHosted();
+
   const shouldShowUnlockButton =
-    !isDemo() && (useUnlockButtonForHosted() || useUnlockButtonForSelfHosted());
+    !isDemo() && (hostedUnlock || selfHostedUnlock);
 
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
@@ -94,8 +99,8 @@ export function Default(props: Props) {
     on: ['App\\Events\\Invoice\\InvoiceWasViewed'],
     callback: ({ data }) => {
       if (
-        !companyUser?.notifications.email.includes('invoice_viewed') ||
-        !companyUser?.notifications.email.includes('invoice_viewed_user')
+        !companyUser?.notifications?.email?.includes('invoice_viewed') ||
+        !companyUser?.notifications?.email?.includes('invoice_viewed_user')
       ) {
         return;
       }
@@ -134,6 +139,7 @@ export function Default(props: Props) {
         <VerifyEmail />
         <VerifyPhone />
         <EInvoiceCredits />
+        <AccountPlanExpired />
 
         {/* This component is only created for December 2025 if you see it in 2026 you can remove and delete it */}
         <PriceIncreaseBanner />
@@ -198,8 +204,8 @@ export function Default(props: Props) {
                   }}
                   onClick={() => {
                     if (
-                      isHosted() &&
-                      import.meta.env.VITE_ENABLE_NEW_ACCOUNT_MANAGEMENT
+                      isHosted() ||
+                      import.meta.env.VITE_ENABLE_NEW_ACCOUNT_MANAGEMENT === 'true'
                     ) {
                       return navigate('/settings/account_management');
                     }

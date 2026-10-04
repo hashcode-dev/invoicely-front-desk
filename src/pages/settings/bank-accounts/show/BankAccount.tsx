@@ -8,13 +8,15 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 import { route } from '$app/common/helpers/route';
 import { useTitle } from '$app/common/hooks/useTitle';
 import { BankAccount as BankAccountEntity } from '$app/common/interfaces/bank-accounts';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { ResourceActions } from '$app/components/ResourceActions';
 import { Settings } from '../../../../components/layouts/Settings';
+import { useActions } from '../common/hooks/useActions';
 import { useBankAccountQuery } from '../common/queries';
 import { Details } from '../components/Details';
 
@@ -24,6 +26,8 @@ export function BankAccount() {
   const { id } = useParams();
 
   const [t] = useTranslation();
+  const actions = useActions();
+  const navigate = useNavigate();
 
   const pages = [
     { name: t('settings'), href: '/settings' },
@@ -47,6 +51,19 @@ export function BankAccount() {
       title={t('bank_account')}
       breadcrumbs={pages}
       docsLink="en/basic-settings/#bank_account_details"
+      navigationTopRight={
+        accountDetails && (
+          <ResourceActions
+            resource={accountDetails}
+            saveButtonLabel={t('edit')}
+            onSaveClick={() =>
+              navigate(route('/settings/bank_accounts/:id/edit', { id }))
+            }
+            actions={actions}
+            disableSaveButton={!accountDetails}
+          />
+        )
+      }
     >
       <Details accountDetails={accountDetails} />
     </Settings>

@@ -32,6 +32,8 @@ import { useColorScheme } from '$app/common/colors';
 import { Trash } from '$app/components/icons/Trash';
 import { Plus } from '$app/components/icons/Plus';
 import classNames from 'classnames';
+import { TAG_ENTITY_TYPES } from '$app/common/interfaces/tag';
+import { TagPillSelector } from '$app/components/tags/TagPillSelector';
 
 interface Props {
   vendor: Vendor;
@@ -95,6 +97,7 @@ export function Form(props: Props) {
       last_name: '',
       email: '',
       send_email: false,
+      cc_only: false,
       created_at: 0,
       updated_at: 0,
       archived_at: 0,
@@ -293,6 +296,15 @@ export function Form(props: Props) {
                 </SelectField>
               </Element>
 
+              <Element leftSide={t('tags')}>
+                <TagPillSelector
+                  entityType={TAG_ENTITY_TYPES.vendor}
+                  value={vendor?.tags || []}
+                  onChange={(tags) => handleChange('tags', tags)}
+                  errorMessage={errors?.errors.tags}
+                />
+              </Element>
+
               {company?.custom_fields?.vendor1 && (
                 <CustomField
                   field="contact1"
@@ -485,16 +497,35 @@ export function Form(props: Props) {
                         onChange={(value) =>
                           handleContactChange('send_email', value, index)
                         }
+                        disabled={contact.cc_only}
+                      />
+                    </Element>
+
+                    <Element leftSide={t('cc_only')} noExternalPadding>
+                      <Toggle
+                        checked={contact.cc_only}
+                        onChange={(value) => {
+                          handleContactChange('cc_only', value, index);
+
+                          if (value) {
+                            setTimeout(() => {
+                              handleContactChange('send_email', false, index);
+                            }, 100);
+                          }
+                        }}
                       />
                     </Element>
 
                     {company?.enable_modules && (
-                    <Element leftSide={t('authorized_to_sign')} noExternalPadding>
-                      <Toggle
-                        checked={contact.can_sign}
-                        onChange={(value) =>
-                          handleContactChange('can_sign', value, index)
-                        }
+                      <Element
+                        leftSide={t('authorized_to_sign')}
+                        noExternalPadding
+                      >
+                        <Toggle
+                          checked={contact.can_sign}
+                          onChange={(value) =>
+                            handleContactChange('can_sign', value, index)
+                          }
                         />
                       </Element>
                     )}

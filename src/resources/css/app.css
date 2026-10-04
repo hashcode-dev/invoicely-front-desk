@@ -68,12 +68,15 @@ select {
   top: 0;
   width: 260px;
   height: 100vh;
+  height: 100dvh;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
   background: var(--sidebar);
   color: #fff;
   z-index: 30;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .brand-block {
@@ -81,7 +84,8 @@ select {
   align-items: center;
   gap: 12px;
   padding: 0 8px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .brand-logo {
@@ -91,11 +95,13 @@ select {
   background: linear-gradient(135deg, var(--primary), var(--primary-strong));
   display: grid;
   place-items: center;
+  flex-shrink: 0;
 }
 
 .brand-block h1 {
   font-size: 21px;
   font-weight: 800;
+  margin: 0;
 }
 
 .brand-block p {
@@ -103,12 +109,41 @@ select {
   letter-spacing: 0.1em;
   font-size: 11px;
   text-transform: uppercase;
+  margin: 0;
 }
 
 .side-nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  margin-bottom: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.06);
+}
+
+.side-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.side-nav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+}
+
+.side-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+}
+
+.side-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .side-link {
@@ -117,11 +152,12 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 10px;
+  padding: 10px 10px;
   border-radius: 10px;
   border-left: 3px solid transparent;
   transition: 0.2s ease;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .side-link:hover {
@@ -137,6 +173,7 @@ select {
 
 .primary-action {
   margin-top: auto;
+  flex-shrink: 0;
   border: none;
   border-radius: 14px;
   padding: 12px 14px;
@@ -149,6 +186,7 @@ select {
   gap: 8px;
   box-shadow: 0 14px 28px rgba(0, 75, 202, 0.38);
   cursor: pointer;
+  width: 100%;
 }
 
 .main-pane {
@@ -488,6 +526,11 @@ th {
     position: static;
     width: 100%;
     height: auto;
+    overflow: visible;
+  }
+
+  .side-nav {
+    overflow-y: visible;
   }
 
   .main-pane {

@@ -8,16 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { route } from '$app/common/helpers/route';
-import { DataTable } from '$app/components/DataTable';
 import { useParams } from 'react-router-dom';
-import { Payment } from '$app/common/interfaces/payment';
-import { usePaymentColumns } from '$app/pages/payments/common/hooks/usePaymentColumns';
-import { useActions } from '$app/pages/payments/common/hooks/useActions';
-import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { EntityState } from '$app/common/enums/entity-state';
 import { permission } from '$app/common/guards/guards/permission';
 import { getEntityState } from '$app/common/helpers';
-import { EntityState } from '$app/common/enums/entity-state';
+import { route } from '$app/common/helpers/route';
+import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
+import { Payment } from '$app/common/interfaces/payment';
+import { DataTable } from '$app/components/DataTable';
+import { useActions } from '$app/pages/payments/common/hooks/useActions';
+import { usePaymentColumns } from '$app/pages/payments/common/hooks/usePaymentColumns';
+import { usePaymentFilters } from '$app/pages/payments/common/hooks/usePaymentFilters';
 
 export default function Payments() {
   const { id } = useParams();
@@ -25,6 +26,8 @@ export default function Payments() {
   const hasPermission = useHasPermission();
 
   const columns = usePaymentColumns();
+
+  const filters = usePaymentFilters();
 
   const actions = useActions();
 
@@ -37,6 +40,8 @@ export default function Payments() {
       )}
       columns={columns}
       customActions={actions}
+      customFilters={filters}
+      customFilterPlaceholder="status"
       withResourcefulActions
       bulkRoute="/api/v1/payments/bulk"
       linkToCreate={route('/payments/create?client=:id', { id })}
@@ -51,6 +56,7 @@ export default function Payments() {
         )
       }
       withoutPageAsPreference
+      withRecordScopedFilters
     />
   );
 }

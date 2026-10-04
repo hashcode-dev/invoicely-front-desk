@@ -10,6 +10,7 @@
 
 import { Element } from '$app/components/cards';
 import { Link } from '$app/components/forms';
+import { TagPills } from '$app/components/tags/TagPills';
 import {
   ApiTransactionType,
   TransactionStatus,
@@ -162,6 +163,12 @@ export function Details(props: Props) {
           {formatDate(transaction?.date || '', dateFormat)}
         </Element>
 
+        {Boolean(transaction?.tags?.length) && (
+          <Element leftSide={t('tags')}>
+            <TagPills tags={transaction?.tags} />
+          </Element>
+        )}
+
         <Element leftSide={t('bank_account')} className="cursor-pointer">
           <Link
             to={route('/settings/bank_accounts/:id/details', {
@@ -261,6 +268,8 @@ export function Details(props: Props) {
             base_type: transaction?.base_type || '',
             transaction_id: transaction?.id || '',
             status_id: transaction?.status_id || '',
+            invoice_ids: transaction?.invoice_ids || '',
+            payment_id: transaction?.payment_id || '',
           }}
           isCreditTransactionType={isCreditTransactionType}
           transactionRule={bankTransactionRuleResponse}

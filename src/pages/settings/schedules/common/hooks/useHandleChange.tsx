@@ -8,12 +8,12 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { Dispatch, SetStateAction } from 'react';
-import { Parameters, Schedule } from '$app/common/interfaces/schedule';
 import { cloneDeep, set } from 'lodash';
-import { useBlankScheduleQuery } from '$app/common/queries/schedules';
+import { Dispatch, SetStateAction } from 'react';
 import { Frequency } from '$app/common/enums/frequency';
+import { Parameters, Schedule } from '$app/common/interfaces/schedule';
+import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { useBlankScheduleQuery } from '$app/common/queries/schedules';
 
 interface Params {
   setErrors: Dispatch<SetStateAction<ValidationBag | undefined>>;
@@ -43,12 +43,14 @@ export const DEFAULT_SCHEDULE_PARAMETERS: Parameters = {
   client_id: '',
   vendors: '',
   projects: '',
+  tag_ids: '',
   categories: '',
   report_keys: [],
   pdf_email_attachment: false,
   auto_send: false,
   include_project_tasks: false,
   template: '',
+  group_by: '',
 };
 
 export function useHandleChange(params: Params) {

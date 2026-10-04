@@ -8,9 +8,11 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { trans } from '$app/common/helpers';
 import { t } from 'i18next';
+import React from 'react';
 import { toast as helper } from 'react-hot-toast';
+import { MdInfoOutline } from 'react-icons/md';
+import { trans } from '$app/common/helpers';
 
 class Toast {
   protected declare currentId: string;
@@ -33,6 +35,22 @@ class Toast {
 
   error(message = 'error_title'): Toast {
     this.currentId = helper.error(t(message), { id: this.currentId });
+
+    return this;
+  }
+
+  info(message: string, replaceable = {}, duration = 8000): Toast {
+    if (this.currentId) {
+      helper.dismiss(this.currentId);
+    }
+
+    this.currentId = helper(trans(message, replaceable), {
+      duration,
+      icon: React.createElement(MdInfoOutline, {
+        size: 20,
+        color: '#3b82f6',
+      }),
+    });
 
     return this;
   }

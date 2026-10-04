@@ -8,6 +8,7 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { TAG_ENTITY_TYPES, TagEntityType } from '$app/common/interfaces/tag';
 import { Identifier } from '../useReports';
 
 type Field =
@@ -20,18 +21,21 @@ type Field =
   | 'clients'
   | 'vendors'
   | 'projects'
+  | 'tags'
   | 'categories'
   | 'include_deleted'
   | 'client'
   | 'pdf_email_attachment'
   | 'template_id'
-  | 'activity_type_id';
+  | 'activity_type_id'
+  | 'group_by';
 
 const ReportFields: Record<Identifier, Field[]> = {
   client: [
-    'document_email_attachment', 
+    'document_email_attachment',
     'include_deleted',
     'template_id',
+    'group_by',
   ],
   invoice: [
     'document_email_attachment',
@@ -40,6 +44,7 @@ const ReportFields: Record<Identifier, Field[]> = {
     'client',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
   invoice_item: [
     'document_email_attachment',
@@ -48,6 +53,7 @@ const ReportFields: Record<Identifier, Field[]> = {
     'status',
     'client',
     'template_id',
+    'group_by',
   ],
   quote: [
     'document_email_attachment',
@@ -56,6 +62,7 @@ const ReportFields: Record<Identifier, Field[]> = {
     'client',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
   quote_item: [
     'document_email_attachment',
@@ -64,6 +71,7 @@ const ReportFields: Record<Identifier, Field[]> = {
     'client',
     'product_key',
     'template_id',
+    'group_by',
   ],
   credit: [
     'document_email_attachment',
@@ -72,13 +80,15 @@ const ReportFields: Record<Identifier, Field[]> = {
     'client',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
-  document: ['document_email_attachment'],
+  document: ['document_email_attachment', 'group_by'],
   payment: [
-    'document_email_attachment', 
-    'status', 
+    'document_email_attachment',
+    'status',
     'client',
     'template_id',
+    'group_by',
   ],
   expense: [
     'document_email_attachment',
@@ -89,22 +99,26 @@ const ReportFields: Record<Identifier, Field[]> = {
     'include_deleted',
     'status',
     'template_id',
+    'group_by',
   ],
   task: [
-    'document_email_attachment', 
-    'include_deleted', 
-    'status', 
+    'document_email_attachment',
+    'include_deleted',
+    'status',
     'client',
+    'tags',
     'template_id',
+    'group_by',
   ],
-  product: ['document_email_attachment', 'template_id'],
-  vendor: ['document_email_attachment', 'template_id'],
+  product: ['document_email_attachment', 'template_id', 'group_by'],
+  vendor: ['document_email_attachment', 'template_id', 'group_by'],
   purchase_order: [
     'document_email_attachment',
     'include_deleted',
     'status',
     'pdf_email_attachment',
     'template_id',
+    'group_by',
   ],
   purchase_order_item: [
     'document_email_attachment',
@@ -112,11 +126,18 @@ const ReportFields: Record<Identifier, Field[]> = {
     'status',
     'product_key',
     'template_id',
+    'group_by',
   ],
-  project: ['clients', 'projects'],
-  activity: ['activity_type_id'],
-  contact: [],
-  recurring_invoice: ['include_deleted', 'status', 'client', 'template_id'],
+  project: ['clients', 'projects', 'tags', 'group_by'],
+  activity: ['activity_type_id', 'group_by'],
+  contact: ['group_by'],
+  recurring_invoice: [
+    'include_deleted',
+    'status',
+    'client',
+    'template_id',
+    'group_by',
+  ],
   recurring_invoice_item: [
     'document_email_attachment',
     'product_key',
@@ -124,17 +145,43 @@ const ReportFields: Record<Identifier, Field[]> = {
     'status',
     'client',
     'template_id',
+    'group_by',
   ],
-  product_sales: ['product_key', 'client'],
-  aged_receivable_detailed_report: [],
-  aged_receivable_summary_report: [],
-  client_balance_report: [],
-  client_sales_report: [],
-  profitloss: ['is_expense_billed', 'is_income_billed', 'include_tax'],
-  tax_summary_report: [],
-  tax_period_report: ['is_income_billed'],
-  user_sales_report: [],
+  product_sales: ['product_key', 'client', 'group_by'],
+  aged_receivable_detailed_report: ['group_by'],
+  aged_receivable_summary_report: ['group_by'],
+  client_balance_report: ['group_by'],
+  client_sales_report: ['group_by'],
+  profitloss: [
+    'is_expense_billed',
+    'is_income_billed',
+    'include_tax',
+    'group_by',
+  ],
+  tax_summary_report: ['group_by'],
+  tax_period_report: ['is_income_billed', 'group_by'],
+  user_sales_report: ['group_by'],
 };
+
+export const REPORT_TAG_ENTITY_TYPES: Partial<Record<Identifier, TagEntityType>> =
+  {
+    client: TAG_ENTITY_TYPES.client,
+    invoice: TAG_ENTITY_TYPES.invoice,
+    invoice_item: TAG_ENTITY_TYPES.invoice,
+    quote: TAG_ENTITY_TYPES.quote,
+    quote_item: TAG_ENTITY_TYPES.quote,
+    credit: TAG_ENTITY_TYPES.credit,
+    payment: TAG_ENTITY_TYPES.payment,
+    expense: TAG_ENTITY_TYPES.expense,
+    task: TAG_ENTITY_TYPES.task,
+    product: TAG_ENTITY_TYPES.product,
+    vendor: TAG_ENTITY_TYPES.vendor,
+    purchase_order: TAG_ENTITY_TYPES.purchaseOrder,
+    purchase_order_item: TAG_ENTITY_TYPES.purchaseOrder,
+    recurring_invoice: TAG_ENTITY_TYPES.recurringInvoice,
+    recurring_invoice_item: TAG_ENTITY_TYPES.recurringInvoice,
+    project: TAG_ENTITY_TYPES.project,
+  };
 
 interface Params {
   report: Identifier;
@@ -144,6 +191,10 @@ export function useShowReportField(params: Params) {
   const { report } = params;
 
   return (field: Field) => {
+    if (field === 'tags') {
+      return report in REPORT_TAG_ENTITY_TYPES;
+    }
+
     return Boolean(ReportFields[report].includes(field));
   };
 }

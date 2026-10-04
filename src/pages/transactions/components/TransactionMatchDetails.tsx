@@ -8,27 +8,29 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { FormEvent, useEffect, useState } from 'react';
-import { toast } from '$app/common/helpers/toast/toast';
-import { request } from '$app/common/helpers/request';
-import { endpoint } from '$app/common/helpers';
-import { useQueryClient } from 'react-query';
-import { TransactionStatus } from '$app/common/enums/transactions';
-import { ListBox } from './ListBox';
-import { Button } from '$app/components/forms';
-import { MdContentCopy, MdLink } from 'react-icons/md';
-import { useTranslation } from 'react-i18next';
-import { TabGroup } from '$app/components/TabGroup';
-import { TransactionRule } from '$app/common/interfaces/transaction-rules';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai';
+import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MdContentCopy, MdLink } from 'react-icons/md';
 import { invalidationQueryAtom } from '$app/common/atoms/data-table';
-import { $refetch } from '$app/common/hooks/useRefetch';
 import { useColorScheme } from '$app/common/colors';
+import { TransactionStatus } from '$app/common/enums/transactions';
+import { endpoint } from '$app/common/helpers';
+import { request } from '$app/common/helpers/request';
+import { toast } from '$app/common/helpers/toast/toast';
+import { $refetch } from '$app/common/hooks/useRefetch';
+import { TransactionRule } from '$app/common/interfaces/transaction-rules';
+import { Button } from '$app/components/forms';
+import { TabGroup } from '$app/components/TabGroup';
+import { ListBox } from './ListBox';
 
 export interface TransactionDetails {
   base_type: string;
   transaction_id: string;
   status_id: string;
+  invoice_ids?: string;
+  payment_id?: string;
 }
 
 interface Props {
@@ -80,7 +82,9 @@ export function TransactionMatchDetails(props: Props) {
         ],
       })
         .then(() => {
-          queryClient.invalidateQueries([invalidationQuery]);
+          queryClient.invalidateQueries({
+            queryKey: [invalidationQuery],
+          });
 
           $refetch(['invoices', 'bank_transactions']);
 
@@ -109,7 +113,9 @@ export function TransactionMatchDetails(props: Props) {
         ],
       })
         .then(() => {
-          queryClient.invalidateQueries([invalidationQuery]);
+          queryClient.invalidateQueries({
+            queryKey: [invalidationQuery],
+          });
 
           $refetch(['invoices', 'payments', 'bank_transactions']);
 
@@ -139,7 +145,9 @@ export function TransactionMatchDetails(props: Props) {
         ],
       })
         .then(() => {
-          queryClient.invalidateQueries([invalidationQuery]);
+          queryClient.invalidateQueries({
+            queryKey: [invalidationQuery],
+          });
 
           $refetch(['bank_transactions', 'expenses']);
 
@@ -168,7 +176,9 @@ export function TransactionMatchDetails(props: Props) {
         ],
       })
         .then(() => {
-          queryClient.invalidateQueries([invalidationQuery]);
+          queryClient.invalidateQueries({
+            queryKey: [invalidationQuery],
+          });
 
           $refetch(['expenses', 'bank_transactions']);
 
@@ -212,6 +222,18 @@ export function TransactionMatchDetails(props: Props) {
       }
     }
   }, [transactionRule]);
+
+  useEffect(() => {
+    const { invoice_ids, payment_id } = props.transactionDetails;
+
+    if (invoice_ids) {
+      setInvoiceIds(invoice_ids.split(',').filter(Boolean));
+    }
+
+    if (payment_id) {
+      setPaymentIds([payment_id]);
+    }
+  }, [props.transactionDetails.transaction_id]);
 
   return (
     <div className="flex flex-col flex-1">

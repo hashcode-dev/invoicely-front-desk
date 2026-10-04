@@ -18,6 +18,11 @@ import {
   useAllInvoiceColumns,
   useInvoiceColumns,
 } from '../common/hooks/useInvoiceColumns';
+import {
+  useEntityTagFilterColumns,
+  useTagFilterCleanup,
+} from '$app/common/hooks/useEntityTagFilters';
+import { TAG_ENTITY_TYPES } from '$app/common/interfaces/tag';
 import { DataTableColumnsPicker } from '$app/components/DataTableColumnsPicker';
 import { useInvoiceFilters } from '../common/hooks/useInvoiceFilters';
 import { ImportButton } from '$app/components/import/ImportButton';
@@ -44,8 +49,6 @@ import { Invoice } from '$app/common/interfaces/invoice';
 import { useFooterColumns } from '../common/hooks/useFooterColumns';
 import { DataTableFooterColumnsPicker } from '$app/components/DataTableFooterColumnsPicker';
 import { useReactSettings } from '$app/common/hooks/useReactSettings';
-import { useSocketEvent } from '$app/common/queries/sockets';
-import { $refetch } from '$app/common/hooks/useRefetch';
 import { InputLabel } from '$app/components/forms';
 import { confirmActionModalAtom } from '$app/pages/recurring-invoices/common/components/ConfirmActionModal';
 import { DeleteInvoicesConfirmationModal } from '../common/components/DeleteInvoicesConfirmationModal';
@@ -84,6 +87,17 @@ export default function Invoices() {
   const { footerColumns, allFooterColumns } = useFooterColumns();
   const verifactuEnabled = useCompanyVerifactu();
 
+  const selectedColumns =
+    reactSettings?.react_table_columns?.invoice || defaultColumns;
+  const shouldShowTagFilter = selectedColumns.includes('tags');
+  const filterColumns = useEntityTagFilterColumns(
+    TAG_ENTITY_TYPES.invoice,
+    'invoice_tag_ids',
+    { enabled: shouldShowTagFilter }
+  );
+
+  useTagFilterCleanup(shouldShowTagFilter, 'invoice_tag_ids');
+
   useEffect(() => {
     if (invoiceResponse && invoiceSliderVisibility) {
       setInvoiceSlider(invoiceResponse);
@@ -100,19 +114,15 @@ export default function Invoices() {
     changeTemplateResources,
   } = useChangeTemplate();
 
-  useSocketEvent({
-    on: [
-      'App\\Events\\Invoice\\InvoiceWasPaid',
-      'App\\Events\\Invoice\\InvoiceWasViewed',
-    ],
-    callback: () => $refetch(['invoices']),
-  });
-
   return (
     <Default title={documentTitle} breadcrumbs={pages} docsLink="en/invoices">
       <DataTable
         resource="invoice"
-        endpoint="/api/v1/invoices?include=client.group_settings,project&without_deleted_clients=true&sort=id|desc"
+        endpoint={`/api/v1/invoices?include=client.group_settings,project${
+          shouldShowTagFilter ? ',tags' : ''
+        }&without_deleted_clients=true&sort=id|desc${
+          shouldShowTagFilter ? '' : '&tag_ids='
+        }`}
         columns={columns}
         footerColumns={footerColumns}
         bulkRoute="/api/v1/invoices/bulk"
@@ -121,10 +131,11 @@ export default function Invoices() {
         withResourcefulActions
         withoutDefaultBulkActions
         customActions={actions}
-        bottomActionsKeys={['cancel_invoice']}
+        bottomActionsKeys={['cancel_invoice', 'credit_note']}
         customBulkActions={customBulkActions}
         customFilters={filters}
         customFilterPlaceholder="status"
+        filterColumns={shouldShowTagFilter ? filterColumns : undefined}
         rightSide={
           <div className="flex items-center space-x-2">
             {Boolean(reactSettings.show_table_footer) && (

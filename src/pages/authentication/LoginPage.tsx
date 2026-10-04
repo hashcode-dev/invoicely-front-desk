@@ -7,8 +7,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@invoicely.com');
+  const [password, setPassword] = useState('password');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [showPassword, setShowPassword] = useState(false);
@@ -111,7 +111,7 @@ export function LoginPage() {
               onError={handleGoogleError}
               theme="outline"
               size="large"
-              width="100%"
+              width="360"
               text="signin_with"
               shape="rectangular"
             />

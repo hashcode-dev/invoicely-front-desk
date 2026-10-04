@@ -8,32 +8,31 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { useColorScheme } from '$app/common/colors';
-import { Card } from '$app/components/cards';
-import { Button, InputField } from '$app/components/forms';
-import { Icon } from '$app/components/icons/Icon';
-import { Modal } from '$app/components/Modal';
 import {
   type DateInputProps,
   type MinimizeButtonProps,
   type NavigateButtonProps,
   Sign,
-  type SignCardProps,
-  SignContext,
   type SignatureSelectorButtonProps,
   type SignatureSelectorDialogProps,
   type SignatureSelectorInputProps,
+  type SignCardProps,
+  SignContext,
   type StartSigningButtonProps,
   type SubmitButtonProps,
 } from '@docuninja/builder2.0';
 import classNames from 'classnames';
-import { Check, ChevronLeft, ChevronRight } from 'react-feather';
 import type { LegacyRef } from 'react';
+import { Check, ChevronLeft, ChevronRight } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { FiMinimize2 } from 'react-icons/fi';
-
 import { useParams } from 'react-router';
 import styled from 'styled-components';
+import { useColorScheme } from '$app/common/colors';
+import { Card } from '$app/components/cards';
+import { Button, InputField } from '$app/components/forms';
+import { Icon } from '$app/components/icons/Icon';
+import { Modal } from '$app/components/Modal';
 
 const Div = styled.div`
   background-color: ${({ theme }) => theme.backgroundColor};
@@ -46,6 +45,8 @@ const Div = styled.div`
 export default function Index() {
   const params = useParams();
   const colors = useColorScheme();
+
+  const [t] = useTranslation();
 
   return (
     <div className="max-w-[90rem] mx-auto">
@@ -85,7 +86,10 @@ export default function Index() {
               backgroundColor: colors.$1,
               textColor: colors.$3,
               foregroundColor: colors.$4,
-            }
+            },
+          },
+          translations: {
+            sign_the_document: String(t('sign_the_document')),
           },
         }}
       >
@@ -195,15 +199,21 @@ function SignatureSelectorDialog({
   input,
   content,
   useSignatureButton,
-}: SignatureSelectorDialogProps) {
+  type,
+}: SignatureSelectorDialogProps & { type?: string }) {
   const [t] = useTranslation();
+
+  const titles: Record<string, string> = {
+    signature: t('create_signature'),
+    initials: t('enter_initials'),
+  };
 
   return (
     <>
       <div className="mr-2">{trigger}</div>
 
       <Modal
-        title={t('create_signature')}
+        title={type ? titles[type] : t('create_signature')}
         visible={isOpen}
         onClose={onOpenChange}
         size="regular"
@@ -227,6 +237,7 @@ function SignatureInput({ value, onChange }: SignatureSelectorInputProps) {
       value={value}
       onValueChange={(value) => onChange(value)}
       placeholder={t('signature_name')}
+      changeOverride
     />
   );
 }

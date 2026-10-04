@@ -8,10 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Project } from './project';
 import { Client } from './client';
+import { Project } from './project';
+import { Tag } from './tag';
 import { TaskStatus } from './task-status';
 import { User } from './user';
+
+export interface TaskMeta {
+  calendar_event_id?: string;
+  calendar_id?: string;
+  calendar_provider?: string;
+}
 
 export interface Task {
   id: string;
@@ -40,10 +47,13 @@ export interface Task {
   updated_at: number;
   client?: Client;
   status?: TaskStatus;
+  tags?: Tag[];
+  task_tag_ids?: string[];
   project?: Project;
   documents: any[];
   date: string;
   calculated_start_date: string;
   user: User;
   assigned_user: User;
+  meta?: TaskMeta;
 }

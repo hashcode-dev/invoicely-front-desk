@@ -8,12 +8,12 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import Tippy from '@tippyjs/react/headless';
 import classNames from 'classnames';
 import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
-import Tippy from '@tippyjs/react/headless';
+import { MdPlayArrow } from 'react-icons/md';
 import { useColorScheme } from '$app/common/colors';
 import { Icon } from './icons/Icon';
-import { MdPlayArrow } from 'react-icons/md';
 
 interface Props {
   children: ReactElement;
@@ -29,6 +29,7 @@ interface Props {
   withoutWrapping?: boolean;
   centerVertically?: boolean;
   childrenWrapperClassName?: string;
+  appendToBody?: boolean;
 }
 
 export function Tooltip(props: Props) {
@@ -43,6 +44,7 @@ export function Tooltip(props: Props) {
     disabled,
     withoutWrapping,
     childrenWrapperClassName,
+    appendToBody,
   } = props;
 
   const parentChildrenElement = useRef<HTMLDivElement>(null);
@@ -79,6 +81,7 @@ export function Tooltip(props: Props) {
       <Tippy
         placement={placement || 'top-start'}
         interactive={true}
+        appendTo={appendToBody ? () => document.body : 'parent'}
         render={() => (
           <div
             className="flex flex-col items-center"

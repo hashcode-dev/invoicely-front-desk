@@ -8,10 +8,12 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { AndorraRegions } from './components/AndorraRegions';
 import { AURegions } from './components/AURegions';
 import { EURegions } from './components/EURegions';
-import { UKRegions } from './components/UKRegions';
 import { SellerSubregion } from './components/SellerSubregion';
+import { SGRegions } from './components/SGRegions';
+import { UKRegions } from './components/UKRegions';
 import { USRegions } from './components/USRegions';
 
 export function CalculateTaxes() {
@@ -22,7 +24,8 @@ export function CalculateTaxes() {
       <EURegions />
       <UKRegions />
       <AURegions />
-
+      <AndorraRegions />
+      <SGRegions />
     </>
   );
 }

@@ -8,18 +8,18 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Button, InputField, SelectField } from '$app/components/forms';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { defaultRule } from '$app/common/constants/rules';
 import {
   Rule,
   TransactionRule,
 } from '$app/common/interfaces/transaction-rules';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { Button, InputField, SelectField } from '$app/components/forms';
 import { Modal } from '$app/components/Modal';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useHandleChange } from '../hooks/useHandleChange';
 import { useCreditRuleFields } from '../hooks/useCreditRuleFields';
+import { useHandleChange } from '../hooks/useHandleChange';
 
 interface Props {
   visible: boolean;
@@ -31,20 +31,26 @@ interface Props {
   appliesTo: 'DEBIT' | 'CREDIT';
 }
 
+const stringOperators = [
+  { value: 'contains', label: 'contains' },
+  { value: 'starts_with', label: 'starts_with' },
+  { value: 'is', label: 'is' },
+  { value: 'is_empty', label: 'is_empty' },
+];
+
+const numberOperators = [
+  { value: '<', label: '<' },
+  { value: '<=', label: '<=' },
+  { value: '=', label: '=' },
+  { value: '>', label: '>' },
+  { value: '>=', label: '>=' },
+];
+
 const OPERATORS = {
-  description: [
-    { value: 'contains', label: 'contains' },
-    { value: 'starts_with', label: 'starts_with' },
-    { value: 'is', label: 'is' },
-    { value: 'is_empty', label: 'is_empty' },
-  ],
-  amount: [
-    { value: '<', label: '<' },
-    { value: '<=', label: '<=' },
-    { value: '=', label: '=' },
-    { value: '>', label: '>' },
-    { value: '>=', label: '>=' },
-  ],
+  description: stringOperators,
+  participant: stringOperators,
+  participant_name: stringOperators,
+  amount: numberOperators,
 };
 
 export function RuleModal({
@@ -77,9 +83,10 @@ export function RuleModal({
   const handleChangeRuleField = (value: string) => {
     handleChangeRule('search_key', value);
 
-    if (value === 'description') {
-      handleChangeRule('operator', 'contains');
-    }
+    const matches = ['description', 'participant', 'participant_name'].includes(
+      value
+    );
+    if (matches) handleChangeRule('operator', 'contains');
 
     if (value === 'amount') {
       handleChangeRule('operator', '<');
@@ -130,6 +137,8 @@ export function RuleModal({
           {t('description')}
         </option>
         <option value="amount">{t('amount')}</option>
+        <option value="participant">{t('participant')}</option>
+        <option value="participant_name">{t('participant_name')}</option>
       </SelectField>
 
       <SelectField

@@ -8,13 +8,13 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { InputField, InputLabel } from '$app/components/forms';
-import { ExpenseCategory } from '$app/common/interfaces/expense-category';
-import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { ColorPicker } from '$app/components/forms/ColorPicker';
 import { Dispatch, RefObject, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ExpenseCategory } from '$app/common/interfaces/expense-category';
+import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { CardContainer } from '$app/components/cards';
+import { InputField, InputLabel } from '$app/components/forms';
+import { ColorPicker } from '$app/components/forms/ColorPicker';
 
 interface Props {
   nameFieldRef?: RefObject<HTMLInputElement | undefined>;
@@ -58,6 +58,7 @@ export function CreateExpenseCategoryForm(props: Props) {
         <InputField
           innerRef={nameFieldRef}
           required
+          changeOverride
           label={t('name')}
           value={expenseCategory?.name}
           onValueChange={(value) => handleChange('name', value)}
@@ -82,6 +83,7 @@ export function CreateExpenseCategoryForm(props: Props) {
       <InputField
         innerRef={nameFieldRef}
         required
+        changeOverride
         label={t('name')}
         value={expenseCategory?.name}
         onValueChange={(value) => handleChange('name', value)}

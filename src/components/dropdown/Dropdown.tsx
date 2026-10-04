@@ -9,8 +9,7 @@
  */
 
 import Tippy from '@tippyjs/react/headless';
-import CommonProps from '../../common/interfaces/common-props.interface';
-import { ChevronDown } from 'react-feather';
+import classNames from 'classnames';
 import {
   Children,
   cloneElement,
@@ -19,17 +18,20 @@ import {
   useRef,
   useState,
 } from 'react';
-import { DropdownElement } from './DropdownElement';
+import { ChevronDown } from 'react-feather';
 import { useClickAway } from 'react-use';
-import classNames from 'classnames';
-import { useAccentColor } from '$app/common/hooks/useAccentColor';
 import { styled } from 'styled-components';
 import { useColorScheme } from '$app/common/colors';
+import { useAccentColor } from '$app/common/hooks/useAccentColor';
+import CommonProps from '../../common/interfaces/common-props.interface';
+import { DropdownElement } from './DropdownElement';
 
 interface Props extends CommonProps {
   label?: string | null;
   cardActions?: boolean;
   cypressRef?: string;
+  /** When set, applied to the trigger control as data-cy (defaults to chevronDownButton). */
+  triggerCypressRef?: string;
   customLabel?: ReactNode;
   minWidth?: string;
   maxWidth?: string;
@@ -140,10 +142,10 @@ export function Dropdown(props: Props) {
               }
             )}
             style={{
-              backgroundColor: props.cardActions && accentColor,
+              backgroundColor: props.cardActions ? accentColor : '',
               color: props.cardActions ? 'white' : '',
             }}
-            data-cy="chevronDownButton"
+            data-cy={props.triggerCypressRef ?? 'chevronDownButton'}
           >
             {!props.cardActions && <span>{props.label}</span>}
             <ChevronDown size={props.cardActions ? 18 : 14} />

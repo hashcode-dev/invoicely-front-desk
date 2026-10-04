@@ -16,11 +16,12 @@ import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
 import { useTitle } from '$app/common/hooks/useTitle';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import { TAG_ENTITY_TYPES } from '$app/common/interfaces/tag';
 import { Page } from '$app/components/Breadcrumbs';
 import { ClientSelector } from '$app/components/clients/ClientSelector';
 import Toggle from '$app/components/forms/Toggle';
 import { Default } from '$app/components/layouts/Default';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   SortableColumns,
@@ -28,12 +29,10 @@ import {
 } from '../common/components/SortableColumns';
 import { Identifier, Payload, Report, useReports } from '../common/useReports';
 import { usePreferences } from '$app/common/hooks/usePreferences';
-import collect from 'collect.js';
-import { useQueryClient } from 'react-query';
+import { isCancelledError, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 import {
   Cell,
-
   PreviewResponse,
   previewAtom,
 } from '../common/components/Preview';
@@ -49,23 +48,31 @@ import { useColorScheme } from '$app/common/colors';
 import { MultiClientSelector } from '../common/components/MultiClientSelector';
 import { MultiExpenseCategorySelector } from '../common/components/MultiExpenseCategorySelector';
 import { MultiProjectSelector } from '../common/components/MultiProjectSelector';
+import { MultiTagSelector } from '../common/components/MultiTagSelector';
 import { MultiVendorSelector } from '../common/components/MultiVendorSelector';
-import { useShowReportField } from '../common/hooks/useShowReportField';
+import {
+  REPORT_TAG_ENTITY_TYPES,
+  useShowReportField,
+} from '../common/hooks/useShowReportField';
 import { proPlan } from '$app/common/guards/guards/pro-plan';
 import { enterprisePlan } from '$app/common/guards/guards/enterprise-plan';
 import { ReportsPlanAlert } from '../common/components/ReportsPlanAlert';
-import { useNumericFormatter } from '$app/common/hooks/useNumericFormatter';
 import { extractTextFromHTML } from '$app/common/helpers/html-string';
 import { sanitizeHTML } from '$app/common/helpers/html-string';
 import { cloneDeep } from 'lodash';
 import { ActivitySelector } from '$app/components/layouts/ActivitySelector';
 import { TemplateSelector } from '../common/components/TemplateSelector';
+import { useGroupByOptions } from '../common/hooks/useGroupByOptions';
+import type { Record as ReportColumnRecord } from '$app/common/constants/exports/client-map';
 
 interface Range {
   identifier: string;
   label: string;
   scheduleIdentifier: string;
 }
+
+const PREVIEW_POLL_RETRIES = 10;
+const PREVIEW_POLL_DELAY_MS = import.meta.env.DEV ? 1000 : 5000;
 
 export const ranges: Range[] = [
   { identifier: 'all', label: 'all', scheduleIdentifier: 'all' },
@@ -119,25 +126,29 @@ export const ranges: Range[] = [
  * - attachment; filename=filename.pdf
  * - attachment; filename*=UTF-8''filename.pdf
  */
-const extractFilenameFromHeader = (contentDisposition: string | undefined): string | null => {
+const extractFilenameFromHeader = (
+  contentDisposition: string | undefined
+): string | null => {
   if (!contentDisposition) {
     return null;
   }
 
   // Try to extract filename from Content-Disposition header
-  const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-  
+  const filenameMatch = contentDisposition.match(
+    /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+  );
+
   if (filenameMatch && filenameMatch[1]) {
     let filename = filenameMatch[1];
-    
+
     // Remove quotes if present
     filename = filename.replace(/^["']|["']$/g, '');
-    
+
     // Handle RFC 5987 encoded filenames (filename*=UTF-8''...)
     if (filename.startsWith("UTF-8''")) {
       filename = decodeURIComponent(filename.substring(7));
     }
-    
+
     return filename.trim();
   }
 
@@ -163,12 +174,20 @@ const download = (data: BlobPart, identifier: string, headers?: any) => {
   const fileType = isPDF ? 'pdf' : 'csv';
   const mimeType = isPDF ? 'application/pdf' : 'text/csv';
 
-  const contentDisposition = 
-    (typeof headers?.['content-disposition'] === 'string' ? headers['content-disposition'] : null) ||
-    (typeof headers?.['Content-Disposition'] === 'string' ? headers['Content-Disposition'] : null) ||
-    (Array.isArray(headers?.['content-disposition']) ? headers['content-disposition'][0] : null) ||
-    (Array.isArray(headers?.['Content-Disposition']) ? headers['Content-Disposition'][0] : null);
-  
+  const contentDisposition =
+    (typeof headers?.['content-disposition'] === 'string'
+      ? headers['content-disposition']
+      : null) ||
+    (typeof headers?.['Content-Disposition'] === 'string'
+      ? headers['Content-Disposition']
+      : null) ||
+    (Array.isArray(headers?.['content-disposition'])
+      ? headers['content-disposition'][0]
+      : null) ||
+    (Array.isArray(headers?.['Content-Disposition'])
+      ? headers['Content-Disposition'][0]
+      : null);
+
   const headerFilename = extractFilenameFromHeader(contentDisposition);
 
   const filename = headerFilename || `${identifier}.${fileType}`;
@@ -195,20 +214,25 @@ export default function Reports() {
   const queryClient = useQueryClient();
 
   const scheduleReport = useScheduleReport();
-  const { save, preferences } = usePreferences();
-  const numericFormatter = useNumericFormatter();
+  const { save, preferences, update } = usePreferences();
 
   const [report, setReport] = useState<Report>(reports[0]);
   const [isPendingExport, setIsPendingExport] = useState(false);
   const [errors, setErrors] = useState<ValidationBag>();
   const [showCustomColumns, setShowCustomColumns] = useState(false);
+  const customColumnsDraftsRef = useRef<
+    Partial<Record<Identifier, ReportColumnRecord[][]>>
+  >({});
 
   const [preview, setPreview] = useAtom(previewAtom);
 
   const showReportField = useShowReportField({ report: report.identifier });
+  const groupByOptions = useGroupByOptions(report.identifier);
 
   const handleReportChange = (identifier: Identifier) => {
     const report = reports.find((report) => report.identifier === identifier);
+
+    queryClient.cancelQueries({ queryKey: ['reports'] });
 
     setShowCustomColumns(false);
 
@@ -255,6 +279,54 @@ export default function Reports() {
     }));
   };
 
+  const resolveReportColumnData = useCallback(() => {
+    if (!showCustomColumns) {
+      return null;
+    }
+
+    const customColumnsDraft =
+      customColumnsDraftsRef.current[report.identifier];
+
+    if (customColumnsDraft) {
+      return customColumnsDraft;
+    }
+
+    if (report.identifier in preferences.reports.columns) {
+      return preferences.reports.columns[report.identifier];
+    }
+
+    return null;
+  }, [preferences.reports.columns, report.identifier, showCustomColumns]);
+
+  const resolveReportKeys = useCallback(() => {
+    const columns = resolveReportColumnData();
+
+    return columns?.[reportColumn]?.map((record) => record.value) ?? [];
+  }, [resolveReportColumnData]);
+
+  const commitCustomColumnsDraft = useCallback(() => {
+    const customColumnsDraft =
+      customColumnsDraftsRef.current[report.identifier];
+
+    if (!showCustomColumns || !customColumnsDraft) {
+      return;
+    }
+
+    if (Array.isArray(preferences.reports.columns)) {
+      update('preferences.reports.columns', {});
+    }
+
+    update(
+      `preferences.reports.columns.${report.identifier}`,
+      customColumnsDraft.map((group) => [...group])
+    );
+  }, [
+    preferences.reports.columns,
+    report.identifier,
+    showCustomColumns,
+    update,
+  ]);
+
   const handleExport = () => {
     toast.processing();
 
@@ -268,15 +340,8 @@ export default function Reports() {
         ? { ...report.payload, client_id: client_id || null }
         : report.payload;
 
-    let reportKeys: string[] = [];
-
-    if (report.identifier in preferences.reports.columns && showCustomColumns) {
-      reportKeys = collect(
-        preferences.reports.columns[report.identifier][reportColumn]
-      )
-        .pluck('value')
-        .toArray() as string[];
-    }
+    const reportKeys = resolveReportKeys();
+    commitCustomColumnsDraft();
 
     updatedPayload = { ...updatedPayload, report_keys: reportKeys };
 
@@ -375,6 +440,10 @@ export default function Reports() {
     setErrors(undefined);
     setPreview(null);
 
+    queryClient.cancelQueries({ queryKey: ['reports'] });
+
+    toast.processing();
+
     const { client_id } = report.payload;
 
     let updatedPayload =
@@ -382,20 +451,13 @@ export default function Reports() {
         ? { ...report.payload, client_id: client_id || null }
         : report.payload;
 
-    let reportKeys: string[] = [];
-
-    if (report.identifier in preferences.reports.columns && showCustomColumns) {
-      reportKeys = collect(
-        preferences.reports.columns[report.identifier][reportColumn]
-      )
-        .pluck('value')
-        .toArray() as string[];
-    }
+    const reportKeys = resolveReportKeys();
+    commitCustomColumnsDraft();
 
     updatedPayload = { ...updatedPayload, report_keys: reportKeys };
 
-    request('POST', endpoint(report.preview), updatedPayload, {}).then(
-      (response) => {
+    request('POST', endpoint(report.preview), updatedPayload, {})
+      .then((response) => {
         const hash = response.data.message as string;
 
         queryClient
@@ -405,8 +467,8 @@ export default function Reports() {
               request('POST', endpoint(`/api/v1/reports/preview/${hash}`)).then(
                 (response) => response.data
               ),
-            retry: 10,
-            retryDelay: import.meta.env.DEV ? 1000 : 5000,
+            retry: PREVIEW_POLL_RETRIES,
+            retryDelay: PREVIEW_POLL_DELAY_MS,
           })
           .then((response) => {
             const { columns, ...rows } = response;
@@ -422,14 +484,32 @@ export default function Reports() {
             });
 
             toast.success();
+
+            setTimeout(() => {
+              document.getElementById('preview-table')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              });
+            }, 100);
+          })
+          .catch((error) => {
+            if (isCancelledError(error)) {
+              return;
+            }
+
+            console.error(error);
+
+            toast.info('report_too_large_to_preview');
           });
-      }
-    );
+      })
+      .catch(() => {
+        toast.dismiss();
+      });
   };
 
   useEffect(() => {
     return () => {
-      queryClient.cancelQueries(['reports']);
+      queryClient.cancelQueries({ queryKey: ['reports'] });
 
       toast.dismiss();
 
@@ -460,7 +540,12 @@ export default function Reports() {
 
           <DropdownElement
             icon={<Icon element={MdSchedule} />}
-            onClick={() => scheduleReport(report, showCustomColumns)}
+            onClick={() => {
+              const reportKeys = resolveReportKeys();
+
+              commitCustomColumnsDraft();
+              scheduleReport(report, showCustomColumns, reportKeys);
+            }}
           >
             {t('schedule')}
           </DropdownElement>
@@ -580,6 +665,7 @@ export default function Reports() {
           {showReportField('status') && (
             <Element leftSide={t('status')} className={'mb-50 py-50'}>
               <StatusSelector
+                key={`${report.identifier}-status-selector`}
                 report={report.identifier}
                 onValueChange={(statuses) =>
                   handlePayloadChange('status', statuses)
@@ -596,7 +682,9 @@ export default function Reports() {
                   handlePayloadChange('template_id', design.id)
                 }
                 clearButton
-                onClearButtonClick={() => handlePayloadChange('template_id', '')}
+                onClearButtonClick={() =>
+                  handlePayloadChange('template_id', '')
+                }
                 entity={report.identifier}
               />
             </Element>
@@ -638,6 +726,18 @@ export default function Reports() {
             />
           )}
 
+          {showReportField('tags') && (
+            <MultiTagSelector
+              key={report.identifier}
+              entityType={
+                REPORT_TAG_ENTITY_TYPES[report.identifier] ??
+                TAG_ENTITY_TYPES.invoice
+              }
+              value={report.payload.tag_ids}
+              onValueChange={(tagIds) => handlePayloadChange('tag_ids', tagIds)}
+            />
+          )}
+
           {showReportField('categories') && (
             <MultiExpenseCategorySelector
               value={report.payload.categories}
@@ -655,6 +755,26 @@ export default function Reports() {
                   handlePayloadChange('activity_type_id', activity_type_id)
                 }
               />
+            </Element>
+          )}
+
+          {showReportField('group_by') && groupByOptions.length > 0 && (
+            <Element leftSide={t('group_by')}>
+              <SelectField
+                value={report.payload.group_by || ''}
+                onValueChange={(value) =>
+                  handlePayloadChange('group_by', value)
+                }
+                customSelector
+                dismissable={false}
+              >
+                <option value="">{t('none')}</option>
+                {groupByOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </SelectField>
             </Element>
           )}
         </Card>
@@ -725,7 +845,10 @@ export default function Reports() {
             <Element leftSide={`${t('customize')} ${t('columns')}`}>
               <Toggle
                 checked={showCustomColumns}
-                onValueChange={(value) => setShowCustomColumns(Boolean(value))}
+                onValueChange={(value) => {
+                  setShowCustomColumns(Boolean(value));
+                }}
+                cypressRef="customizeReportColumns"
               />
             </Element>
           )}
@@ -736,10 +859,18 @@ export default function Reports() {
         <SortableColumns
           report={report.identifier}
           columns={report.custom_columns}
+          draftColumns={
+            customColumnsDraftsRef.current[report.identifier] ?? null
+          }
+          onColumnsChange={(columns) => {
+            customColumnsDraftsRef.current[report.identifier] = columns;
+          }}
         />
       )}
 
-      {preview && <EnhancedPreview enableMultiSort={true} enableNaturalSort={true} />}
+      {preview && (
+        <EnhancedPreview enableMultiSort={true} enableNaturalSort={true} />
+      )}
     </Default>
   );
 }
