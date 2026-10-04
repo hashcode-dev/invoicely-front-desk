@@ -178,19 +178,19 @@ export function DatePicker(props: Props) {
     props: HTMLProps<HTMLInputElement>,
     ref: Ref<HTMLInputElement>
   ) => (
-    <div className="flex items-center justify-end">
+    <div className="flex items-center justify-end relative">
       <input
         placeholder={dayjs().format(dateFormat)}
         onClick={props.onClick}
         value={getFormattedValue()}
         onChange={props.onChange}
-        className={`w-full py-2 px-3 rounded text-sm text-gray-900 dark:bg-gray-800 dark:border-transparent dark:text-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed border border-gray-300 ${props.className}`}
+        className={`w-full min-h-[42px] py-2 px-3.5 rounded-xl text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed transition-all ${props.className || ''}`}
         ref={ref}
       />
 
       {!date && (
-        <div onClick={props.onClick} className="absolute mr-2 cursor-pointer">
-          <Icon element={MdCalendarMonth} size={20} />
+        <div onClick={props.onClick} className="absolute mr-3 cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+          <Icon element={MdCalendarMonth} size={18} />
         </div>
       )}
     </div>

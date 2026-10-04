@@ -21,55 +21,47 @@ interface Props extends CommonProps {
 
 export function Alert(props: Props) {
   const [visible, setVisible] = useState<boolean>(true);
-  const colors = useColorScheme();
+
+  if (!visible) {
+    return null;
+  }
+
+  const type = props.type || 'info';
+
+  const typeStyles = {
+    danger:
+      'border-red-200 dark:border-red-900/60 bg-red-50/90 dark:bg-red-950/40 text-red-800 dark:text-red-200',
+    warning:
+      'border-amber-200 dark:border-amber-900/60 bg-amber-50/90 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200',
+    success:
+      'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200',
+    info:
+      'border-blue-200 dark:border-blue-900/60 bg-blue-50/90 dark:bg-blue-950/40 text-blue-800 dark:text-blue-200',
+  }[type] || 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200';
 
   return (
     <div
-      style={{
-        color: colors.$3,
-        colorScheme: colors.$0,
-        backgroundColor: colors.$1,
-      }}
-      className={classNames(`border-l-4 py-2 ${props.className}`, {
-        'bg-red-50 border-red-500': props.type === 'danger',
-        'bg-yellow-50 border-yellow-500': props.type === 'warning',
-        'bg-green-50 border-green-500': props.type === 'success',
-        block: visible,
-        hidden: !visible,
-      })}
+      role="alert"
+      className={classNames(
+        `rounded-xl border p-4 text-sm font-medium transition-all shadow-xs ${typeStyles}`,
+        props.className
+      )}
     >
-      <div className="mx-4">
-        <div
-          style={{
-            color: colors.$3,
-            colorScheme: colors.$0,
-            backgroundColor: colors.$1,
-            borderColor: colors.$4,
-          }}
-          className={classNames('text-sm', {
-            'text-red-700': props.type === 'danger',
-            'text-yellow-700': props.type === 'warning',
-            'text-green-700': props.type === 'success',
-          })}
-        >
-          <div
-            className="flex items-center justify-between space-x-2"
-            style={{ backgroundColor: colors.$1, borderColor: colors.$4 }}
-          >
-            <div
-              className="w-full break-words"
-              style={{ backgroundColor: colors.$1, borderColor: colors.$4 }}
-            >
-              {props.children}
-            </div>
-
-            {!props.disableClosing && (
-              <button type="button">
-                <X onClick={() => setVisible(false)} />
-              </button>
-            )}
-          </div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 break-words leading-relaxed">
+          {props.children}
         </div>
+
+        {!props.disableClosing && (
+          <button
+            type="button"
+            onClick={() => setVisible(false)}
+            className="p-1 rounded-lg opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500/30 -mr-1 -mt-1"
+            aria-label="Close alert"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

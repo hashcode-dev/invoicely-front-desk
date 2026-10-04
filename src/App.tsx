@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { atom } from 'jotai';
 import { useAuth } from './common/context/AuthContext';
 import { LoginPage } from './pages/authentication/LoginPage';
@@ -49,6 +49,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function Shell({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const sideNavRef = React.useRef<HTMLElement>(null);
 
   function handleLogout() {
@@ -76,16 +77,23 @@ function Shell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav ref={sideNavRef} className="side-nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              className={({ isActive }) => (isActive ? 'side-link active' : 'side-link')}
-              to={item.path}
-            >
-              <span className="material-symbols-outlined">{item.icon}</span>
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const isItemActive =
+              location.pathname === item.path ||
+              location.pathname.startsWith(item.path + '/');
+            return (
+              <NavLink
+                key={item.path}
+                className={({ isActive }) =>
+                  isActive || isItemActive ? 'side-link active' : 'side-link'
+                }
+                to={item.path}
+              >
+                <span className="material-symbols-outlined">{item.icon}</span>
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
 
         <button

@@ -82,9 +82,9 @@ export function InputField(props: Props) {
       <div className="relative">
         <DebounceInput
           style={{
-            backgroundColor: colors.$1,
-            color: colors.$3,
-            paddingRight: props.value && props.clearable ? '2.5rem' : '0.75rem',
+            backgroundColor: reactSettings.dark_mode ? '#152232' : '#ffffff',
+            color: reactSettings.dark_mode ? '#f1f5f9' : '#0b1c30',
+            paddingRight: props.value && props.clearable ? '2.5rem' : '0.875rem',
             ...props.style,
           }}
           min={props.min}
@@ -99,13 +99,16 @@ export function InputField(props: Props) {
           id={props.id}
           type={inputType}
           className={classNames(
-            `w-full py-2 px-3 rounded-md text-sm disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-0 ${props.className}`,
+            `w-full min-h-[42px] px-3.5 py-2.5 rounded-xl text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 ${props.className ?? ''}`,
             {
               border: props.border !== false,
-              'border-[#09090B26] focus:border-black': !reactSettings.dark_mode,
-              'border-[#1f2e41] focus:border-white': reactSettings.dark_mode,
+              'border-slate-300 dark:border-slate-700 focus:border-blue-600 focus:ring-blue-500/30 placeholder-slate-400 dark:placeholder-slate-500':
+                !props.errorMessage,
+              'border-red-500 focus:border-red-500 focus:ring-red-500/30':
+                Boolean(props.errorMessage),
             }
           )}
+
           placeholder={props.placeholder || ''}
           onBlur={(event) => {
             if (!props.changeOverride) {

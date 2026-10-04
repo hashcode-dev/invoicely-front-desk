@@ -170,29 +170,25 @@ export function Tabs(props: Props) {
             {props.tabs.map(
               (tab) =>
                 (typeof tab.enabled === 'undefined' || tab.enabled) && (
-                  <StyledLink
+                  <Link
                     key={tab.name}
                     to={tab.href}
                     onClick={(event) => handleScroll(event)}
-                    theme={{
-                      textColor: isActive(tab) ? colors.$3 : colors.$17,
-                      hoverTextColor: colors.$3,
-                    }}
-                    className="whitespace-nowrap font-medium text-sm px-4 py-3"
+                    className={classNames(
+                      'whitespace-nowrap font-medium text-sm px-4 py-3 border-b-2 transition-all duration-150',
+                      isActive(tab)
+                        ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 font-semibold'
+                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:border-slate-300'
+                    )}
                     aria-current={isActive(tab) ? 'page' : undefined}
-                    style={{
-                      borderBottom: isActive(tab)
-                        ? `1px solid ${colors.$3}`
-                        : `1px solid ${colors.$20}`,
-                    }}
                   >
                     <div>{tab.formatName?.() || tab.name}</div>
-                  </StyledLink>
+                  </Link>
                 )
             )}
 
             <div
-              className={classNames({
+              className={classNames('border-b border-slate-200 dark:border-slate-800', {
                 'flex-1': !withHorizontalPadding || fullRightPadding,
               })}
               style={{
@@ -205,10 +201,10 @@ export function Tabs(props: Props) {
                       minWidth: horizontalPaddingWidth,
                     }),
                 height: paddingTabsHeight,
-                borderBottom: `1px solid ${colors.$20}`,
               }}
             />
           </nav>
+
 
           {props.rightSide && (
             <div

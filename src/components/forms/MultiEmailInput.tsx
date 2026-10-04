@@ -52,9 +52,9 @@ const Field = styled(ReactMultiEmail)<{
   align-items: center;
   gap: 0.375rem;
   width: 100%;
-  min-height: 2.375rem;
-  padding: 0.3125rem 0.75rem;
-  border-radius: 0.375rem;
+  min-height: 2.625rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.75rem;
   border-width: 1px;
   border-style: solid;
   border-color: ${({ $borderColor }) => $borderColor};
@@ -63,9 +63,12 @@ const Field = styled(ReactMultiEmail)<{
   font-size: 0.875rem;
   line-height: 1.25rem;
   cursor: text;
+  transition: all 150ms ease-in-out;
 
   &.focused {
-    border-color: ${({ $focusBorderColor }) => $focusBorderColor};
+    border-color: #004bca;
+    box-shadow: 0 0 0 2px rgba(0, 97, 255, 0.25);
+    outline: none;
   }
 
   &.is-disabled {
@@ -224,8 +227,7 @@ export function MultiEmailInput({
         getLabel={(email: string, index: number, removeEmail: (index: number) => void) => (
           <span
             key={`${email}-${index}`}
-            className="inline-flex h-6 max-w-full items-center gap-1 rounded-full px-2 text-xs font-medium"
-            style={{ backgroundColor: colors.$20, color: colors.$3 }}
+            className="inline-flex h-6 max-w-full items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900 shadow-xs"
             data-cy="emailBadge"
           >
             <span className="truncate">{email}</span>
@@ -233,7 +235,7 @@ export function MultiEmailInput({
             {!disabled && (
               <RemoveBadgeButton
                 type="button"
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full focus:outline-none"
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full hover:bg-blue-200/60 dark:hover:bg-blue-800 focus:outline-none transition-colors"
                 onClick={(event) => {
                   event.stopPropagation();
 
@@ -245,7 +247,7 @@ export function MultiEmailInput({
                   reactSettings.dark_mode ? colors.$5 : colors.$24
                 }
               >
-                <XMark size="0.55rem" color={colors.$3} />
+                <XMark size="0.55rem" color="currentColor" />
               </RemoveBadgeButton>
             )}
           </span>

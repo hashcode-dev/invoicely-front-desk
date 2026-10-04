@@ -68,55 +68,44 @@ export function Button(props: Props) {
       props.type !== 'primary' && props.type !== 'secondary' ? accentColor : '',
   };
 
+  const getButtonClasses = () => {
+    return classNames(
+      `inline-flex items-center justify-center space-x-2 text-sm font-semibold rounded-xl transition-all focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${props.className ?? ''}`,
+      {
+        'w-full': props.variant === 'block',
+        'p-0 m-0 border-0 bg-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100':
+          props.type === 'minimal',
+        'min-h-[42px] px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-sm hover:shadow active:scale-[0.98] border border-transparent focus:ring-2 focus:ring-blue-500/40':
+          props.type === 'primary',
+        'min-h-[42px] px-4 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 shadow-xs focus:ring-2 focus:ring-blue-500/20':
+          props.type === 'secondary',
+        'opacity-75 pointer-events-none': props.disabled && props.to,
+      }
+    );
+  };
+
   if (props.to) {
     return (
-      <StyledLink
+      <Link
         to={props.to}
-        theme={{
-          backgroundColor: props.type === 'primary' ? colors.$18 : colors.$1,
-          color: props.type === 'primary' ? colors.$1 : colors.$3,
-          borderColor: props.type === 'primary' ? 'transparent' : colors.$24,
-          hoverColor: props.type === 'primary' ? colors.$18 : colors.$4,
-        }}
-        className={classNames(
-          `border inline-flex items-center space-x-2 px-4 shadow-sm justify-center rounded-md text-sm ${props.className}`,
-          {
-            'py-2 px-4': props.type !== 'minimal',
-            'w-full': props.variant === 'block',
-            'p-0 m-0': props.type === 'minimal',
-            'opacity-75 pointer-events-none': props.disabled,
-          }
-        )}
-        style={css}
+        className={getButtonClasses()}
+        style={props.style}
       >
         {props.disabled && !props.disableWithoutIcon ? (
           <Spinner variant="light" />
         ) : (
           props.children
         )}
-      </StyledLink>
+      </Link>
     );
   }
 
   return (
-    <StyledButton
+    <button
       type={props.behavior}
       disabled={props.disabled}
-      theme={{
-        backgroundColor: props.type === 'primary' ? colors.$18 : colors.$1,
-        color: props.type === 'primary' ? colors.$1 : colors.$3,
-        borderColor: props.type === 'primary' ? 'transparent' : colors.$24,
-        hoverColor: props.type === 'primary' ? colors.$18 : colors.$4,
-      }}
-      className={classNames(
-        `border inline-flex items-center space-x-2 px-4 shadow-sm justify-center rounded-md text-sm ${props.className} disabled:cursor-not-allowed disabled:opacity-75`,
-        {
-          'py-2 px-4': props.type !== 'minimal',
-          'w-full': props.variant === 'block',
-          'p-0 m-0': props.type === 'minimal',
-        }
-      )}
-      style={css}
+      className={getButtonClasses()}
+      style={props.style}
       onClick={props.onClick}
       form={props.form}
     >
@@ -125,6 +114,7 @@ export function Button(props: Props) {
       ) : (
         props.children
       )}
-    </StyledButton>
+    </button>
   );
 }
+

@@ -133,7 +133,7 @@ export function Default(props: Props) {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div className="w-full">
       <div className="fixed bottom-4 right-4 z-50 flex items-end flex-col-reverse space-y-4 space-y-reverse">
         <ActivateCompany />
         <VerifyEmail />
@@ -145,63 +145,27 @@ export function Default(props: Props) {
         <PriceIncreaseBanner />
       </div>
 
-      <MobileSidebar
-        navigation={navigation}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
-
-      <DesktopSidebar navigation={navigation} docsLink={props.docsLink} />
-
-      <div
-        className={classNames('flex flex-col flex-1', {
-          'md:pl-16': isMiniSidebar,
-          'md:pl-64': !isMiniSidebar,
-        })}
-      >
-        <div
-          style={{ backgroundColor: colors.$1 }}
-          className="sticky top-0 z-10 flex-shrink-0 flex h-16 border-b shadow"
-        >
-          <button
-            type="button"
-            className="px-4 border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <span className="sr-only">Open sidebar</span>
-            <MenuIcon color={colors.$3} />
-          </button>
-
-          <div
-            className="flex-1 px-4 xl:px-8 flex items-center"
-            data-cy="topNavbar"
-          >
-            <div className="flex flex-1 items-center space-x-4">
-              <h2
-                style={{ color: colors.$3 }}
-                className="text-sm md:text-lg whitespace-nowrap"
-              >
-                {props.title}
-              </h2>
-
-              <QuickCreatePopover />
-              <Search />
+      <div className="flex flex-col flex-1 w-full">
+        {(props.title || props.onSaveClick || saveBtn || props.onCancelClick || props.breadcrumbs?.length || navigationTopRightElement || props.navigationTopRight) && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 mb-5 border-b border-slate-200/80 dark:border-slate-800">
+            <div className="flex flex-col gap-1 min-w-0">
+              {props.breadcrumbs && props.breadcrumbs.length > 0 && (
+                <div className="pb-1">
+                  <Breadcrumbs pages={props.breadcrumbs} />
+                </div>
+              )}
+              {props.title && (
+                <h1 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                  {props.title}
+                </h1>
+              )}
             </div>
 
-            <div className="ml-4 flex items-center md:ml-6 space-x-2 lg:space-x-3">
-              <Notifications />
-
+            <div className="flex items-center flex-wrap gap-2.5 sm:self-center">
               {shouldShowUnlockButton && (
                 <button
                   type="button"
-                  className="hidden sm:inline-flex items-center justify-center px-4 rounded-md text-sm font-medium text-white relative overflow-hidden"
-                  style={{
-                    height: '2.25rem',
-                    background: '#2176FF',
-                    border: '1px solid #0062ff',
-                    boxShadow:
-                      '0px 1px 1px 0px #1453B82E, 0px 2px 2px 0px #1453B829, 0px 5px 3px 0px #1453B817, 0px 9px 4px 0px #1453B808, 0px 15px 4px 0px #1453B800, 0px 1px 0px 0px #FFFFFF40 inset, 0px 0px 0px 1px #0062FF',
-                  }}
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-sm transition-all"
                   onClick={() => {
                     if (
                       isHosted() ||
@@ -219,14 +183,8 @@ export function Default(props: Props) {
                     });
                   }}
                 >
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-
-                  <span className="relative z-10 hidden xl:block">
+                  <span>
                     {isSelfHosted() ? t('white_label_button') : t('unlock_pro')}
-                  </span>
-
-                  <span className="relative z-10 xl:hidden">
-                    {t('upgrade')}
                   </span>
                 </button>
               )}
@@ -296,32 +254,12 @@ export function Default(props: Props) {
               )}
             </div>
           </div>
-        </div>
+        )}
 
         {props.aboveMainContainer}
 
-        <main className="flex-1">
-          {(props.breadcrumbs || props.topRight || props.afterBreadcrumbs) &&
-            props.breadcrumbs.length > 0 && (
-              <div className="pt-4 px-4 md:px-6 md:pt-6 dark:text-gray-100 flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
-                <div className="flex items-center w-full">
-                  {props.breadcrumbs && (
-                    <Breadcrumbs pages={props.breadcrumbs} />
-                  )}
-
-                  {props.afterBreadcrumbs}
-                </div>
-
-                {props.topRight && <div>{props.topRight}</div>}
-              </div>
-            )}
-
-          <div
-            style={{ color: colors.$3, backgroundColor: colors.$23 }}
-            className="p-4 xl:px-6 dark:text-gray-100"
-          >
-            {props.children}
-          </div>
+        <main className="flex-1 w-full">
+          {props.children}
         </main>
       </div>
 

@@ -40,7 +40,7 @@ export function useCompanyDetailsTabs() {
       href: '/settings/company_details/documents',
       formatName: () => (
         <DocumentsTabLabel
-          numberOfDocuments={data?.data?.meta.pagination.total}
+          numberOfDocuments={data?.data?.meta?.pagination?.total ?? 0}
         />
       ),
     },

@@ -102,7 +102,7 @@ export function TaxSettings() {
             headerStyle={{ borderColor: colors.$20 }}
             withoutBodyPadding
           >
-            {!companyChanges.calculate_taxes && (
+            {!companyChanges?.calculate_taxes && (
               <Element leftSide={t('invoice_tax_rates')}>
                 <SelectField
                   value={companyChanges?.enabled_tax_rates?.toString() || '0'}
@@ -159,18 +159,18 @@ export function TaxSettings() {
               </SelectField>
             </Element>
 
-            {companyChanges.calculate_taxes ? null : (
+            {companyChanges?.calculate_taxes ? null : (
               <Element leftSide={t('inclusive_taxes')}>
                 <div className="flex items-center space-x-7">
                   <Toggle
                     onChange={(value: boolean) =>
                       handleToggleChange('settings.inclusive_taxes', value)
                     }
-                    checked={Boolean(companyChanges?.settings.inclusive_taxes)}
+                    checked={Boolean(companyChanges?.settings?.inclusive_taxes)}
                     cypressRef="inclusiveTaxToggle"
                   />
 
-                  {companyChanges?.settings.inclusive_taxes ? (
+                  {companyChanges?.settings?.inclusive_taxes ? (
                     <span>{t('inclusive')}: 100 + 10% = 90.91 + 9.09</span>
                   ) : (
                     <span>{t('exclusive')}: 100 + 10% = 100 + 10</span>
@@ -193,15 +193,15 @@ export function TaxSettings() {
 
                   <CalculateTaxesNotificationModal />
 
-                  {companyChanges.calculate_taxes && <CalculateTaxes />}
+                  {companyChanges?.calculate_taxes && <CalculateTaxes />}
                 </>
               )}
           </Card>
 
           <Selector />
 
-          {companyChanges.enabled_item_tax_rates > 0 &&
-            !companyChanges.enabled_tax_rates && <DefaultLineItemTaxes />}
+          {Boolean(companyChanges && (companyChanges.enabled_item_tax_rates ?? 0) > 0) &&
+            !companyChanges?.enabled_tax_rates && <DefaultLineItemTaxes />}
         </>
       )}
 

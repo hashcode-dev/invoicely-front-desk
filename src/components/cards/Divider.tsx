@@ -18,18 +18,16 @@ interface Props extends CommonProps {
 }
 
 export function Divider(props: Props) {
-  const colors = useColorScheme();
-
   return (
     <div
-      style={{ borderColor: props.borderColor || colors.$21 }}
+      style={props.borderColor ? { borderColor: props.borderColor } : undefined}
       className={classNames(
-        'border-b',
+        'border-b border-slate-200/80 dark:border-slate-800',
         {
-          'pt-6 mb-4 border-b': !props.withoutPadding,
+          'pt-6 mb-4': !props.withoutPadding,
         },
         props.className ?? ''
       )}
-    ></div>
+    />
   );
 }

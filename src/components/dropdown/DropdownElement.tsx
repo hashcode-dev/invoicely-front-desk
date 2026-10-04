@@ -65,7 +65,7 @@ export function DropdownElement(props: Props) {
             {
               'flex items-center': props.icon,
             },
-            `w-full text-left z-50 block px-4 py-2 text-sm text-gray-700 rounded-[0.1875rem] ${props.className}`
+            `w-full text-left z-50 block px-3.5 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-lg transition-colors ${props.className || ''}`
           )}
           onClick={(event) => {
             if (preventLeavingPage) {
@@ -79,7 +79,7 @@ export function DropdownElement(props: Props) {
 
           <div
             className={classNames({
-              'ml-2': props.icon,
+              'ml-2.5': props.icon,
             })}
           >
             {props.children}
@@ -90,7 +90,7 @@ export function DropdownElement(props: Props) {
   }
 
   return (
-    <div className="p-1">
+    <div className="p-0.5">
       <Button
         theme={{
           color: colors.$3,
@@ -111,7 +111,7 @@ export function DropdownElement(props: Props) {
           {
             'flex items-center': props.icon,
           },
-          `w-full text-left z-50 block px-4 py-2 text-sm rounded-[0.1875rem] ${props.className} `
+          `w-full text-left z-50 block px-3.5 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-lg transition-colors ${props.className || ''}`
         )}
         data-cy={props.cypressRef}
       >

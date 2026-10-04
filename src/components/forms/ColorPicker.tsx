@@ -95,17 +95,7 @@ export function ColorPicker(props: Props) {
           <HexColorInput
             color={color}
             onChange={setColor}
-            className={classNames(
-              'border rounded-md my-2 p-2 focus:outline-none focus:ring-0',
-              {
-                'border-[#d1d5db] focus:border-black': !reactSettings.dark_mode,
-                'border-[#1f2e41] focus:border-white': reactSettings.dark_mode,
-              }
-            )}
-            style={{
-              backgroundColor: colors.$1,
-              width: '100%',
-            }}
+            className="w-full min-h-[42px] px-3.5 py-2 my-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-mono text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 transition-all"
           />
 
           <div className="flex w-full justify-between">
@@ -141,7 +131,7 @@ export function ColorPicker(props: Props) {
             {DEFAULT_COLORS.map((defaultColor) => (
               <div
                 key={defaultColor}
-                className="relative cursor-pointer w-full hover:opacity-75"
+                className="relative cursor-pointer w-full rounded-lg shadow-xs hover:scale-105 transition-transform overflow-hidden"
                 onClick={() => setColor(defaultColor)}
                 style={{ height: 32, backgroundColor: defaultColor }}
               >
@@ -150,8 +140,8 @@ export function ColorPicker(props: Props) {
                     className="absolute"
                     element={MdDone}
                     color="white"
-                    size={25}
-                    style={{ top: '0.3rem', left: '1.45rem' }}
+                    size={22}
+                    style={{ top: '0.3rem', left: '1.25rem' }}
                   />
                 )}
               </div>
@@ -174,7 +164,7 @@ export function ColorPicker(props: Props) {
       ) : (
         <div
           style={{ backgroundColor: color }}
-          className={classNames('w-16 h-6 shadow rounded-md', {
+          className={classNames('w-14 h-8 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm transition-transform hover:scale-105', {
             'opacity-75 cursor-not-allowed': props.disabled,
             'cursor-pointer':
               typeof props.disabled === 'undefined' || !props.disabled,

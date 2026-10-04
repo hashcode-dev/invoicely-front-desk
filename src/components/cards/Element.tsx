@@ -39,58 +39,52 @@ export function Element(props: Props) {
   return (
     <div
       className={classNames(
-        `sm:grid sm:gap-10 flex flex-col lg:flex-row ${props.className}`,
+        `sm:grid sm:gap-8 flex flex-col lg:flex-row border-b border-slate-100 dark:border-slate-800/60 last:border-b-0 transition-colors ${props.className || ''}`,
         {
           'px-5 sm:px-6': !props.noExternalPadding,
-          'py-4 sm:py-3': !props.noVerticalPadding,
+          'py-3.5 sm:py-4': !props.noVerticalPadding,
           'sm:items-center': !props.withoutItemsCenter,
           'sm:grid-cols-2': props.twoGridColumns,
           'sm:grid-cols-3': !props.twoGridColumns,
         }
       )}
       onClick={props.onClick}
-      style={{ color: colors.$3, colorScheme: colors.$0, ...style }}
+      style={style}
     >
       <dt
         className={classNames('text-sm flex flex-col', {
-          'opacity-75': props.disabledLabels,
+          'opacity-60': props.disabledLabels,
           'h-full justify-start': props.textVerticalAlign === 'top',
         })}
-        style={{ color: colors.$3, colorScheme: colors.$0 }}
       >
         <span
-          className={classNames('font-medium', {
+          className={classNames('font-semibold text-slate-800 dark:text-slate-200 text-sm', {
             'whitespace-nowrap': props.withoutWrappingLeftSide,
           })}
-          style={{ color: colors.$22, colorScheme: colors.$0 }}
         >
           {props.leftSide}
-          {props.required && <span className="ml-1 text-red-600">*</span>}
+          {props.required && <span className="ml-1 text-red-500 font-bold">*</span>}
         </span>
         {props.leftSideHelp &&
           (typeof props.leftSideHelp === 'object' ? (
-            props.leftSideHelp
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              {props.leftSideHelp}
+            </div>
           ) : (
             <span
-              className="text-xs"
+              className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed"
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               dangerouslySetInnerHTML={{ __html: props.leftSideHelp }}
-              style={{
-                color: colors.$22,
-                colorScheme: colors.$0,
-                opacity: 0.8,
-              }}
-            ></span>
+            />
           ))}
       </dt>
       <dd
-        className={classNames('mt-4 text-sm sm:mt-0', {
+        className={classNames('mt-3 text-sm sm:mt-0', {
           'flex flex-col sm:flex-row sm:justify-end': props.pushContentToRight,
           'sm:col-span-1': props.twoGridColumns,
           'sm:col-span-2': !props.twoGridColumns,
         })}
-        style={{ color: colors.$3, colorScheme: colors.$0 }}
       >
         {props.children}
       </dd>

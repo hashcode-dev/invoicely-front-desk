@@ -83,8 +83,10 @@ client.interceptors.response.use(
     }
 
     if (error.response?.status === 429 || error.response?.status === 401) {
-      window.location.reload();
-      clearLocalStorage();
+      if (localStorage.getItem('X-NINJA-TOKEN') !== 'demo-token') {
+        window.location.reload();
+        clearLocalStorage();
+      }
     }
 
     if (error.response?.status === 404) {

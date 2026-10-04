@@ -47,18 +47,19 @@ export default function Toggle(props: Props) {
     <Switch.Group as="div" className="flex items-center">
       <StyledSwitch
         theme={{
-          ringColor: colors.$5,
-          borderColor: colors.$5,
-          backgroundColor: checked ? colors.$3 : colors.$5,
+          ringColor: '#004bca',
+          borderColor: checked ? '#004bca' : '#cbd5e1',
+          backgroundColor: checked ? '#004bca' : '#cbd5e1',
         }}
         className={classNames(
           'relative inline-flex items-center flex-shrink-0 h-6 w-11 rounded-full transition-colors ease-in-out duration-200',
           {
-            'cursor-not-allowed opacity-75': disabled,
-            'border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2':
+            'cursor-not-allowed opacity-60': disabled,
+            'cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-2':
               !disabled,
           }
         )}
+
         checked={checked}
         onChange={(value) => {
           if (!disabled) {

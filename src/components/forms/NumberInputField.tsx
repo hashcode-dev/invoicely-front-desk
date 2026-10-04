@@ -157,11 +157,9 @@ export function NumberInputField(props: Props) {
         <NumericFormat
           data-cy={props.cypressRef}
           className={classNames(
-            `w-full py-2 px-3 rounded-md text-sm disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-0 ${props.className}`,
+            `w-full min-h-[42px] px-3.5 py-2.5 rounded-xl text-sm transition-all focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 disabled:opacity-60 disabled:cursor-not-allowed ${props.className || ''}`,
             {
-              border: props.border !== false,
-              'border-[#09090B26] focus:border-black': !reactSettings.dark_mode,
-              'border-[#1f2e41] focus:border-white': reactSettings.dark_mode,
+              'border border-slate-300 dark:border-slate-700': props.border !== false,
             }
           )}
           value={currentValue || ''}

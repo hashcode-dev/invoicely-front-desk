@@ -76,18 +76,13 @@ export function Card(props: Props) {
     <div
       ref={props.innerRef}
       className={classNames(
-        `border rounded-md overflow-visible ${props.className}`,
+        `border rounded-2xl bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 card-shadow overflow-visible transition-shadow ${props.className ?? ''}`,
         {
           'overflow-y-auto': props.withScrollableBody,
           'h-full': height === 'full',
         }
       )}
-      style={{
-        backgroundColor: colors.$1,
-        color: colors.$3,
-        borderColor: colors.$4,
-        ...props.style,
-      }}
+      style={props.style}
     >
       <form
         onSubmit={(e) => {
@@ -99,13 +94,14 @@ export function Card(props: Props) {
         {props.title && (
           <div
             className={classNames(
+              'border-b border-slate-200 dark:border-slate-800',
               {
-                'bg-white sticky top-0': props.withScrollableBody,
+                'bg-white dark:bg-slate-900 sticky top-0 z-10': props.withScrollableBody,
                 'px-4 sm:px-6 py-3':
-                  padding == 'small' && !props.withoutHeaderPadding,
-                'px-4 sm:px-6 py-5':
-                  padding == 'regular' && !props.withoutHeaderPadding,
-                'border-b': !props.withoutHeaderBorder,
+                  padding === 'small' && !props.withoutHeaderPadding,
+                'px-6 py-4.5 sm:py-5':
+                  padding === 'regular' && !props.withoutHeaderPadding,
+                'border-b-0': props.withoutHeaderBorder,
               },
               props.headerClassName
             )}
@@ -113,37 +109,37 @@ export function Card(props: Props) {
               typeof props.collapsed !== 'undefined' &&
               setIsCollpased(!isCollapsed)
             }
-            style={{ borderColor: colors.$4, ...props.headerStyle }}
+            style={props.headerStyle}
           >
             <div
-              className={classNames('flex items-center justify-between', {
+              className={classNames('flex items-center justify-between gap-4', {
                 'cursor-pointer select-none':
                   typeof props.collapsed !== 'undefined',
               })}
             >
               <div>
                 <h3
-                  className={classNames('leading-6 font-medium', {
-                    'text-lg': padding == 'regular',
-                    'text-md': padding == 'small',
+                  className={classNames('font-display font-bold text-slate-900 dark:text-slate-100 tracking-tight', {
+                    'text-lg': padding === 'regular',
+                    'text-base': padding === 'small',
                   })}
                 >
                   {props.title}
                 </h3>
 
                 {props.description && (
-                  <p className="mt-1 max-w-2xl text-sm">{props.description}</p>
+                  <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{props.description}</p>
                 )}
               </div>
 
               {props.topRight}
 
               {typeof props.collapsed !== 'undefined' && isCollapsed && (
-                <ChevronDown />
+                <ChevronDown className="text-slate-400" />
               )}
 
               {typeof props.collapsed !== 'undefined' && !isCollapsed && (
-                <ChevronUp />
+                <ChevronUp className="text-slate-400" />
               )}
             </div>
           </div>
@@ -153,8 +149,8 @@ export function Card(props: Props) {
           className={classNames(props.childrenClassName, {
             hidden: isCollapsed,
             'py-0': props.withoutBodyPadding,
-            'py-4': padding === 'regular' && !props.withoutBodyPadding,
-            'py-2': padding === 'small' && !props.withoutBodyPadding,
+            'p-6': padding === 'regular' && !props.withoutBodyPadding,
+            'p-4': padding === 'small' && !props.withoutBodyPadding,
             'h-full': height === 'full',
           })}
         >
@@ -169,58 +165,54 @@ export function Card(props: Props) {
 
         {(props.withSaveButton || props.additionalAction) && (
           <div
-            className="border-t px-4 py-5 sm:p-0"
-            style={{ borderColor: colors.$20 }}
+            className="border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/20 rounded-b-2xl flex items-center justify-end space-x-3"
           >
-            <dl className="sm:divide-y sm:divide-gray-200">
-              <div className="sm:py-5 sm:px-6 flex justify-end space-x-4">
-                {props.additionalAction}
+            {props.additionalAction}
 
-                {props.withSaveButton && !props.additionalSaveOptions && (
-                  <Button
-                    onClick={props.onSaveClick}
-                    disabled={props.disableSubmitButton}
-                    disableWithoutIcon={props.disableWithoutIcon}
-                  >
-                    {props.saveButtonLabel ?? t('save')}
-                  </Button>
-                )}
+            {props.withSaveButton && !props.additionalSaveOptions && (
+              <Button
+                onClick={props.onSaveClick}
+                disabled={props.disableSubmitButton}
+                disableWithoutIcon={props.disableWithoutIcon}
+              >
+                {props.saveButtonLabel ?? t('save')}
+              </Button>
+            )}
 
-                {props.withSaveButton && props.additionalSaveOptions && (
-                  <div className="flex">
-                    <Button
-                      className="rounded-br-none rounded-tr-none px-3"
-                      onClick={props.onSaveClick}
+            {props.withSaveButton && props.additionalSaveOptions && (
+              <div className="flex">
+                <Button
+                  className="rounded-br-none rounded-tr-none px-3"
+                  onClick={props.onSaveClick}
+                  disabled={props.disableSubmitButton}
+                  disableWithoutIcon={props.disableWithoutIcon}
+                >
+                  {props.saveButtonLabel ?? t('save')}
+                </Button>
+
+                <Dropdown
+                  className="rounded-bl-none rounded-tl-none h-full px-1 border-l-1 border-y-0 border-r-0"
+                  disabled={props.disableSubmitButton}
+                  cardActions
+                  labelButtonBorderColor={colors.$1}
+                >
+                  {props.additionalSaveOptions.map((action, i) => (
+                    <DropdownElement
+                      key={i}
+                      icon={action.icon}
                       disabled={props.disableSubmitButton}
-                      disableWithoutIcon={props.disableWithoutIcon}
+                      onClick={action.onClick}
                     >
-                      {props.saveButtonLabel ?? t('save')}
-                    </Button>
-
-                    <Dropdown
-                      className="rounded-bl-none rounded-tl-none h-full px-1 border-l-1 border-y-0 border-r-0"
-                      disabled={props.disableSubmitButton}
-                      cardActions
-                      labelButtonBorderColor={colors.$1}
-                    >
-                      {props.additionalSaveOptions.map((action, i) => (
-                        <DropdownElement
-                          key={i}
-                          icon={action.icon}
-                          disabled={props.disableSubmitButton}
-                          onClick={action.onClick}
-                        >
-                          {action.text}
-                        </DropdownElement>
-                      ))}
-                    </Dropdown>
-                  </div>
-                )}
+                      {action.text}
+                    </DropdownElement>
+                  ))}
+                </Dropdown>
               </div>
-            </dl>
+            )}
           </div>
         )}
       </form>
     </div>
   );
+
 }

@@ -90,10 +90,8 @@ export function Dropdown(props: Props) {
         render={() => (
           <DropdownElements
             theme={{ hoverColor: colors.$2 }}
-            className={`border box rounded-md shadow-lg focus:outline-none whitespace-normal ${props.className}`}
+            className={`rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-shadow py-1 focus:outline-none whitespace-normal ${props.className || ''}`}
             style={{
-              backgroundColor: colors.$1,
-              borderColor: colors.$19,
               minWidth: props.minWidth ?? '12rem',
               maxWidth: props.maxWidth ?? '14.7rem',
             }}
@@ -135,10 +133,11 @@ export function Dropdown(props: Props) {
             disabled={props.disabled}
             onClick={() => setVisible(!visible)}
             className={classNames(
-              `border inline-flex items-center space-x-2 px-4 justify-center rounded-md text-sm disabled:cursor-not-allowed disabled:opacity-75 py-2 ${props.className}`,
+              `border inline-flex items-center space-x-2 px-3.5 py-2 justify-center rounded-xl text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${props.className || ''}`,
               {
-                'hover:bg-white hover:border-gray-300': !props.cardActions,
-                'hover:opacity-90': props.cardActions,
+                'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800':
+                  !props.cardActions,
+                'hover:opacity-90 shadow-sm': props.cardActions,
               }
             )}
             style={{

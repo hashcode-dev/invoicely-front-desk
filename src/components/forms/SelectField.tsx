@@ -98,40 +98,45 @@ export function SelectField(props: SelectProps) {
         color: colors.$3,
       });
     },
-    menu: (base) => {
-      return merge(base, {
-        width: 'max-content',
-        minWidth: '100%',
-        backgroundColor: colors.$4,
-        borderColor: colors.$4,
-        zIndex: 50,
-      });
-    },
     control: (base, { isDisabled, isFocused }) => {
       return merge(base, {
-        borderRadius: '0.375rem',
+        borderRadius: '0.75rem',
+        minHeight: '42px',
         backgroundColor: colors.$1,
         color: colors.$3,
-        borderColor: isFocused ? colors.$3 : colors.$24,
+        borderColor: isFocused ? '#0061ff' : '#cbd5e1',
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         pointerEvents: readOnly ? 'none' : isDisabled ? 'auto' : 'unset',
-        boxShadow: 'none',
+        boxShadow: isFocused ? '0 0 0 2px rgba(0, 97, 255, 0.25)' : 'none',
         '&:hover': {
-          borderColor: isFocused ? colors.$3 : colors.$24,
+          borderColor: isFocused ? '#0061ff' : '#94a3b8',
         },
         ...controlStyle,
+      });
+    },
+    menu: (base) => {
+      return merge(base, {
+        borderRadius: '0.75rem',
+        overflow: 'hidden',
+        boxShadow:
+          '0 10px 25px -5px rgba(11, 28, 48, 0.1), 0 8px 10px -6px rgba(11, 28, 48, 0.05)',
+        border: '1px solid #e2e8f0',
+        backgroundColor: colors.$1,
+        zIndex: 50,
       });
     },
     option: (base, { isSelected, isFocused }) => {
       return merge(base, {
         display: 'flex',
         alignItems: 'center',
-        color: colors.$3,
-        backgroundColor: isSelected || isFocused ? colors.$7 : colors.$1,
+        padding: '8px 14px',
+        color: isSelected ? '#004bca' : '#0b1c30',
+        backgroundColor: isSelected ? '#eff4ff' : isFocused ? '#f8f9ff' : 'transparent',
         ':hover': {
-          backgroundColor: colors.$7,
+          backgroundColor: '#eff4ff',
+          color: '#004bca',
         },
-        minHeight: '1.875rem',
+        minHeight: '2.25rem',
       });
     },
     indicatorSeparator: () => {
@@ -142,7 +147,7 @@ export function SelectField(props: SelectProps) {
   };
 
   return (
-    <div className={classNames({ 'space-y-2': Boolean(customSelector) })}>
+    <div className={classNames({ 'space-y-1.5': Boolean(customSelector) })}>
       {props.label && (
         <InputLabel className="mb-1" for={props.id}>
           {props.label}
@@ -158,20 +163,15 @@ export function SelectField(props: SelectProps) {
           }}
           id={props.id}
           className={classNames(
-            `w-full py-2 rounded text-sm border disabled:cursor-not-allowed ${props.className}`
+            `w-full min-h-[42px] px-3.5 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all disabled:cursor-not-allowed ${props.className ?? ''}`
           )}
           defaultValue={props.defaultValue}
           value={props.value}
           ref={props.innerRef}
           disabled={props.disabled}
-          style={{
-            backgroundColor: colors.$1,
-            borderColor: colors.$5,
-            color: colors.$3,
-            ...props.style,
-          }}
           data-cy={props.cypressRef}
         >
+
           {props.withBlank && (
             <option value={props.blankOptionValue ?? ''}></option>
           )}

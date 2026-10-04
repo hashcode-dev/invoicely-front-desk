@@ -20,28 +20,22 @@ interface Props {
 export function SettingsLabel(props: Props) {
   const { label, helpLabel, required } = props;
 
-  const colors = useColorScheme();
-
   return (
     <div className="flex flex-col text-sm">
-      <span className="font-medium" style={{ color: colors.$22 }}>
+      <span className="font-semibold text-slate-800 dark:text-slate-200">
         {label}
-        {required && <span className="ml-1 text-red-600">*</span>}
+        {required && <span className="ml-1 text-red-500 font-bold">*</span>}
       </span>
 
       {helpLabel && (
         <>
           {typeof helpLabel === 'string' ? (
             <span
-              className="text-xs"
+              className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: helpLabel }}
-              style={{ color: colors.$22, opacity: 0.8 }}
             />
           ) : (
-            <div
-              className="text-xs"
-              style={{ color: colors.$22, opacity: 0.8 }}
-            >
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
               {helpLabel}
             </div>
           )}

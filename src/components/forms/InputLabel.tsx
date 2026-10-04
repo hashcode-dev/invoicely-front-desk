@@ -18,15 +18,13 @@ interface Props extends CommonProps {
 }
 
 export function InputLabel(props: Props) {
-  const colors = useColorScheme();
-
   return (
     <label
-      className={`text-sm font-medium block ${props.className}`}
+      className={`text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 block ${props.className ?? ''}`}
       htmlFor={props.for}
-      style={{ color: colors.$22 }}
     >
       {props.children}
     </label>
   );
 }
+

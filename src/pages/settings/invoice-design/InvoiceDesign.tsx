@@ -69,15 +69,10 @@ export default function InvoiceDesign() {
     : true;
 
   const ProBadge = () => (
-    <div className="flex space-x-0.5 items-center text-xs py-1 px-2 bg-[#2176FF26] rounded">
-      <div>
-        <Sparkle size="1rem" color="#2176FF" />
-      </div>
-
-      <span className="font-medium" style={{ color: '#2176FF' }}>
-        {t('pro')}
-      </span>
-    </div>
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-900">
+      <Sparkle size="0.75rem" color="#004bca" />
+      <span>{t('pro')}</span>
+    </span>
   );
 
   const pages: Page[] = [
