@@ -28,6 +28,7 @@ import { Default } from '$app/components/layouts/Default';
 import { Tabs } from '$app/components/Tabs';
 import { ValidationAlert } from '$app/components/ValidationAlert';
 import { useHandleCompanySave } from '$app/pages/settings/common/hooks/useHandleCompanySave';
+import { v4 } from 'uuid';
 import { useTabs } from './ common/hooks/useTabs';
 
 export default function Create() {
@@ -49,10 +50,38 @@ export default function Create() {
 
   const [errors, setErrors] = useState<ValidationBag>();
   const [isFormBusy, setIsFormBusy] = useState<boolean>(false);
-  const [client, setClient] = useState<Client | undefined>();
+  const [client, setClient] = useState<Client | undefined>(() => ({
+    name: '',
+    number: '',
+    id_number: '',
+    vat_number: '',
+    website: '',
+    phone: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country_id: '',
+    currency_id: '',
+    custom_value1: '',
+    custom_value2: '',
+    custom_value3: '',
+    custom_value4: '',
+    shipping_address1: '',
+    shipping_address2: '',
+    shipping_city: '',
+    shipping_state: '',
+    shipping_postal_code: '',
+    shipping_country_id: '',
+    settings: {},
+    contacts: [],
+    group_settings_id: searchParams.get('group') || '',
+  } as unknown as Client));
 
   const [contacts, setContacts] = useState<Partial<ClientContact>[]>([
     {
+      contact_key: v4().replaceAll('-', ''),
       first_name: '',
       last_name: '',
       email: '',
@@ -68,12 +97,15 @@ export default function Create() {
 
   useEffect(() => {
     if (blankClient) {
-      setClient({
-        ...blankClient.data,
-        group_settings_id: searchParams.get('group') || '',
-      });
+      const clientData = (blankClient as any)?.data ?? blankClient;
+      setClient((prev) => ({
+        ...prev,
+        ...clientData,
+        group_settings_id:
+          searchParams.get('group') || prev?.group_settings_id || '',
+      }));
     }
-  }, [blankClient]);
+  }, [blankClient, searchParams]);
 
   const onSave = async () => {
     if (isFormBusy) {

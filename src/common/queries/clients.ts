@@ -31,9 +31,9 @@ export function useBlankClientQuery(params: BlankQueryParams) {
     queryKey: ['/api/v1/clients/create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/clients/create')).then(
-        (response) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/clients/create'))
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     refetchOnWindowFocus: Boolean(params.refetchOnWindowFocus),
     staleTime: Infinity,

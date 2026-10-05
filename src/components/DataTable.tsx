@@ -1439,15 +1439,25 @@ export function DataTable<T extends object>(props: Props<T>) {
           onRowsChange={setPerPage}
           totalPages={
             totalPagesPropPath
-              ? get(data, totalPagesPropPath)
-              : data.data.meta.pagination.total_pages
+              ? (get(data, totalPagesPropPath) ?? 1)
+              : (data?.data?.meta?.pagination?.total_pages ??
+                (data as any)?.meta?.pagination?.total_pages ??
+                1)
           }
           totalRecords={
             totalRecordsPropPath
-              ? get(data, totalRecordsPropPath)
-              : data.data.meta.pagination.total
+              ? (get(data, totalRecordsPropPath) ?? 0)
+              : (data?.data?.meta?.pagination?.total ??
+                (data as any)?.meta?.pagination?.total ??
+                (Array.isArray(data?.data?.data)
+                  ? data.data.data.length
+                  : Array.isArray(data?.data)
+                  ? data.data.length
+                  : 0))
           }
-          pagination={data.data.meta?.pagination}
+          pagination={
+            data?.data?.meta?.pagination ?? (data as any)?.meta?.pagination
+          }
         />
       )}
     </div>

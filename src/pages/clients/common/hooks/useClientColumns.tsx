@@ -116,8 +116,8 @@ export function useClientColumns() {
   const getContactsColumns = useCallback((client: Client) => {
     const names: string[] = [];
 
-    client.contacts.map((contact) =>
-      names.push(`${contact.first_name} ${contact.last_name}`)
+    client.contacts?.forEach((contact) =>
+      names.push(`${contact.first_name || ''} ${contact.last_name || ''}`.trim())
     );
 
     return names.join('<br />');
@@ -158,7 +158,7 @@ export function useClientColumns() {
         formatMoney(
           value,
           resource?.country_id,
-          resource?.settings.currency_id
+          resource?.settings?.currency_id
         ),
     },
     {
@@ -169,7 +169,7 @@ export function useClientColumns() {
         formatMoney(
           value,
           resource?.country_id,
-          resource?.settings.currency_id
+          resource?.settings?.currency_id
         ),
     },
     {
@@ -177,15 +177,15 @@ export function useClientColumns() {
       id: 'contacts',
       label: t('contact_name'),
       format: (value, resource) =>
-        resource.contacts.length > 0 && (
+        Boolean(resource?.contacts?.length) && (
           <DynamicLink
             to={route('/clients/:id', { id: resource.id })}
             renderSpan={disableNavigation('client', resource)}
           >
             {(() => {
-              const firstName = resource.contacts[0].first_name || '';
-              const lastName = resource.contacts[0].last_name || '';
-              const email = resource.contacts[0].email || '';
+              const firstName = resource.contacts?.[0]?.first_name || '';
+              const lastName = resource.contacts?.[0]?.last_name || '';
+              const email = resource.contacts?.[0]?.email || '';
 
               const fullName = `${firstName} ${lastName}`.trim();
 
@@ -199,8 +199,8 @@ export function useClientColumns() {
       id: 'contact_email',
       label: t('contact_email'),
       format: (value, client) =>
-        client.contacts.length > 0 && (
-          <CopyToClipboard text={client.contacts[0].email} />
+        Boolean(client?.contacts?.length) && (
+          <CopyToClipboard text={client.contacts?.[0]?.email || ''} />
         ),
     },
     {
@@ -224,7 +224,7 @@ export function useClientColumns() {
       column: 'contact_phone',
       id: 'id',
       label: t('contact_phone'),
-      format: (value, client) => client.contacts[0].phone,
+      format: (value, client) => client?.contacts?.[0]?.phone || '',
     },
     {
       column: 'contacts',
@@ -253,14 +253,14 @@ export function useClientColumns() {
       id: 'credit_balance',
       label: t('credit_balance'),
       format: (value, client) =>
-        formatMoney(value, client?.country_id, client?.settings.currency_id),
+        formatMoney(value, client?.country_id, client?.settings?.currency_id),
     },
     {
       column: 'currency',
       id: 'id',
       label: t('currency'),
       format: (value, client) =>
-        client.settings?.currency_id &&
+        client?.settings?.currency_id &&
         resolveCurrency(client.settings.currency_id)?.code,
     },
     {
@@ -291,7 +291,7 @@ export function useClientColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, client) => client.documents.length,
+      format: (value, client) => client?.documents?.length || 0,
     },
     {
       column: 'entity_state',
@@ -316,7 +316,7 @@ export function useClientColumns() {
       label: t('language'),
       format: (value, client) =>
         resolveLanguage(
-          client.settings.language_id || company.settings.language_id
+          client?.settings?.language_id || company?.settings?.language_id
         )?.name,
     },
     {
@@ -392,10 +392,10 @@ export function useClientColumns() {
       label: t('task_rate'),
       format: (value, client) =>
         formatMoney(
-          client.settings.default_task_rate ||
-            company.settings.default_task_rate,
+          client?.settings?.default_task_rate ||
+            company?.settings?.default_task_rate,
           client?.country_id,
-          client?.settings.currency_id
+          client?.settings?.currency_id
         ),
     },
     {
@@ -414,7 +414,7 @@ export function useClientColumns() {
       id: 'website',
       label: t('website'),
       format: (value) => (
-        <Link to={value.toString()} external>
+        <Link to={value?.toString() || ''} external>
           {value}
         </Link>
       ),
@@ -430,7 +430,7 @@ export function useClientColumns() {
               id: value,
             })}
           >
-            {client.group_settings?.name}
+            {client?.group_settings?.name}
           </Link>
         ),
     },
@@ -443,7 +443,7 @@ export function useClientColumns() {
       column: 'tags',
       id: 'client_tag_ids',
       label: t('tags'),
-      format: (value, client) => <TagPills tags={client.tags} />,
+      format: (value, client) => <TagPills tags={client?.tags || []} />,
     },
   ];
 
