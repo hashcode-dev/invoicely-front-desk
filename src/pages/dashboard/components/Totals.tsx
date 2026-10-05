@@ -215,7 +215,9 @@ export function Totals() {
           includeDrafts,
         }),
         body
-      ).then((response) => response.data),
+      )
+        .then((response) => response?.data ?? null)
+        .catch(() => null),
     staleTime: Infinity,
   });
 
@@ -229,7 +231,9 @@ export function Totals() {
           { includeDrafts }
         ),
         body
-      ).then((response) => response.data),
+      )
+        .then((response) => response?.data ?? null)
+        .catch(() => null),
     staleTime: Infinity,
   });
 

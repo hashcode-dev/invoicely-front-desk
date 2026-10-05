@@ -28,10 +28,12 @@ export function useGroupSettingsQuery(params?: GlobalParams) {
           status: params?.status ?? 'active',
           perPage: params?.perPage ?? 20,
         })
-      ).then(
-        (response: GenericSingleResourceResponse<GroupSettings[]>) =>
-          response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<GroupSettings[]>) =>
+            response?.data?.data ?? []
+        )
+        .catch(() => [] as GroupSettings[]),
 
     staleTime: Infinity,
   });

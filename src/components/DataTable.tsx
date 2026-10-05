@@ -569,7 +569,7 @@ export function DataTable<T extends object>(props: Props<T>) {
       [props.resource]: selected,
     }));
 
-    currentData.forEach((resource: any) => {
+    (currentData || []).forEach((resource: any) => {
       const row = document.querySelector(
         `tr[row-id="${resource.id}"]`
       ) as HTMLElement;
@@ -630,7 +630,7 @@ export function DataTable<T extends object>(props: Props<T>) {
     }
 
     setSelectedResources((prevSelected) => {
-      const fromCurrent = currentData.filter((resource: T) =>
+      const fromCurrent = (currentData || []).filter((resource: T) =>
         selected?.includes(resource?.['id' as keyof T] as string)
       );
 
@@ -638,7 +638,7 @@ export function DataTable<T extends object>(props: Props<T>) {
         const id = resource?.['id' as keyof T] as string;
         return (
           selected.includes(id) &&
-          !currentData.some((r: T) => r?.['id' as keyof T] === id)
+          !(currentData || []).some((r: T) => r?.['id' as keyof T] === id)
         );
       });
 
@@ -794,7 +794,7 @@ export function DataTable<T extends object>(props: Props<T>) {
   };
 
   const getColumnValues = (columnId: string) => {
-    return currentData.map(
+    return (currentData || []).map(
       (resource: T) => resource[columnId as keyof typeof resource]
     ) as (string | number)[];
   };
@@ -811,15 +811,13 @@ export function DataTable<T extends object>(props: Props<T>) {
   );
 
   const handleAllCheckboxClick = useCallback(() => {
-    if (currentData.length === 0) {
+    const dataLen = currentData?.length || 0;
+    if (dataLen === 0) {
       setSelected([]);
-    } else if (
-      selected.length === currentData.length &&
-      currentData.length > 0
-    ) {
+    } else if (selected.length === dataLen && dataLen > 0) {
       setSelected([]);
     } else {
-      setSelected(currentData.map((resource: any) => resource.id) || []);
+      setSelected((currentData || []).map((resource: any) => resource.id) || []);
     }
   }, [selected, currentData]);
 
@@ -828,7 +826,7 @@ export function DataTable<T extends object>(props: Props<T>) {
   }, [apiEndpoint.pathname]);
 
   useEffect(() => {
-    if (currentData.length && enableSavingLatestDataForNavigation) {
+    if (currentData?.length && enableSavingLatestDataForNavigation) {
       setFullTableLatestDataAtom({
         type: props.resource,
         resources: currentData as unknown as Resource[],
@@ -839,7 +837,7 @@ export function DataTable<T extends object>(props: Props<T>) {
   useDebounce(
     () => {
       if (data && !isFetching) {
-        setCurrentData(data.data.data);
+        setCurrentData(Array.isArray(data?.data?.data) ? data.data.data : []);
       }
     },
     10,
@@ -889,7 +887,7 @@ export function DataTable<T extends object>(props: Props<T>) {
   }, [data]);
 
   useEffect(() => {
-    if (!currentData.length && !isLoading && !isFetching) {
+    if (!currentData?.length && !isLoading && !isFetching) {
       setCurrentPage(1);
     }
 
@@ -916,7 +914,7 @@ export function DataTable<T extends object>(props: Props<T>) {
       Number(perPage) === selected.length
     ) {
       setSelected(
-        currentData
+        (currentData || [])
           .map((resource: any) => resource.id)
           .filter((resourceId: string) => selected.includes(resourceId)) || []
       );
@@ -1072,7 +1070,10 @@ export function DataTable<T extends object>(props: Props<T>) {
         </Actions>
       )}
 
-      {currentData.length === 0 && !isLoading && !isFetching && emptyState ? (
+      {(currentData?.length || 0) === 0 &&
+      !isLoading &&
+      !isFetching &&
+      emptyState ? (
         emptyState
       ) : (
         <Table
@@ -1103,7 +1104,7 @@ export function DataTable<T extends object>(props: Props<T>) {
               >
                 <DataTableCheckbox
                   resource={props.resource}
-                  dataLength={currentData.length}
+                  dataLength={currentData?.length || 0}
                 />
               </Th>
             )}
@@ -1180,14 +1181,18 @@ export function DataTable<T extends object>(props: Props<T>) {
           <Tbody
             style={{
               ...styleOptions?.tBodyStyle,
-              opacity: areRowsRendered || !currentData.length ? 1 : 0.5,
+              opacity: areRowsRendered || !currentData?.length ? 1 : 0.5,
               pointerEvents:
-                areRowsRendered || !currentData.length ? 'auto' : 'none',
+                areRowsRendered || !currentData?.length ? 'auto' : 'none',
               cursor:
-                areRowsRendered || !currentData.length ? 'default' : 'progress',
+                areRowsRendered || !currentData?.length ? 'default' : 'progress',
             }}
           >
-            {(isLoading || !isEqual(currentData, data?.data?.data)) &&
+            {(isLoading ||
+              !isEqual(
+                currentData,
+                Array.isArray(data?.data?.data) ? data.data.data : []
+              )) &&
               !isError && (
                 <MemoizedTr
                   className="border-b"
@@ -1215,8 +1220,11 @@ export function DataTable<T extends object>(props: Props<T>) {
             )}
 
             {!isLoading &&
-              currentData?.length === 0 &&
-              isEqual(currentData, data?.data?.data) && (
+              (currentData?.length || 0) === 0 &&
+              isEqual(
+                currentData,
+                Array.isArray(data?.data?.data) ? data.data.data : []
+              ) && (
                 <MemoizedTr
                   className="border-b"
                   style={{
@@ -1233,8 +1241,11 @@ export function DataTable<T extends object>(props: Props<T>) {
                 </MemoizedTr>
               )}
 
-            {isEqual(currentData, data?.data?.data) &&
-              currentData.map((resource: any, rowIndex: number) => (
+            {isEqual(
+              currentData,
+              Array.isArray(data?.data?.data) ? data.data.data : []
+            ) &&
+              (currentData || []).map((resource: any, rowIndex: number) => (
                 <MemoizedTr
                   key={rowIndex}
                   className="border-b table-row"

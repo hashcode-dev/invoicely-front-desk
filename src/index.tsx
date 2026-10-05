@@ -59,7 +59,12 @@ createRoot(container).render(
       <Provider store={store}>
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <AuthProvider>
-            <Router>
+            <Router
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
               <ScrollToTop>
                 <App />
               </ScrollToTop>
