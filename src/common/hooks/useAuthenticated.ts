@@ -46,7 +46,9 @@ export function useAuthenticated(): boolean {
         if (demoSession) {
           parsedUser = JSON.parse(demoSession);
         }
-      } catch {}
+      } catch {
+        // Ignore invalid session JSON
+      }
 
       const mockCompany = {
         id: 'demo-company-id',
@@ -104,7 +106,7 @@ export function useAuthenticated(): boolean {
         invoice_task_project: false,
         track_inventory: false,
         stop_on_unpaid_recurring: false,
-        enabled_modules: 0,
+        enabled_modules: 65535,
         calculate_taxes: false,
         tax_data: null,
         e_invoice_certificate: '',
@@ -146,7 +148,7 @@ export function useAuthenticated(): boolean {
         last_name: '',
         email: parsedUser.email || 'user@invoicely.com',
         account: { default_company_id: 'demo-company-id' },
-        permissions: '',
+        permissions: 'create_all,view_all,edit_all,view_dashboard,view_reports',
         is_admin: true,
         is_owner: true,
       };
@@ -156,7 +158,7 @@ export function useAuthenticated(): boolean {
         user: mockUserObj,
         account: { default_company_id: 'demo-company-id' },
         notifications: { email: [] },
-        permissions: '',
+        permissions: 'create_all,view_all,edit_all,view_dashboard,view_reports',
         is_admin: true,
         is_owner: true,
         is_locked: false,
@@ -178,7 +180,6 @@ export function useAuthenticated(): boolean {
       dispatch(changeCurrentIndex(0));
     }
   }, [demoSession, token, user.authenticated, user.user?.id, dispatch]);
-
 
   if (demoSession || token === 'demo-token') {
     return true;

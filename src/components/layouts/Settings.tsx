@@ -19,7 +19,7 @@ import { useColorScheme } from '$app/common/colors';
 import { useActiveSettingsDetails } from '$app/common/hooks/useActiveSettingsDetails';
 import { useCurrentSettingsLevel } from '$app/common/hooks/useCurrentSettingsLevel';
 import { useSwitchToCompanySettings } from '$app/common/hooks/useSwitchToCompanySettings';
-import { Breadcrumbs, Page } from '$app/components/Breadcrumbs';
+import { Page } from '$app/components/Breadcrumbs';
 import { ValidationAlert } from '$app/components/ValidationAlert';
 import { classNames } from '../../common/helpers';
 import { companySettingsErrorsAtom } from '../../pages/settings/common/atoms';
@@ -70,11 +70,15 @@ export function Settings(props: Props) {
   const normalizedQuery = filterQuery.toLowerCase().trim();
 
   const filteredBasic = basic.filter(
-    (item) => item.enabled && (!normalizedQuery || item.name.toLowerCase().includes(normalizedQuery))
+    (item) =>
+      item.enabled &&
+      (!normalizedQuery || item.name.toLowerCase().includes(normalizedQuery))
   );
 
   const filteredAdvanced = advanced.filter(
-    (item) => item.enabled && (!normalizedQuery || item.name.toLowerCase().includes(normalizedQuery))
+    (item) =>
+      item.enabled &&
+      (!normalizedQuery || item.name.toLowerCase().includes(normalizedQuery))
   );
 
   useEffect(() => {
@@ -92,14 +96,11 @@ export function Settings(props: Props) {
       breadcrumbs={props.breadcrumbs}
       aboveMainContainer={props.aboveMainContainer}
     >
-
       <div className="grid grid-cols-12 gap-6 items-start">
         <div className="col-span-12 lg:col-span-3">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3.5 card-shadow space-y-4 sticky top-4">
             {(isGroupSettingsActive || isClientSettingsActive) && (
-              <div
-                className="flex items-center justify-between border border-blue-200 dark:border-blue-900 py-2.5 px-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 shadow-xs"
-              >
+              <div className="flex items-center justify-between border border-blue-200 dark:border-blue-900 py-2.5 px-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 shadow-xs">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
                   <div className="text-blue-600 dark:text-blue-400">
                     <Icon
@@ -122,7 +123,8 @@ export function Settings(props: Props) {
                   onClick={() => {
                     switchToCompanySettings();
 
-                    isGroupSettingsActive && navigate('/settings/group_settings');
+                    isGroupSettingsActive &&
+                      navigate('/settings/group_settings');
                     isClientSettingsActive && navigate('/clients');
                   }}
                   aria-label="Switch to company settings"
@@ -134,7 +136,9 @@ export function Settings(props: Props) {
 
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-                <span className="material-symbols-outlined text-[18px]">search</span>
+                <span className="material-symbols-outlined text-[18px]">
+                  search
+                </span>
               </div>
               <input
                 type="text"
@@ -183,7 +187,10 @@ export function Settings(props: Props) {
                   </SelectField>
                 </div>
 
-                <nav className="space-y-0.5 hidden lg:block" aria-label="Basic Settings">
+                <nav
+                  className="space-y-0.5 hidden lg:block"
+                  aria-label="Basic Settings"
+                >
                   {filteredBasic.map((item) => (
                     <Link
                       key={item.name}
@@ -232,7 +239,10 @@ export function Settings(props: Props) {
                   </SelectField>
                 </div>
 
-                <nav className="space-y-0.5 hidden lg:block" aria-label="Advanced Settings">
+                <nav
+                  className="space-y-0.5 hidden lg:block"
+                  aria-label="Advanced Settings"
+                >
                   {filteredAdvanced.map((item, index) => (
                     <div key={index}>
                       <Link
@@ -281,7 +291,6 @@ export function Settings(props: Props) {
           {props.children}
         </div>
       </div>
-
     </Default>
   );
 }

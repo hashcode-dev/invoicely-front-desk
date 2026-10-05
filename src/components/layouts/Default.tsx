@@ -8,10 +8,9 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import classNames from 'classnames';
 import { useAtomValue } from 'jotai';
-import { FormEvent, ReactElement, ReactNode, useState } from 'react';
-import { Info, Menu as MenuIcon } from 'react-feather';
+import { FormEvent, ReactElement, ReactNode } from 'react';
+import { Info } from 'react-feather';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +19,6 @@ import { isDemo, isHosted, isSelfHosted, trans } from '$app/common/helpers';
 import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
 import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
 import { usePreventNavigation } from '$app/common/hooks/usePreventNavigation';
-import { useReactSettings } from '$app/common/hooks/useReactSettings';
 import { useUnlockButtonForHosted } from '$app/common/hooks/useUnlockButtonForHosted';
 import { useUnlockButtonForSelfHosted } from '$app/common/hooks/useUnlockButtonForSelfHosted';
 import { Invoice } from '$app/common/interfaces/invoice';
@@ -33,20 +31,14 @@ import {
   saveBtnAtom,
   useNavigationTopRightElement,
 } from '$app/components/layouts/common/hooks';
-import { QuickCreatePopover } from '$app/components/QuickCreatePopover';
-import { Search } from '$app/pages/dashboard/components/Search';
 import CommonProps from '../../common/interfaces/common-props.interface';
+import { AccountPlanExpired } from '../banners/AccountPlanExpired';
 import { ActivateCompany } from '../banners/ActivateCompany';
 import { EInvoiceCredits } from '../banners/EInvoiceCredits';
 import { PriceIncreaseBanner } from '../banners/PriceIncrease';
 import { VerifyEmail } from '../banners/VerifyEmail';
 import { VerifyPhone } from '../banners/VerifyPhone';
 import { Feedback } from '../Feedback';
-import { Notifications } from '../Notifications';
-import { AccountPlanExpired } from '../banners/AccountPlanExpired';
-import { useNavigation } from './common/navigation';
-import { DesktopSidebar } from './components/DesktopSidebar';
-import { MobileSidebar } from './components/MobileSidebar';
 
 export interface SaveOption {
   label: string;
@@ -78,19 +70,12 @@ export function Default(props: Props) {
 
   const user = useCurrentUser();
   const companyUser = useCurrentCompanyUser();
-  const reactSettings = useReactSettings();
-
-  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
 
   const hostedUnlock = useUnlockButtonForHosted();
   const selfHostedUnlock = useUnlockButtonForSelfHosted();
 
   const shouldShowUnlockButton =
     !isDemo() && (hostedUnlock || selfHostedUnlock);
-
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-
-  const navigation = useNavigation();
 
   const saveBtn = useAtomValue(saveBtnAtom);
   const navigationTopRightElement = useNavigationTopRightElement();
@@ -146,7 +131,13 @@ export function Default(props: Props) {
       </div>
 
       <div className="flex flex-col flex-1 w-full">
-        {(props.title || props.onSaveClick || saveBtn || props.onCancelClick || props.breadcrumbs?.length || navigationTopRightElement || props.navigationTopRight) && (
+        {(props.title ||
+          props.onSaveClick ||
+          saveBtn ||
+          props.onCancelClick ||
+          props.breadcrumbs?.length ||
+          navigationTopRightElement ||
+          props.navigationTopRight) && (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 mb-5 border-b border-slate-200/80 dark:border-slate-800">
             <div className="flex flex-col gap-1 min-w-0">
               {props.breadcrumbs && props.breadcrumbs.length > 0 && (
@@ -169,7 +160,8 @@ export function Default(props: Props) {
                   onClick={() => {
                     if (
                       isHosted() ||
-                      import.meta.env.VITE_ENABLE_NEW_ACCOUNT_MANAGEMENT === 'true'
+                      import.meta.env.VITE_ENABLE_NEW_ACCOUNT_MANAGEMENT ===
+                        'true'
                     ) {
                       return navigate('/settings/account_management');
                     }
@@ -258,9 +250,7 @@ export function Default(props: Props) {
 
         {props.aboveMainContainer}
 
-        <main className="flex-1 w-full">
-          {props.children}
-        </main>
+        <main className="flex-1 w-full">{props.children}</main>
       </div>
 
       <Feedback />

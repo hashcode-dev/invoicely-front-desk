@@ -28,5 +28,14 @@ export function enabled(module: ModuleBitmask): Guard {
 export function useEnabled() {
   const company = useCurrentCompany();
 
-  return (module: ModuleBitmask) => Boolean(company?.enabled_modules & module);
+  return (module: ModuleBitmask) => {
+    if (!company) {
+      const demoSession = sessionStorage.getItem('invoicely_auth_user');
+      const token = localStorage.getItem('X-NINJA-TOKEN');
+      if (demoSession || token === 'demo-token') {
+        return true;
+      }
+    }
+    return Boolean(company?.enabled_modules & module);
+  };
 }

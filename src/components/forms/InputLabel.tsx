@@ -9,7 +9,6 @@
  */
 
 import { ReactNode } from 'react';
-import { useColorScheme } from '$app/common/colors';
 import CommonProps from '../../common/interfaces/common-props.interface';
 
 interface Props extends CommonProps {
@@ -20,11 +19,12 @@ interface Props extends CommonProps {
 export function InputLabel(props: Props) {
   return (
     <label
-      className={`text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 block ${props.className ?? ''}`}
+      className={`text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 block ${
+        props.className ?? ''
+      }`}
       htmlFor={props.for}
     >
       {props.children}
     </label>
   );
 }
-

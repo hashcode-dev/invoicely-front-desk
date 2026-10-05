@@ -10,7 +10,6 @@
 
 import classNames from 'classnames';
 import { ReactNode } from 'react';
-import { useColorScheme } from '$app/common/colors';
 import { Link } from './forms';
 import { House } from './icons/House';
 
@@ -23,7 +22,10 @@ export function Breadcrumbs(props: { pages: Page[] }) {
 
   return (
     <nav className="flex items-center" aria-label="Breadcrumb">
-      <ol role="list" className="flex items-center space-x-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <ol
+        role="list"
+        className="flex items-center space-x-2 text-xs font-medium text-slate-500 dark:text-slate-400"
+      >
         <li>
           <Link
             to="/dashboard"

@@ -346,7 +346,9 @@ export function useNavigation() {
           ? '/settings/company_details'
           : '/settings/user_details',
       icon: Gear,
-      visible: Boolean(company),
+      visible:
+        Boolean(company) ||
+        Boolean(sessionStorage.getItem('invoicely_auth_user')),
     },
   ];
 
@@ -358,7 +360,7 @@ export function useNavigation() {
     }
 
     setCache(initialNavigation);
-  }, [i18n.language, company?.settings?.translations]);
+  }, [i18n.language, company?.settings?.translations, companyUser, company]);
 
   useEffect(() => {
     window.addEventListener('navigation.changeVisibility', (event) => {

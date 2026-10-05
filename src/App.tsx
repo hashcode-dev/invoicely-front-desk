@@ -1,39 +1,29 @@
-import React from 'react';
-import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import {
+  NavLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
+import classNames from 'classnames';
 import { atom } from 'jotai';
 import { useAuth } from './common/context/AuthContext';
+import { useAuthenticated } from './common/hooks/useAuthenticated';
+import {
+  useFetchReactSettings,
+  useReactSettings,
+} from './common/hooks/useReactSettings';
+import { CompanySwitcher } from './components/CompanySwitcher';
+import { HelpSidebarIcons } from './components/HelpSidebarIcons';
+import { Notifications } from './components/Notifications';
+import { Tooltip } from './components/Tooltip';
+import { useNavigation } from './components/layouts/common/navigation';
 import { LoginPage } from './pages/authentication/LoginPage';
 import { LandingPage } from './pages/landing/LandingPage';
 import { routes } from './common/routes';
 import { Toaster } from 'react-hot-toast';
-
-type NavItem = {
-  label: string;
-  path: string;
-  icon: string;
-};
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-  { label: 'Invoices', path: '/invoices', icon: 'receipt_long' },
-  { label: 'Recurring Invoices', path: '/recurring_invoices', icon: 'autorenew' },
-  { label: 'Quotes', path: '/quotes', icon: 'request_quote' },
-  { label: 'Credits', path: '/credits', icon: 'credit_score' },
-  { label: 'Payments', path: '/payments', icon: 'payments' },
-  { label: 'Customers', path: '/clients', icon: 'group' },
-  { label: 'Vendors', path: '/vendors', icon: 'store' },
-  { label: 'Products', path: '/products', icon: 'inventory_2' },
-  { label: 'Projects', path: '/projects', icon: 'account_tree' },
-  { label: 'Tasks', path: '/tasks', icon: 'task_alt' },
-  { label: 'Purchase Orders', path: '/purchase_orders', icon: 'shopping_cart' },
-  { label: 'Expenses', path: '/expenses', icon: 'account_balance_wallet' },
-  { label: 'Recurring Expenses', path: '/recurring_expenses', icon: 'repeat' },
-  { label: 'Transactions', path: '/transactions', icon: 'swap_horiz' },
-  { label: 'Reports', path: '/reports', icon: 'analytics' },
-  { label: 'Documents', path: '/documents', icon: 'description' },
-  { label: 'Activities', path: '/activities', icon: 'history' },
-  { label: 'Settings', path: '/settings', icon: 'settings' },
-];
 
 export const refreshEntityDataBannerAtom = atom({
   refetchEntityId: '',
@@ -47,9 +37,15 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
+  useAuthenticated();
+  useFetchReactSettings();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const navigation = useNavigation();
+  const reactSettings = useReactSettings();
+  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const sideNavRef = React.useRef<HTMLElement>(null);
 
   function handleLogout() {
@@ -65,63 +61,178 @@ function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar" onWheel={handleSidebarWheel}>
+      {mobileOpen && (
+        <div
+          className="mobile-overlay md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={classNames('sidebar', {
+          mini: isMiniSidebar,
+          'mobile-open': mobileOpen,
+        })}
+        onWheel={handleSidebarWheel}
+      >
         <div className="brand-block">
           <div className="brand-logo">
             <span className="material-symbols-outlined">account_balance</span>
           </div>
-          <div>
-            <h1>Invoicely</h1>
-            <p>Enterprise Suite</p>
-          </div>
+          {!isMiniSidebar && (
+            <div className="brand-text">
+              <h1>Invoicely</h1>
+              <p>Enterprise Suite</p>
+            </div>
+          )}
         </div>
 
+        {!isMiniSidebar && (
+          <div className="company-switcher-container">
+            <CompanySwitcher />
+          </div>
+        )}
+
         <nav ref={sideNavRef} className="side-nav">
-          {navItems.map((item) => {
+          {navigation.map((item) => {
+            if (!item.visible) return null;
             const isItemActive =
-              location.pathname === item.path ||
-              location.pathname.startsWith(item.path + '/');
-            return (
-              <NavLink
-                key={item.path}
-                className={({ isActive }) =>
-                  isActive || isItemActive ? 'side-link active' : 'side-link'
-                }
-                to={item.path}
-              >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
+              location.pathname === item.href ||
+              location.pathname.startsWith(item.href + '/');
+
+            const itemNode = (
+              <div key={item.href} className="side-nav-group">
+                <div className="side-link-wrapper">
+                  <NavLink
+                    className={({ isActive }) =>
+                      isActive || isItemActive
+                        ? 'side-link active'
+                        : 'side-link'
+                    }
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className="nav-icon">
+                      <item.icon size="1.25rem" />
+                    </span>
+                    {!isMiniSidebar && (
+                      <span className="nav-label">{item.name}</span>
+                    )}
+                  </NavLink>
+
+                  {item.rightButton &&
+                    !isMiniSidebar &&
+                    item.rightButton.visible && (
+                      <NavLink
+                        to={item.rightButton.to}
+                        className="quick-add-btn"
+                        title={
+                          item.rightButton.tooltipLabel ||
+                          item.rightButton.label
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMobileOpen(false);
+                        }}
+                      >
+                        <item.rightButton.icon size="0.95rem" />
+                      </NavLink>
+                    )}
+                </div>
+
+                {item.subOptions && isItemActive && !isMiniSidebar && (
+                  <div className="side-sub-nav">
+                    {item.subOptions.map(
+                      (sub) =>
+                        sub.visible && (
+                          <NavLink
+                            key={sub.href}
+                            to={sub.href}
+                            className={({ isActive }) =>
+                              isActive || location.pathname.startsWith(sub.href)
+                                ? 'side-sub-link active'
+                                : 'side-sub-link'
+                            }
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            <span>{sub.name}</span>
+                          </NavLink>
+                        )
+                    )}
+                  </div>
+                )}
+              </div>
             );
+
+            if (isMiniSidebar) {
+              return (
+                <Tooltip
+                  key={item.href}
+                  message={item.name as string}
+                  width="auto"
+                  placement="right"
+                  withoutArrow
+                  withoutWrapping
+                >
+                  {itemNode}
+                </Tooltip>
+              );
+            }
+
+            return itemNode;
           })}
         </nav>
 
         <button
           className="primary-action"
           type="button"
-          onClick={() => navigate('/invoices/create')}
+          onClick={() => {
+            navigate('/invoices/create');
+            setMobileOpen(false);
+          }}
         >
           <span className="material-symbols-outlined">add</span>
-          Create Invoice
+          {!isMiniSidebar && <span>Create Invoice</span>}
         </button>
+
+        <div className="sidebar-footer">
+          <HelpSidebarIcons />
+        </div>
       </aside>
 
-      <div className="main-pane">
+      <div className={classNames('main-pane', { mini: isMiniSidebar })}>
         <header className="topbar">
-          <label className="search-box" htmlFor="global-search">
-            <span className="material-symbols-outlined">search</span>
-            <input
-              id="global-search"
-              placeholder="Search invoices, customers, reports..."
-              type="text"
-            />
-          </label>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <button
+              className="icon-btn md:hidden"
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+
+            <label className="search-box" htmlFor="global-search">
+              <span className="material-symbols-outlined">search</span>
+              <input
+                id="global-search"
+                placeholder="Search invoices, customers, reports..."
+                type="text"
+              />
+            </label>
+          </div>
 
           <div className="topbar-actions">
-            <button className="icon-btn" type="button" aria-label="Notifications">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="icon-btn" type="button" aria-label="Help">
+            <Notifications />
+            <button
+              className="icon-btn"
+              type="button"
+              aria-label="Help"
+              onClick={() =>
+                window.open('https://invoiceninja.github.io', '_blank')
+              }
+            >
               <span className="material-symbols-outlined">help_outline</span>
             </button>
             <div className="profile-chip">

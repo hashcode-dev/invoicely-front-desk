@@ -9,7 +9,6 @@
  */
 
 import { ReactNode } from 'react';
-import { useColorScheme } from '$app/common/colors';
 
 interface Props {
   label: string | ReactNode;

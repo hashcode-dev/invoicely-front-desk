@@ -10,8 +10,6 @@
 
 import classNames from 'classnames';
 import { ChangeEvent } from 'react';
-import { useColorScheme } from '$app/common/colors';
-import { useReactSettings } from '$app/common/hooks/useReactSettings';
 import CommonProps from '../../common/interfaces/common-props.interface';
 
 interface Props extends CommonProps {
@@ -52,11 +50,14 @@ export function Radio(props: Props) {
 
             <label
               htmlFor={option.id}
-              className={classNames('ml-2.5 block text-sm font-medium text-slate-700 dark:text-slate-200', {
-                'opacity-60 cursor-not-allowed': props.disabled,
-                'cursor-pointer':
-                  typeof props.disabled === 'undefined' || !props.disabled,
-              })}
+              className={classNames(
+                'ml-2.5 block text-sm font-medium text-slate-700 dark:text-slate-200',
+                {
+                  'opacity-60 cursor-not-allowed': props.disabled,
+                  'cursor-pointer':
+                    typeof props.disabled === 'undefined' || !props.disabled,
+                }
+              )}
             >
               {option.title}
             </label>
