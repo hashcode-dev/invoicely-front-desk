@@ -292,9 +292,9 @@ export function useTaskColumns() {
       label: t('calculated_rate'),
       format: (value, task) =>
         formatMoney(
-          task.rate || company.settings.default_task_rate,
+          task.rate || company?.settings?.default_task_rate || 0,
           task.client?.country_id,
-          task.client?.settings.currency_id
+          task.client?.settings?.currency_id
         ),
     },
     {
@@ -337,7 +337,7 @@ export function useTaskColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, task) => task.documents.length,
+      format: (value, task) => task.documents?.length ?? 0,
     },
     {
       column: 'is_deleted',
@@ -365,7 +365,7 @@ export function useTaskColumns() {
         formatMoney(
           value,
           task.client?.country_id,
-          task.client?.settings.currency_id
+          task.client?.settings?.currency_id
         ),
     },
     {
@@ -391,7 +391,7 @@ export function useTaskColumns() {
       column: 'tags',
       id: 'task_tag_ids',
       label: t('tags'),
-      format: (value, task) => <TagPills tags={task.tags} />,
+      format: (value, task) => <TagPills tags={task?.tags || []} />,
     },
   ];
 

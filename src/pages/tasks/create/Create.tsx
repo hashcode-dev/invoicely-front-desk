@@ -32,6 +32,38 @@ import { TaskTable } from '../common/components/TaskTable';
 import { isOverlapping } from '../common/helpers/is-overlapping';
 import { useStart } from '../common/hooks/useStart';
 
+const blankTask: Task = {
+  id: '',
+  user_id: '',
+  assigned_user_id: '',
+  client_id: '',
+  invoice_id: '',
+  project_id: '',
+  status_id: '',
+  status_sort_order: 0,
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  duration: 0,
+  description: '',
+  is_running: false,
+  time_log: '[]',
+  number: '',
+  rate: 0,
+  is_date_based: false,
+  status_order: 0,
+  is_deleted: false,
+  archived_at: 0,
+  created_at: 0,
+  updated_at: 0,
+  documents: [],
+  date: new Date().toISOString().split('T')[0],
+  calculated_start_date: '',
+  user: {} as any,
+  assigned_user: {} as any,
+};
+
 export default function Create() {
   const [t] = useTranslation();
   const { documentTitle } = useTitle('new_task');
@@ -64,11 +96,10 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        const _task = cloneDeep(data);
+        const _task = data ? cloneDeep(data) : cloneDeep(blankTask);
 
         if (searchParams.get('client')) {
           _task.client_id = searchParams.get('client')!;
@@ -92,7 +123,7 @@ export default function Create() {
   }, [data]);
 
   useEffect(() => {
-    if (task && taskStatuses && isInitialConfiguration) {
+    if (task && taskStatuses?.data && isInitialConfiguration) {
       setTask(
         (current) =>
           current && {

@@ -28,7 +28,7 @@ export const useCustomBulkActions = () => {
 
   const showEmailPaymentAction = (payments: Payment[]) => {
     return payments.every(({ client }) =>
-      client?.contacts.some(({ email }) => email)
+      client?.contacts?.some(({ email }) => email)
     );
   };
 

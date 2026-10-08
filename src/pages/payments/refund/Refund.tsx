@@ -96,7 +96,7 @@ export default function Refund() {
   });
 
   const getInvoiceAmount = (invoiceItem: Invoice) => {
-    const paymentable = payment?.paymentables.find(
+    const paymentable = payment?.paymentables?.find(
       ({ invoice_id }) => invoice_id === invoiceItem.id
     );
 
@@ -104,7 +104,7 @@ export default function Refund() {
   };
 
   const getInvoiceLabel = (invoice: Invoice) => {
-    const paymentable = payment?.paymentables.find(
+    const paymentable = payment?.paymentables?.find(
       ({ invoice_id }) => invoice_id === invoice.id
     );
 
@@ -112,7 +112,7 @@ export default function Refund() {
       ? `${t('invoice')} #${invoice.number} - ${t('refundable')} (${formatMoney(
           paymentable.amount - paymentable.refunded,
           payment?.client?.country_id,
-          payment?.client?.settings.currency_id
+          payment?.client?.settings?.currency_id
         )})`
       : '';
   };
@@ -148,12 +148,12 @@ export default function Refund() {
   }, [formik.values.invoices]);
 
   useEffect(() => {
-    if (companyGateway) {
+    if (companyGateway?.data?.data?.gateway) {
       const gateway: Gateway = companyGateway.data.data.gateway;
 
-      const showGatewayRefund = Object.values(gateway.options).some(
-        (option) => option.refund
-      );
+      const showGatewayRefund = gateway.options
+        ? Object.values(gateway.options).some((option) => option.refund)
+        : false;
 
       setShouldShowGatewayRefund(showGatewayRefund);
     }

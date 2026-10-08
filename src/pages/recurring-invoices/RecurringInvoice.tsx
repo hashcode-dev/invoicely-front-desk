@@ -100,7 +100,11 @@ export default function RecurringInvoice() {
     if (data) {
       const ri = cloneDeep(data);
 
-      ri.line_items.map((item) => (item._id = v4()));
+      if (Array.isArray(ri.line_items)) {
+        ri.line_items.forEach((item) => (item._id = v4()));
+      } else {
+        ri.line_items = [];
+      }
 
       setRecurringInvoice(ri);
 

@@ -55,11 +55,11 @@ export function useProductQuoteColumns() {
     // We need to clone the product columns to local object,
     // because by default it's frozen.
     let updatedVariables: string[] =
-      clone(company?.settings.pdf_variables.product_quote_columns) || [];
+      clone(company?.settings?.pdf_variables?.product_quote_columns) || [];
 
     // Separating pdf_variables from the final output due to the need to find the correct indexes in certain cases.
     let pdfVariables =
-      clone(company?.settings.pdf_variables.product_quote_columns) || [];
+      clone(company?.settings?.pdf_variables?.product_quote_columns) || [];
 
     const numberOfPdfVariables = pdfVariables.length;
 
@@ -151,7 +151,7 @@ export function useProductQuoteColumns() {
     // If some of them are added in pdf_variables but not added to the company, we must remove them.
     ['product1', 'product2', 'product3', 'product4'].forEach((field) => {
       if (
-        company?.custom_fields[field] &&
+        company?.custom_fields?.[field] &&
         !pdfVariables.includes(`$product.${field}`)
       ) {
         updatedVariables = insertVariablesAtIndex(
@@ -162,7 +162,7 @@ export function useProductQuoteColumns() {
       }
 
       if (
-        !company?.custom_fields[field] &&
+        !company?.custom_fields?.[field] &&
         pdfVariables.includes(`$product.${field}`)
       ) {
         updatedVariables = updatedVariables.filter(

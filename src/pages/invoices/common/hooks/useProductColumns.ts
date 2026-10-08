@@ -55,11 +55,11 @@ export function useProductColumns() {
     // We need to clone the product columns to local object,
     // because by default it's frozen.
     let updatedVariables: string[] =
-      clone(company?.settings.pdf_variables.product_columns) || [];
+      clone(company?.settings?.pdf_variables?.product_columns) || [];
 
     // Separating pdf_variables from the final output due to the need to find the correct indexes in certain cases.
     let pdfVariables =
-      clone(company?.settings.pdf_variables.product_columns) || [];
+      clone(company?.settings?.pdf_variables?.product_columns) || [];
 
     const numberOfPdfVariables = pdfVariables.length;
 
@@ -128,7 +128,7 @@ export function useProductColumns() {
     );
 
     // Removing the discount variable if it is not enabled in company settings.
-    if (!company.enable_product_discount) {
+    if (!company?.enable_product_discount) {
       updatedVariables = updatedVariables.filter(
         (variable) => variable !== '$product.discount'
       );
@@ -140,7 +140,7 @@ export function useProductColumns() {
 
     // Adding the discount variable, if it is not included in pdf_variables, because it should be present regardless of its inclusion in pdf_variables.
     if (
-      company.enable_product_discount &&
+      company?.enable_product_discount &&
       !updatedVariables.includes('$product.discount')
     ) {
       updatedVariables.push('$product.discount');
@@ -151,7 +151,7 @@ export function useProductColumns() {
     // If some of them are added in pdf_variables but not added to the company, we must remove them.
     ['product1', 'product2', 'product3', 'product4'].forEach((field) => {
       if (
-        company?.custom_fields[field] &&
+        company?.custom_fields?.[field] &&
         !pdfVariables.includes(`$product.${field}`)
       ) {
         updatedVariables = insertVariablesAtIndex(
@@ -162,7 +162,7 @@ export function useProductColumns() {
       }
 
       if (
-        !company?.custom_fields[field] &&
+        !company?.custom_fields?.[field] &&
         pdfVariables.includes(`$product.${field}`)
       ) {
         updatedVariables = updatedVariables.filter(

@@ -89,7 +89,7 @@ export function useApplyInvoiceTableColumns({
         formatMoney(
           value,
           invoice?.client?.country_id,
-          invoice?.client?.settings.currency_id
+          invoice?.client?.settings?.currency_id
         ),
     },
     {

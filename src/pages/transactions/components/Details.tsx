@@ -124,7 +124,7 @@ export function Details(props: Props) {
 
       setMatchedExpenses(filteredMatchedExpenses);
       setMatchedExpenseCategory(expenseCategoryResponse?.data.data);
-      setMatchedPayment(paymentResponse);
+      setMatchedPayment(paymentResponse ?? undefined);
     }
   }, [
     transaction,

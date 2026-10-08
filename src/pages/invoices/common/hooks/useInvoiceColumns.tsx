@@ -62,7 +62,7 @@ export type DataTableColumnsExtended<TResource = any, TColumn = string> = {
 export function resourceViewedAt(resource: Invoice | Credit) {
   let viewed = '';
 
-  resource.invitations.map((invitation) => {
+  resource?.invitations?.forEach((invitation) => {
     if (invitation.viewed_date) {
       viewed = invitation.viewed_date;
     }
@@ -172,12 +172,12 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
     }
 
     return (
-      currentCompany.settings.e_invoice_type === 'PEPPOL' &&
-      PEPPOL_COUNTRIES.includes(currentInvoice.client?.country_id || '') &&
+      currentCompany?.settings?.e_invoice_type === 'PEPPOL' &&
+      PEPPOL_COUNTRIES.includes(currentInvoice?.client?.country_id || '') &&
       PEPPOL_CLASSIFICATIONS[
-        currentInvoice.client?.country_id as keyof typeof PEPPOL_CLASSIFICATIONS
+        currentInvoice?.client?.country_id as keyof typeof PEPPOL_CLASSIFICATIONS
       ]?.includes(
-        (currentInvoice.client?.classification || 'business') as Classification
+        (currentInvoice?.client?.classification || 'business') as Classification
       )
     );
   };
@@ -308,7 +308,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
         formatMoney(
           value,
           invoice.client?.country_id,
-          invoice.client?.settings.currency_id
+          invoice.client?.settings?.currency_id
         ),
     },
     {
@@ -319,7 +319,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
         formatMoney(
           calculateNetAmount(invoice),
           invoice.client?.country_id,
-          invoice.client?.settings.currency_id
+          invoice.client?.settings?.currency_id
         ),
     },
     {
@@ -373,7 +373,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
         formatMoney(
           value,
           invoice.client?.country_id,
-          invoice.client?.settings.currency_id
+          invoice.client?.settings?.currency_id
         ),
     },
     {
@@ -438,8 +438,8 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
       sortKey: 'contact.email',
       format: (value, invoice) =>
         invoice.client &&
-        invoice.client.contacts.length > 0 && (
-          <CopyToClipboard text={invoice.client?.contacts[0].email} />
+        (invoice.client.contacts?.length ?? 0) > 0 && (
+          <CopyToClipboard text={invoice.client?.contacts[0]?.email} />
         ),
     },
     {
@@ -449,8 +449,8 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
       sortKey: 'contact.first_name',
       format: (value, invoice) =>
         invoice.client &&
-        invoice.client.contacts.length > 0 &&
-        `${invoice.client?.contacts[0].first_name} ${invoice.client?.contacts[0].last_name}`,
+        (invoice.client.contacts?.length ?? 0) > 0 &&
+        `${invoice.client?.contacts[0]?.first_name} ${invoice.client?.contacts[0]?.last_name}`,
     },
     {
       column: 'created_at',
@@ -491,7 +491,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
           ? formatMoney(
               value,
               invoice.client?.country_id,
-              invoice.client?.settings.currency_id
+              invoice.client?.settings?.currency_id
             )
           : `${formatNumber(value)} %`,
     },
@@ -499,7 +499,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, invoice) => invoice.documents.length,
+      format: (value, invoice) => invoice.documents?.length ?? 0,
     },
     {
       column: 'entity_state',
@@ -560,7 +560,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
         formatMoney(
           value,
           invoice.client?.country_id,
-          invoice.client?.settings.currency_id
+          invoice.client?.settings?.currency_id
         ),
     },
     {
@@ -658,7 +658,7 @@ export function useInvoiceColumns(): DataTableColumns<Invoice> {
         formatMoney(
           value,
           invoice.client?.country_id,
-          invoice.client?.settings.currency_id
+          invoice.client?.settings?.currency_id
         ),
     },
     {

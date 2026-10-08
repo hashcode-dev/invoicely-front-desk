@@ -234,7 +234,7 @@ export function useRecurringExpenseColumns() {
           calculateExpenseAmount(recurringExpense),
           recurringExpense.client?.country_id,
           recurringExpense.currency_id ||
-            recurringExpense.client?.settings.currency_id
+            recurringExpense.client?.settings?.currency_id
         ),
     },
     {
@@ -309,7 +309,7 @@ export function useRecurringExpenseColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, recurringExpense) => recurringExpense.documents.length,
+      format: (value, recurringExpense) => recurringExpense.documents?.length ?? 0,
     },
     {
       column: 'exchange_rate',
@@ -333,7 +333,7 @@ export function useRecurringExpenseColumns() {
           calculateExpenseExclusiveAmount(recurringExpense),
           recurringExpense.client?.country_id,
           recurringExpense.currency_id ||
-            recurringExpense.client?.settings.currency_id
+            recurringExpense.client?.settings?.currency_id
         ),
     },
     {
@@ -456,7 +456,7 @@ export function useRecurringExpenseColumns() {
       id: 'recurring_expense_tag_ids',
       label: t('tags'),
       format: (value, recurringExpense) => (
-        <TagPills tags={recurringExpense.tags} />
+        <TagPills tags={recurringExpense?.tags || []} />
       ),
     },
   ];

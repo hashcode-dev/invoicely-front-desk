@@ -38,6 +38,31 @@ import { TagPillSelector } from '$app/components/tags/TagPillSelector';
 import { UserSelector } from '$app/components/users/UserSelector';
 import { projectAtom } from '../common/atoms';
 
+const blankProject: Project = {
+  id: '',
+  user_id: '',
+  assigned_user_id: '',
+  client_id: '',
+  name: '',
+  number: '',
+  created_at: 0,
+  updated_at: 0,
+  archived_at: 0,
+  is_deleted: false,
+  task_rate: 0,
+  due_date: '',
+  private_notes: '',
+  public_notes: '',
+  budgeted_hours: 0,
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  color: '',
+  documents: [],
+  current_hours: 0,
+};
+
 export default function Create() {
   const { documentTitle } = useTitle('new_project');
 
@@ -106,13 +131,12 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        const _project = cloneDeep(data);
+        const _project = data ? cloneDeep(data) : cloneDeep(blankProject);
 
-        _project.task_rate = company?.settings.default_task_rate || 0;
+        _project.task_rate = company?.settings?.default_task_rate || 0;
 
         if (searchParams.get('client')) {
           _project.client_id = searchParams.get('client')!;
@@ -128,7 +152,7 @@ export default function Create() {
   useEffect(() => {
     if (project?.client_id && project.client_id.length > 1) {
       clientResolver.find(project.client_id).then((client) => {
-        if (client.settings.default_task_rate) {
+        if (client?.settings?.default_task_rate) {
           handleChange('task_rate', client.settings.default_task_rate);
         }
       });

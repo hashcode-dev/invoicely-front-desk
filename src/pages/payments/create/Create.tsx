@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { v4 } from 'uuid';
+import dayjs from 'dayjs';
 import { useColorScheme } from '$app/common/colors';
 import { endpoint } from '$app/common/helpers';
 import { useCreditResolver } from '$app/common/hooks/credits/useCreditResolver';
@@ -63,6 +64,45 @@ interface PaymentCredit {
   amount: number;
   credit_id: string;
 }
+
+const blankPaymentTemplate: PaymentOnCreation = {
+  id: '',
+  user_id: '',
+  assigned_user_id: '',
+  amount: 0,
+  refunded: 0,
+  applied: 0,
+  transaction_reference: '',
+  date: dayjs().format('YYYY-MM-DD'),
+  is_manual: true,
+  created_at: 0,
+  updated_at: 0,
+  archived_at: 0,
+  is_deleted: false,
+  type_id: '',
+  invitation_id: '',
+  private_notes: '',
+  number: '',
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  client_id: '',
+  client_contact_id: '',
+  company_gateway_id: '',
+  status_id: '1',
+  project_id: '',
+  vendor_id: '',
+  currency_id: '',
+  exchange_rate: 1,
+  exchange_currency_id: '',
+  paymentables: [],
+  documents: [],
+  invoices: [],
+  credits: [],
+  tags: [],
+  payment_tag_ids: [],
+};
 
 export default function Create() {
   const { documentTitle } = useTitle('create_payment');
@@ -129,13 +169,22 @@ export default function Create() {
         value = undefined;
       }
 
-      if (typeof blankPayment !== 'undefined' && typeof value === 'undefined') {
+      if (typeof value === 'undefined') {
+        const payload =
+          blankPayment && typeof blankPayment === 'object'
+            ? 'data' in blankPayment && (blankPayment as any).data?.data
+              ? (blankPayment as any).data.data
+              : blankPayment
+            : {};
+
         value = {
-          ...blankPayment.data.data,
+          ...blankPaymentTemplate,
+          ...payload,
           invoices: [],
           credits: [],
           client_id: '',
           type_id: company?.settings?.payment_type_id ?? '',
+          date: (payload as any)?.date || dayjs().format('YYYY-MM-DD'),
         };
       }
 
@@ -264,7 +313,13 @@ export default function Create() {
     field: TField,
     value: TValue
   ) => {
-    setPayment((current) => current && { ...current, [field]: value });
+    setPayment((current) => {
+      const base = current ?? {
+        ...blankPaymentTemplate,
+        type_id: company?.settings?.payment_type_id ?? '',
+      };
+      return { ...base, [field]: value };
+    });
   };
 
   const onSubmit = useSave({ setErrors, setIsFormBusy, isFormBusy });

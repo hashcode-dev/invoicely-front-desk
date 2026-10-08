@@ -106,7 +106,7 @@ export function usePaymentColumns() {
       return payment.amount * payment.exchange_rate;
     }
 
-    if (payment.client && payment.client.settings.currency_id?.length > 1) {
+    if (payment.client && payment.client.settings?.currency_id && payment.client.settings.currency_id.length > 1) {
       const currency = resolveCurrency(payment.currency_id);
 
       if (currency) {
@@ -163,7 +163,7 @@ export function usePaymentColumns() {
         formatMoney(
           value,
           payment.client?.country_id,
-          payment.client?.settings.currency_id
+          payment.client?.settings?.currency_id
         ),
     },
     {
@@ -243,7 +243,7 @@ export function usePaymentColumns() {
         formatMoney(
           calculateConvertedAmount(payment),
           payment.client?.country_id,
-          payment.exchange_currency_id || payment.client?.settings.currency_id
+          payment.exchange_currency_id || payment.client?.settings?.currency_id
         ),
     },
     {
@@ -328,7 +328,7 @@ export function usePaymentColumns() {
         formatMoney(
           value,
           payment.client?.country_id,
-          payment.client?.settings.currency_id
+          payment.client?.settings?.currency_id
         ),
     },
     {
@@ -339,7 +339,7 @@ export function usePaymentColumns() {
         formatMoney(
           value,
           payment.client?.country_id,
-          payment.client?.settings.currency_id
+          payment.client?.settings?.currency_id
         ),
     },
     {
@@ -348,11 +348,11 @@ export function usePaymentColumns() {
       label: t('credits'),
       format: (value, payment) =>
         formatMoney(
-          payment.paymentables
+          (payment.paymentables || [])
             .filter((item) => item.credit_id != undefined)
             .reduce((sum, paymentable) => sum + paymentable.amount, 0),
           payment.client?.country_id,
-          payment.client?.settings.currency_id
+          payment.client?.settings?.currency_id
         ),
     },
     {
@@ -365,7 +365,7 @@ export function usePaymentColumns() {
       column: 'tags',
       id: 'payment_tag_ids',
       label: t('tags'),
-      format: (value, payment) => <TagPills tags={payment.tags} />,
+      format: (value, payment) => <TagPills tags={payment?.tags || []} />,
     },
   ];
 

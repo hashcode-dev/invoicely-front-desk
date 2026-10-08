@@ -31,7 +31,7 @@ export default function Settings() {
 
   const context: Context = useOutletContext();
 
-  const { invoice, errors, setInvoice } = context;
+  const { invoice, errors, setInvoice } = context || {};
 
   const handleChange = (
     property: keyof Invoice,

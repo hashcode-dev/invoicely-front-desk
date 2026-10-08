@@ -21,11 +21,11 @@ export function useTaskColumns() {
     // We need to clone the task columns to local object,
     // because by default it's frozen.
     let updatedVariables: string[] =
-      clone(company?.settings.pdf_variables.task_columns) || [];
+      clone(company?.settings?.pdf_variables?.task_columns) || [];
 
     // Separating pdf_variables from the final output due to the need to find the correct indexes in certain cases.
     let pdfVariables =
-      clone(company?.settings.pdf_variables.task_columns) || [];
+      clone(company?.settings?.pdf_variables?.task_columns) || [];
 
     const numberOfPdfVariables = pdfVariables.length;
 
@@ -92,7 +92,7 @@ export function useTaskColumns() {
     pdfVariables = pdfVariables.filter((variable) => variable !== '$task.tax');
 
     // Removing the discount variable if it is not enabled in company settings.
-    if (!company.enable_product_discount) {
+    if (!company?.enable_product_discount) {
       updatedVariables = updatedVariables.filter(
         (variable) => variable !== '$task.discount'
       );
@@ -104,7 +104,7 @@ export function useTaskColumns() {
 
     // Adding the discount variable, if it is not included in pdf_variables, because it should be present regardless of its inclusion in pdf_variables.
     if (
-      company.enable_product_discount &&
+      company?.enable_product_discount &&
       !updatedVariables.includes('$task.discount')
     ) {
       updatedVariables.push('$task.discount');
@@ -115,7 +115,7 @@ export function useTaskColumns() {
     // If some of them are added in pdf_variables but not added to the company, we must remove them.
     ['task1', 'task2', 'task3', 'task4'].forEach((field) => {
       if (
-        company?.custom_fields[field] &&
+        company?.custom_fields?.[field] &&
         !pdfVariables.includes(`$task.${field}`)
       ) {
         updatedVariables = insertVariablesAtIndex(
@@ -126,7 +126,7 @@ export function useTaskColumns() {
       }
 
       if (
-        !company?.custom_fields[field] &&
+        !company?.custom_fields?.[field] &&
         pdfVariables.includes(`$task.${field}`)
       ) {
         updatedVariables = updatedVariables.filter(

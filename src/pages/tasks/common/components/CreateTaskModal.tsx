@@ -75,7 +75,7 @@ export function CreateTaskModal(props: Props) {
 
           $refetch(['tasks']);
 
-          setTask(data);
+          setTask(data || undefined);
 
           props.setVisible(false);
         })

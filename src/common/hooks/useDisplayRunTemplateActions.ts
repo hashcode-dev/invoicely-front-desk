@@ -23,10 +23,12 @@ export function useDisplayRunTemplateActions() {
       request(
         'GET',
         endpoint('/api/v1/designs?template=true&status=active&sort=name|asc')
-      ).then(
-        (response: AxiosResponse<GenericManyResponse<Design>>) =>
-          response.data.data
-      ),
+      )
+        .then(
+          (response: AxiosResponse<GenericManyResponse<Design>>) =>
+            response?.data?.data ?? []
+        )
+        .catch(() => []),
 
     staleTime: Infinity,
   });

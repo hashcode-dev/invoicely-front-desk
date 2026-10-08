@@ -161,7 +161,7 @@ export function useProjectColumns() {
         formatMoney(
           value,
           task.client?.country_id,
-          task.client?.settings.currency_id
+          task.client?.settings?.currency_id
         ),
     },
     {
@@ -295,7 +295,7 @@ export function useProjectColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, project) => project.documents.length,
+      format: (value, project) => project.documents?.length ?? 0,
     },
     {
       column: 'is_deleted',
@@ -318,7 +318,7 @@ export function useProjectColumns() {
       column: 'tags',
       id: 'project_tag_ids',
       label: t('tags'),
-      format: (value, project) => <TagPills tags={project.tags} />,
+      format: (value, project) => <TagPills tags={project?.tags || []} />,
     },
   ];
 

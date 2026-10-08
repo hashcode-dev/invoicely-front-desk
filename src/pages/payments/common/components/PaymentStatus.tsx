@@ -21,6 +21,8 @@ interface Props {
 export function PaymentStatus(props: Props) {
   const [t] = useTranslation();
 
+  if (!props.entity) return null;
+
   const { status_id, applied, amount, is_deleted, archived_at } = props.entity;
 
   const statusThemeColors = useStatusThemeColorScheme();

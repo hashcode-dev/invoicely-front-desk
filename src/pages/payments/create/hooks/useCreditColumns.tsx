@@ -74,7 +74,7 @@ export function useCreditColumns({
         formatMoney(
           value,
           credit.client?.country_id,
-          credit.client?.settings.currency_id
+          credit.client?.settings?.currency_id
         ),
     },
     {

@@ -169,8 +169,8 @@ export function useProductColumns() {
       format: (value, product) =>
         formatMoney(
           value,
-          product.company?.settings.country_id,
-          product.company?.settings.currency_id
+          product.company?.settings?.country_id,
+          product.company?.settings?.currency_id
         ),
     },
     {
@@ -219,7 +219,7 @@ export function useProductColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, product) => product.documents.length,
+      format: (value, product) => product.documents?.length || 0,
     },
     {
       column: 'entity_state',
@@ -286,7 +286,7 @@ export function useProductColumns() {
       column: 'tags',
       id: 'product_tag_ids',
       label: t('tags'),
-      format: (value, product) => <TagPills tags={product.tags} />,
+      format: (value, product) => <TagPills tags={product?.tags || []} />,
     },
   ];
 

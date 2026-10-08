@@ -88,7 +88,7 @@ export default function Products() {
   }, [sliderProductId]);
 
   useEffect(() => {
-    if (productResponse && productSliderVisibility) {
+    if (productResponse?.data?.data && productSliderVisibility) {
       setProductSlider(productResponse.data.data);
     }
   }, [productResponse, productSliderVisibility]);

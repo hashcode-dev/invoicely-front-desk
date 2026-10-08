@@ -62,7 +62,7 @@ export function ClientSelector(props: Props) {
   const { resource, afterClientName } = props;
 
   const handleCheckedState = (contactId: string) => {
-    const potential = resource?.invitations.find(
+    const potential = resource?.invitations?.find(
       (i) => i.client_contact_id === contactId
     );
 
@@ -87,7 +87,7 @@ export function ClientSelector(props: Props) {
       }
 
       // Find the invitation for this contact
-      const invitation = resource.invitations.find(
+      const invitation = resource?.invitations?.find(
         (inv) => inv.client_contact_id === contactId
       );
 

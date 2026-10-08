@@ -33,7 +33,7 @@ export default function Documents() {
 
   const context: Context = useOutletContext();
 
-  const { invoice } = context;
+  const { invoice } = context || {};
 
   return (
     <Card

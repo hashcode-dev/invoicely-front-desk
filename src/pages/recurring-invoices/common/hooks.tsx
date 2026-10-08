@@ -730,7 +730,7 @@ export function useRecurringInvoiceColumns() {
         formatMoney(
           value,
           recurringInvoice.client?.country_id,
-          recurringInvoice.client?.settings.currency_id
+          recurringInvoice.client?.settings?.currency_id
         ),
     },
     {
@@ -741,7 +741,7 @@ export function useRecurringInvoiceColumns() {
         formatMoney(
           calculateNetAmount(recurringInvoice),
           recurringInvoice.client?.country_id,
-          recurringInvoice.client?.settings.currency_id
+          recurringInvoice.client?.settings?.currency_id
         ),
     },
     {
@@ -832,7 +832,7 @@ export function useRecurringInvoiceColumns() {
           ? formatMoney(
               value,
               recurringInvoice.client?.country_id,
-              recurringInvoice.client?.settings.currency_id
+              recurringInvoice.client?.settings?.currency_id
             )
           : `${formatNumber(value)} %`,
     },
@@ -840,7 +840,8 @@ export function useRecurringInvoiceColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, recurringInvoice) => recurringInvoice.documents.length,
+      format: (value, recurringInvoice) =>
+        recurringInvoice.documents?.length || 0,
     },
     {
       column: 'entity_state',

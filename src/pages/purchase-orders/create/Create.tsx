@@ -36,6 +36,72 @@ import { purchaseOrderAtom } from '../common/atoms';
 import { useCreate } from '../common/hooks';
 import { usePurchaseOrderUtilities } from '../edit/hooks/usePurchaseOrderUtilities';
 
+const blankPurchaseOrder: PurchaseOrder = {
+  id: '',
+  user_id: '',
+  project_id: '',
+  assigned_user_id: '',
+  vendor_id: '',
+  amount: 0,
+  balance: 0,
+  client_id: '',
+  status_id: '1',
+  design_id: '',
+  created_at: 0,
+  updated_at: 0,
+  archived_at: 0,
+  is_deleted: false,
+  number: '',
+  discount: 0,
+  po_number: '',
+  date: new Date().toISOString().split('T')[0],
+  last_sent_date: '',
+  next_send_date: '',
+  reminder1_sent: '',
+  reminder2_sent: '',
+  reminder3_sent: '',
+  reminder_last_sent: '',
+  due_date: '',
+  terms: '',
+  public_notes: '',
+  private_notes: '',
+  uses_inclusive_taxes: false,
+  tax_name1: '',
+  tax_rate1: 0,
+  tax_name2: '',
+  tax_rate2: 0,
+  tax_name3: '',
+  tax_rate3: 0,
+  total_taxes: 0,
+  is_amount_discount: false,
+  footer: '',
+  partial: 0,
+  partial_due_date: '',
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  has_tasks: false,
+  has_expenses: false,
+  custom_surcharge1: 0,
+  custom_surcharge2: 0,
+  custom_surcharge3: 0,
+  custom_surcharge4: 0,
+  custom_surcharge_tax1: false,
+  custom_surcharge_tax2: false,
+  custom_surcharge_tax3: false,
+  custom_surcharge_tax4: false,
+  exchange_rate: 1,
+  line_items: [],
+  invitations: [],
+  documents: [],
+  entity_type: 'purchase_order',
+  paid_to_date: 0,
+  subscription_id: '',
+  expense_id: '',
+  location_id: '',
+};
+
 export interface PurchaseOrderContext {
   vendor: Vendor | undefined;
   purchaseOrder: PurchaseOrder | undefined;
@@ -125,13 +191,12 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        const po = cloneDeep(data);
+        const po = data ? cloneDeep(data) : cloneDeep(blankPurchaseOrder);
 
-        if (typeof po.line_items === 'string') {
+        if (typeof po.line_items === 'string' || !Array.isArray(po.line_items)) {
           po.line_items = [];
         }
 
@@ -141,6 +206,7 @@ export default function Create() {
 
         po.line_items.forEach((item) => (item._id = v4()));
 
+        po.invitations = Array.isArray(po.invitations) ? po.invitations : [];
         po.invitations.forEach(
           (invitation) =>
             (invitation['client_contact_id'] =
@@ -169,7 +235,7 @@ export default function Create() {
 
         const invitations: Invitation[] = [];
 
-        vendor.contacts.map((contact: VendorContact) => {
+        vendor.contacts?.forEach((contact: VendorContact) => {
           if (contact.send_email) {
             const invitation = cloneDeep(
               blankInvitation

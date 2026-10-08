@@ -67,7 +67,12 @@ export function InvoiceDetails(props: Props) {
           <InputField
             type="date"
             onValueChange={(value) => handleChange('next_send_date', value)}
-            value={dayjs(recurringInvoice?.next_send_date).format('YYYY-MM-DD')}
+            value={
+              recurringInvoice?.next_send_date &&
+              dayjs(recurringInvoice.next_send_date).isValid()
+                ? dayjs(recurringInvoice.next_send_date).format('YYYY-MM-DD')
+                : ''
+            }
             min={dayjs().format('YYYY-MM-DD')}
             errorMessage={props.errors?.errors.next_send_date}
           />
@@ -75,7 +80,7 @@ export function InvoiceDetails(props: Props) {
 
         <Element leftSide={t('remaining_cycles')}>
           <SelectField
-            value={recurringInvoice?.remaining_cycles?.toString()}
+            value={recurringInvoice?.remaining_cycles?.toString() ?? '-1'}
             onValueChange={(value) =>
               handleChange('remaining_cycles', parseInt(value))
             }
@@ -94,7 +99,7 @@ export function InvoiceDetails(props: Props) {
 
         <Element leftSide={t('due_date')}>
           <SelectField
-            value={recurringInvoice?.due_date_days?.toString()}
+            value={recurringInvoice?.due_date_days?.toString() ?? 'terms'}
             onValueChange={(value) => handleChange('due_date_days', value)}
             errorMessage={props.errors?.errors.due_date_days}
             customSelector
@@ -172,7 +177,7 @@ export function InvoiceDetails(props: Props) {
                 onValueChange={(value) =>
                   handleChange('is_amount_discount', JSON.parse(value))
                 }
-                value={recurringInvoice?.is_amount_discount.toString()}
+                value={recurringInvoice?.is_amount_discount?.toString() ?? 'false'}
                 errorMessage={props.errors?.errors.is_amount_discount}
                 customSelector
                 dismissable={false}

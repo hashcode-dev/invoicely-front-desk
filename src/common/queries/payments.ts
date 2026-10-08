@@ -41,9 +41,12 @@ export function usePaymentQuery(params: PaymentParams) {
             include: params.include || '',
           }
         )
-      ).then(
-        (response: GenericSingleResourceResponse<Payment>) => response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<Payment>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     enabled: (params.enabled ?? true) && Boolean(params.id),
     staleTime: Infinity,
@@ -76,10 +79,12 @@ export function usePaymentsQuery(params: PaymentsParams) {
             with: params.with || '',
           }
         )
-      ).then(
-        (response: GenericSingleResourceResponse<Payment[]>) =>
-          response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<Payment[]>) =>
+            response?.data?.data ?? []
+        )
+        .catch(() => []),
 
     enabled: params.enabled ?? true,
     staleTime: Infinity,
@@ -91,7 +96,10 @@ export function useBlankPaymentQuery() {
 
   return useQuery({
     queryKey: [route('/api/v1/payments/create')],
-    queryFn: () => request('GET', endpoint('/api/v1/payments/create')),
+    queryFn: () =>
+      request('GET', endpoint('/api/v1/payments/create'))
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
     staleTime: Infinity,
     enabled: hasPermission('create_payment'),
   });

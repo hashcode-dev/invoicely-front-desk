@@ -30,10 +30,12 @@ export function useBlankRecurringExpenseQuery(params: BlankQueryParams) {
     queryKey: ['/api/v1/recurring_expenses', 'create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/recurring_expenses/create')).then(
-        (response: GenericSingleResourceResponse<RecurringExpense>) =>
-          response.data.data
-      ),
+      request('GET', endpoint('/api/v1/recurring_expenses/create'))
+        .then(
+          (response: GenericSingleResourceResponse<RecurringExpense>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     enabled: hasPermission('create_recurring_expense')
       ? (params.enabled ?? true)

@@ -34,6 +34,43 @@ import { Page } from '$app/components/Breadcrumbs';
 import { Default } from '$app/components/layouts/Default';
 import { Form } from '../edit/components/Form';
 
+const blankVendor: Vendor = {
+  id: '',
+  user_id: '',
+  assigned_user_id: '',
+  name: '',
+  website: '',
+  private_notes: '',
+  public_notes: '',
+  last_login: 0,
+  address1: '',
+  address2: '',
+  phone: '',
+  city: '',
+  vendor_hash: '',
+  state: '',
+  postal_code: '',
+  country_id: '',
+  currency_id: '',
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  is_deleted: false,
+  vat_number: '',
+  id_number: '',
+  updated_at: 0,
+  archived_at: 0,
+  created_at: 0,
+  number: '',
+  contacts: [],
+  documents: [],
+  language_id: '',
+  classification: '',
+  routing_id: '',
+  is_tax_exempt: false,
+};
+
 export default function Create() {
   const [t] = useTranslation();
 
@@ -71,12 +108,11 @@ export default function Create() {
   ]);
 
   useEffect(() => {
-    if (data) {
-      setVendor({
-        ...data,
-        country_id: '',
-      });
-    }
+    const baseVendor = data ? { ...data } : { ...blankVendor };
+    setVendor({
+      ...baseVendor,
+      country_id: '',
+    });
   }, [data]);
 
   const handleSave = () => {

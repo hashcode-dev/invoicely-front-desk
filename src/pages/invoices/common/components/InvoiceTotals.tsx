@@ -62,19 +62,20 @@ export function InvoiceTotals(props: Props) {
     props.onChange(property, value);
 
   const isAnyTaxHidden = () => {
+    const enabledTaxes = company?.enabled_tax_rates ?? 0;
     if (
-      company.enabled_tax_rates === 0 &&
+      enabledTaxes === 0 &&
       (resource?.tax_name1 || resource?.tax_name2 || resource?.tax_name3)
     ) {
       return true;
     }
 
-    if (company.enabled_tax_rates === 2 && resource?.tax_name3) {
+    if (enabledTaxes === 2 && resource?.tax_name3) {
       return true;
     }
 
     if (
-      company.enabled_tax_rates === 1 &&
+      enabledTaxes === 1 &&
       (resource?.tax_name2 || resource?.tax_name3)
     ) {
       return true;

@@ -104,7 +104,7 @@ export function CreateProjectModal(props: Props) {
 
           props.onProjectCreated(response.data.data);
 
-          setProject(blankProject);
+          setProject(blankProject || undefined);
           props.setVisible(false);
         })
         .catch((error: AxiosError<ValidationBag>) => {
@@ -123,7 +123,7 @@ export function CreateProjectModal(props: Props) {
       size="regular"
       visible={props.visible}
       onClose={() => {
-        setProject(blankProject);
+        setProject(blankProject || undefined);
         props.setVisible(false);
       }}
     >

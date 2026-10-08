@@ -129,11 +129,11 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
+        data != null &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        const _quote = cloneDeep(data);
+        const _quote = cloneDeep(data) as Quote;
 
         if (typeof _quote.line_items === 'string') {
           _quote.line_items = [];
@@ -146,7 +146,7 @@ export default function Create() {
         _quote.uses_inclusive_taxes =
           company?.settings?.inclusive_taxes ?? false;
 
-        return (value = _quote);
+        value = _quote;
       }
 
       return value;

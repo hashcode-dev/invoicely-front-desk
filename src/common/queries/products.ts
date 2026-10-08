@@ -62,9 +62,12 @@ export function useBlankProductQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/products/create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/products/create')).then(
-        (response: GenericSingleResourceResponse<Product>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/products/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Product>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

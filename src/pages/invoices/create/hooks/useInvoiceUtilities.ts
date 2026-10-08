@@ -41,7 +41,7 @@ export function useInvoiceUtilities(props: Props) {
   };
 
   const handleInvitationChange = (id: string, checked: boolean) => {
-    let invitations = [...invoice!.invitations];
+    let invitations = [...(invoice?.invitations || [])];
 
     const potential =
       invitations?.find((invitation) => invitation.client_contact_id === id) ||
@@ -114,11 +114,11 @@ export function useInvoiceUtilities(props: Props) {
 
   const calculateInvoiceSum = (invoice: Invoice) => {
     const currency = currencyResolver(
-      props.client?.settings.currency_id || company?.settings.currency_id
+      props.client?.settings?.currency_id || company?.settings?.currency_id
     );
 
     if (currency && invoice) {
-      const eInvoiceType = company?.settings.e_invoice_type;
+      const eInvoiceType = company?.settings?.e_invoice_type;
 
       const invoiceSum = invoice.uses_inclusive_taxes
         ? new InvoiceSumInclusive(invoice, currency, eInvoiceType).build()
@@ -129,7 +129,7 @@ export function useInvoiceUtilities(props: Props) {
   };
 
   const handleLineItemChange = (index: number, lineItem: InvoiceItem) => {
-    const lineItems = invoice?.line_items || [];
+    const lineItems = [...(invoice?.line_items || [])];
 
     lineItems[index] = lineItem;
 
@@ -141,15 +141,17 @@ export function useInvoiceUtilities(props: Props) {
     value: unknown,
     index: number
   ) => {
-    const lineItems = invoice?.line_items || [];
+    const lineItems = [...(invoice?.line_items || [])];
 
-    if (lineItems[index][key] === value) {
+    if (lineItems[index] && lineItems[index][key] === value) {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    lineItems[index][key] = value;
+    if (lineItems[index]) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      lineItems[index][key] = value;
+    }
 
     setInvoice((invoice) => invoice && { ...invoice, line_items: lineItems });
   };
@@ -160,7 +162,7 @@ export function useInvoiceUtilities(props: Props) {
         invoice && {
           ...invoice,
           line_items: [
-            ...invoice.line_items,
+            ...(invoice.line_items || []),
             { ...blankLineItem(), type_id: typeId, quantity: 1 },
           ],
         }
@@ -168,7 +170,7 @@ export function useInvoiceUtilities(props: Props) {
   };
 
   const handleDeleteLineItem = (index: number) => {
-    const lineItems = invoice?.line_items || [];
+    const lineItems = [...(invoice?.line_items || [])];
 
     lineItems.splice(index, 1);
 

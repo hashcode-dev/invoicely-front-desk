@@ -24,9 +24,12 @@ export function useBlankQuoteQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/quotes', 'create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/quotes/create')).then(
-        (response: GenericSingleResourceResponse<Quote>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/quotes/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Quote>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

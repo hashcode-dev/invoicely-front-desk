@@ -202,7 +202,9 @@ export function useTransactionColumns() {
       column: 'tags',
       id: 'bank_transaction_tag_ids',
       label: t('tags'),
-      format: (value, transaction) => <TagPills tags={transaction.tags} />,
+      format: (value, transaction) => (
+        <TagPills tags={transaction?.tags || []} />
+      ),
     },
   ];
 

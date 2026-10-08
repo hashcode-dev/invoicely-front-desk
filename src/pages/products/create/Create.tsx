@@ -27,9 +27,43 @@ import { useBlankProductQuery } from '$app/common/queries/products';
 import { Container } from '$app/components/Container';
 import { Default } from '$app/components/layouts/Default';
 import { Spinner } from '$app/components/Spinner';
+import { Product } from '$app/common/interfaces/product';
 import { ProductTableResource } from '$app/pages/invoices/common/components/ProductsTable';
 import { productAtom } from '../common/atoms';
 import { CreateProduct } from '../common/components/CreateProduct';
+
+const blankProduct: Product = {
+  id: '',
+  user_id: '',
+  assigned_user_id: '',
+  product_key: '',
+  notes: '',
+  cost: 0,
+  price: 0,
+  quantity: 1,
+  max_quantity: 0,
+  tax_id: '',
+  product_image: '',
+  tax_name1: '',
+  tax_rate1: 0,
+  tax_name2: '',
+  tax_rate2: 0,
+  tax_name3: '',
+  tax_rate3: 0,
+  created_at: 0,
+  updated_at: 0,
+  archived_at: 0,
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  is_deleted: false,
+  in_stock_quantity: 0,
+  stock_notification: false,
+  stock_notification_threshold: 0,
+  documents: [],
+  income_account_id: '',
+};
 
 export default function Create() {
   const { documentTitle } = useTitle('new_product');
@@ -97,7 +131,7 @@ export default function Create() {
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        value = cloneDeep(data);
+        value = data ? cloneDeep(data) : { ...blankProduct };
 
         if (
           currentCompany?.quickbooks &&

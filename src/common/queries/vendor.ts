@@ -44,9 +44,9 @@ export function useBlankVendorQuery() {
     queryKey: ['/api/v1/vendors', 'create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/vendors/create')).then(
-        (response) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/vendors/create'))
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     staleTime: Infinity,
     enabled: hasPermission('create_vendor'),

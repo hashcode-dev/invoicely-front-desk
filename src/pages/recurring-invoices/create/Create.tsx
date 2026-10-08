@@ -113,8 +113,8 @@ export default function Create() {
     }
 
     return {
-      name: company?.settings[`tax_name${taxNumber}`],
-      rate: company?.settings[`tax_rate${taxNumber}`],
+      name: company?.settings?.[`tax_name${taxNumber}`],
+      rate: company?.settings?.[`tax_rate${taxNumber}`],
     };
   };
 
@@ -127,13 +127,53 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        const _recurringInvoice = cloneDeep(data);
+        const defaultBlankRecurringInvoice: Partial<RecurringInvoice> = {
+          line_items: [],
+          invitations: [],
+          documents: [],
+          status_id: '1',
+          auto_bill: company?.settings?.auto_bill ?? 'off',
+          auto_bill_enabled: false,
+          remaining_cycles: -1,
+          frequency_id: '1',
+          next_send_date: dayjs().format('YYYY-MM-DD'),
+          uses_inclusive_taxes: company?.settings?.inclusive_taxes ?? false,
+          tax_name1: company?.settings?.tax_name1 ?? '',
+          tax_rate1: company?.settings?.tax_rate1 ?? 0,
+          tax_name2: company?.settings?.tax_name2 ?? '',
+          tax_rate2: company?.settings?.tax_rate2 ?? 0,
+          tax_name3: company?.settings?.tax_name3 ?? '',
+          tax_rate3: company?.settings?.tax_rate3 ?? 0,
+          discount: 0,
+          is_amount_discount: false,
+          terms: '',
+          public_notes: '',
+          private_notes: '',
+          footer: '',
+          custom_value1: '',
+          custom_value2: '',
+          custom_value3: '',
+          custom_value4: '',
+          custom_surcharge1: 0,
+          custom_surcharge2: 0,
+          custom_surcharge3: 0,
+          custom_surcharge4: 0,
+          amount: 0,
+          balance: 0,
+        };
 
-        if (typeof _recurringInvoice.line_items === 'string') {
+        const _recurringInvoice =
+          data && typeof data === 'object'
+            ? cloneDeep(data)
+            : (defaultBlankRecurringInvoice as RecurringInvoice);
+
+        if (
+          typeof _recurringInvoice.line_items === 'string' ||
+          !Array.isArray(_recurringInvoice.line_items)
+        ) {
           _recurringInvoice.line_items = [];
         }
 
@@ -141,14 +181,26 @@ export default function Create() {
           _recurringInvoice.client_id = searchParams.get('client')!;
         }
 
-        if (_recurringInvoice.next_send_date === '') {
+        if (!_recurringInvoice.next_send_date) {
           _recurringInvoice.next_send_date = dayjs().format('YYYY-MM-DD');
         }
 
-        _recurringInvoice.uses_inclusive_taxes =
-          company?.settings?.inclusive_taxes ?? false;
+        if (!_recurringInvoice.auto_bill) {
+          _recurringInvoice.auto_bill = company?.settings?.auto_bill ?? 'off';
+        }
 
-        _recurringInvoice.auto_bill = company?.settings?.auto_bill ?? 'off';
+        if (typeof _recurringInvoice.uses_inclusive_taxes === 'undefined') {
+          _recurringInvoice.uses_inclusive_taxes =
+            company?.settings?.inclusive_taxes ?? false;
+        }
+
+        if (!_recurringInvoice.invitations) {
+          _recurringInvoice.invitations = [];
+        }
+
+        if (!_recurringInvoice.documents) {
+          _recurringInvoice.documents = [];
+        }
 
         value = _recurringInvoice;
       }
@@ -161,21 +213,20 @@ export default function Create() {
         setRecurringInvoice(undefined);
       }
     };
-  }, [data]);
+  }, [data, company]);
 
   useEffect(() => {
     recurringInvoice && calculateInvoiceSum(recurringInvoice);
   }, [recurringInvoice]);
 
   useEffect(() => {
-    recurringInvoice &&
-      recurringInvoice.client_id.length > 1 &&
+    if (recurringInvoice?.client_id && recurringInvoice.client_id.length > 1) {
       clientResolver.find(recurringInvoice.client_id).then((client) => {
         setClient(client);
 
         const invitations: Record<string, unknown>[] = [];
 
-        client.contacts.map((contact) => {
+        client?.contacts?.forEach((contact) => {
           if (contact.send_email) {
             const invitation = cloneDeep(blankInvitation);
 
@@ -186,10 +237,10 @@ export default function Create() {
 
         handleChange('invitations', invitations);
 
-        if (!client.is_tax_exempt) {
+        if (!client?.is_tax_exempt) {
           if (
             company &&
-            company.enabled_tax_rates > 0 &&
+            (company.enabled_tax_rates ?? 0) > 0 &&
             searchParams.get('action') !== 'clone'
           ) {
             const { name, rate } = settingResolver(client, '1');
@@ -200,7 +251,7 @@ export default function Create() {
 
           if (
             company &&
-            company.enabled_tax_rates > 1 &&
+            (company.enabled_tax_rates ?? 0) > 1 &&
             searchParams.get('action') !== 'clone'
           ) {
             const { name, rate } = settingResolver(client, '2');
@@ -211,7 +262,7 @@ export default function Create() {
 
           if (
             company &&
-            company.enabled_tax_rates > 2 &&
+            (company.enabled_tax_rates ?? 0) > 2 &&
             searchParams.get('action') !== 'clone'
           ) {
             const { name, rate } = settingResolver(client, '3');
@@ -221,6 +272,7 @@ export default function Create() {
           }
         }
       });
+    }
   }, [recurringInvoice?.client_id]);
 
   const [, setIsConfirmationVisible] = useAtom(confirmActionModalAtom);

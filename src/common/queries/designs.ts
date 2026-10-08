@@ -33,14 +33,16 @@ export function useDesignsQuery() {
       request(
         'GET',
         endpoint('/api/v1/designs?status=active&sort=name|asc&per_page=100')
-      ).then((response: AxiosResponse<GenericManyResponse<Design>>) =>
-        response.data.data.filter(
-          (design) =>
-            freePlanDesigns.includes(design.name) ||
-            proPlan() ||
-            enterprisePlan()
+      )
+        .then((response: AxiosResponse<GenericManyResponse<Design>>) =>
+          (response?.data?.data || []).filter(
+            (design) =>
+              freePlanDesigns.includes(design.name) ||
+              proPlan() ||
+              enterprisePlan()
+          )
         )
-      ),
+        .catch(() => []),
 
     staleTime: Infinity,
   });
@@ -60,9 +62,12 @@ export function useDesignQuery(params: DesignQueryOptions) {
       request(
         'GET',
         endpoint('/api/v1/designs/:id?include=client', { id })
-      ).then(
-        (response: GenericSingleResourceResponse<Design>) => response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<Design>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
     enabled: enabled && Boolean(id),
@@ -76,9 +81,12 @@ export function useBlankDesignQuery(options?: GenericQueryOptions) {
     queryKey: [route('/api/v1/designs/create')],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/designs/create')).then(
-        (response: GenericSingleResourceResponse<Design>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/designs/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Design>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
     enabled: resolveBlankQueryEnabled(options, isAdmin),
@@ -96,10 +104,12 @@ export function useTemplateQuery(entity: string) {
           '/api/v1/designs?template=true&status=active&sort=name|asc&entities=' +
             entity
         )
-      ).then(
-        (response: AxiosResponse<GenericManyResponse<Design>>) =>
-          response.data.data
-      ),
+      )
+        .then(
+          (response: AxiosResponse<GenericManyResponse<Design>>) =>
+            response?.data?.data ?? []
+        )
+        .catch(() => []),
 
     staleTime: Infinity,
   });

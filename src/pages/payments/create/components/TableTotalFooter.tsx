@@ -76,7 +76,7 @@ export function TableTotalFooter({ resource, payment }: Props) {
         {formatMoney(
           getCalculatedTotal(),
           resolvedClient?.country_id,
-          resolvedClient?.settings.currency_id
+          resolvedClient?.settings?.currency_id
         )}
       </span>
     </div>

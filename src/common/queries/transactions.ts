@@ -49,10 +49,12 @@ export function useBlankTransactionQuery() {
     queryKey: ['/api/v1/bank_transactions', 'create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/bank_transactions/create')).then(
-        (response: GenericSingleResourceResponse<Transaction>) =>
-          response.data.data
-      ),
+      request('GET', endpoint('/api/v1/bank_transactions/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Transaction>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
     enabled: hasPermission('create_bank_transaction'),

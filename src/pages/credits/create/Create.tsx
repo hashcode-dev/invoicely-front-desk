@@ -32,6 +32,74 @@ import { creditAtom, invoiceSumAtom } from '../common/atoms';
 import { useCreate, useCreditUtilities } from '../common/hooks';
 import { useBlankCreditQuery } from '../common/queries';
 
+const blankCredit: Credit = {
+  id: '',
+  user_id: '',
+  project_id: '',
+  assigned_user_id: '',
+  amount: 0,
+  balance: 0,
+  client_id: '',
+  vendor_id: '',
+  status_id: '1',
+  design_id: '',
+  recurring_id: '',
+  invoice_id: '',
+  created_at: 0,
+  updated_at: 0,
+  archived_at: 0,
+  is_deleted: false,
+  number: '',
+  discount: 0,
+  po_number: '',
+  date: new Date().toISOString().split('T')[0],
+  last_sent_date: '',
+  next_send_date: '',
+  due_date: '',
+  terms: '',
+  public_notes: '',
+  private_notes: '',
+  uses_inclusive_taxes: false,
+  tax_name1: '',
+  tax_rate1: 0,
+  tax_name2: '',
+  tax_rate2: 0,
+  tax_name3: '',
+  tax_rate3: 0,
+  total_taxes: 0,
+  is_amount_discount: false,
+  footer: '',
+  partial: 0,
+  partial_due_date: '',
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  has_tasks: false,
+  has_expenses: false,
+  custom_surcharge1: 0,
+  custom_surcharge2: 0,
+  custom_surcharge3: 0,
+  custom_surcharge4: 0,
+  exchange_rate: 1,
+  custom_surcharge_tax1: false,
+  custom_surcharge_tax2: false,
+  custom_surcharge_tax3: false,
+  custom_surcharge_tax4: false,
+  line_items: [],
+  entity_type: 'credit',
+  reminder1_sent: '',
+  reminder2_sent: '',
+  reminder3_sent: '',
+  reminder_last_sent: '',
+  paid_to_date: 0,
+  subscription_id: '',
+  auto_bill_enabled: false,
+  invitations: [],
+  documents: [],
+  location_id: '',
+};
+
 export interface CreditsContext {
   credit: Credit | undefined;
   setCredit: Dispatch<SetStateAction<Credit | undefined>>;
@@ -137,14 +205,18 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone' &&
         searchParams.get('action') !== 'reverse'
       ) {
-        const _credit = cloneDeep(data);
+        const _credit: Credit = data
+          ? cloneDeep(data)
+          : cloneDeep(blankCredit);
 
-        if (typeof _credit.line_items === 'string') {
+        if (
+          typeof _credit.line_items === 'string' ||
+          !Array.isArray(_credit.line_items)
+        ) {
           _credit.line_items = [];
         }
 
@@ -170,13 +242,14 @@ export default function Create() {
 
   useEffect(() => {
     credit &&
+      credit.client_id &&
       credit.client_id.length > 1 &&
       clientResolver.find(credit.client_id).then((client) => {
         setClient(client);
 
         const invitations: Invitation[] = [];
 
-        client.contacts.map((contact) => {
+        client.contacts?.forEach((contact) => {
           if (contact.send_email) {
             const invitation = cloneDeep(
               blankInvitation
@@ -236,7 +309,7 @@ export default function Create() {
       title={documentTitle}
       breadcrumbs={pages}
       onSaveClick={() => save(credit!)}
-      disableSaveButton={credit?.client_id.length === 0 || isFormBusy}
+      disableSaveButton={!credit?.client_id || credit.client_id.length === 0 || isFormBusy}
     >
       {!isLoading ? (
         <div className="space-y-4">

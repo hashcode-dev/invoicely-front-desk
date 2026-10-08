@@ -16,36 +16,39 @@ export function useTotalVariables() {
   const company = useCurrentCompany();
 
   return useMemo(() => {
-    if (company?.settings.pdf_variables.total_columns.length > 0) {
+    if (
+      company?.settings?.pdf_variables?.total_columns &&
+      company.settings.pdf_variables.total_columns.length > 0
+    ) {
       const columns = cloneDeep(company.settings.pdf_variables.total_columns);
 
       const filtered = columns.filter(
         (variable: string) => !variable.includes('$custom_surcharge')
       );
 
-      if (company.enabled_tax_rates > 0) {
+      if ((company?.enabled_tax_rates ?? 0) > 0) {
         filtered.push('$tax1');
       }
-      if (company.enabled_tax_rates > 1) {
+      if ((company?.enabled_tax_rates ?? 0) > 1) {
         filtered.push('$tax2');
       }
-      if (company.enabled_tax_rates > 2) {
+      if ((company?.enabled_tax_rates ?? 0) > 2) {
         filtered.push('$tax3');
       }
 
-      if (company.custom_fields?.surcharge1) {
+      if (company?.custom_fields?.surcharge1) {
         filtered.push('$custom_surcharge1');
       }
 
-      if (company.custom_fields?.surcharge2) {
+      if (company?.custom_fields?.surcharge2) {
         filtered.push('$custom_surcharge2');
       }
 
-      if (company.custom_fields?.surcharge3) {
+      if (company?.custom_fields?.surcharge3) {
         filtered.push('$custom_surcharge3');
       }
 
-      if (company.custom_fields?.surcharge4) {
+      if (company?.custom_fields?.surcharge4) {
         filtered.push('$custom_surcharge4');
       }
 
@@ -79,13 +82,13 @@ export function useTotalVariables() {
     variables.push('$paid_to_date');
     variables.push('$balance_due');
 
-    if (company?.enabled_tax_rates > 0) {
+    if ((company?.enabled_tax_rates ?? 0) > 0) {
       variables.push('$tax1');
     }
-    if (company?.enabled_tax_rates > 1) {
+    if ((company?.enabled_tax_rates ?? 0) > 1) {
       variables.push('$tax2');
     }
-    if (company?.enabled_tax_rates > 2) {
+    if ((company?.enabled_tax_rates ?? 0) > 2) {
       variables.push('$tax3');
     }
 

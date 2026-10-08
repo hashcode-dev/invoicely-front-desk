@@ -20,12 +20,15 @@ import { resolveBlankQueryEnabled } from '$app/common/queries/blank-query-option
 export function useBlankCreditQuery(options?: GenericQueryOptions) {
   const hasPermission = useHasPermission();
 
-  return useQuery<Credit>({
+  return useQuery<Credit | null>({
     queryKey: ['/api/v1/credits', 'create'],
     queryFn: () =>
-      request('GET', endpoint('/api/v1/credits/create')).then(
-        (response: GenericSingleResourceResponse<Credit>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/credits/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Credit>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
     staleTime: Infinity,
     enabled: resolveBlankQueryEnabled(options, hasPermission('create_credit')),
   });

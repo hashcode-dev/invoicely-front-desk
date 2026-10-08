@@ -868,7 +868,7 @@ export function useCreditColumns() {
         formatMoney(
           value,
           credit.client?.country_id,
-          credit.client?.settings.currency_id
+          credit.client?.settings?.currency_id
         ),
     },
     {
@@ -885,7 +885,7 @@ export function useCreditColumns() {
         formatMoney(
           credit.balance,
           credit.client?.country_id,
-          credit.client?.settings.currency_id
+          credit.client?.settings?.currency_id
         ),
     },
     {
@@ -931,8 +931,8 @@ export function useCreditColumns() {
       sortKey: 'contact.email',
       format: (value, credit) =>
         credit.client &&
-        credit.client.contacts.length > 0 && (
-          <CopyToClipboard text={credit.client?.contacts[0].email} />
+        (credit.client.contacts?.length ?? 0) > 0 && (
+          <CopyToClipboard text={credit.client?.contacts[0]?.email} />
         ),
     },
     {
@@ -942,8 +942,8 @@ export function useCreditColumns() {
       sortKey: 'contact.first_name',
       format: (value, credit) =>
         credit.client &&
-        credit.client.contacts.length > 0 &&
-        `${credit.client?.contacts[0].first_name} ${credit.client?.contacts[0].last_name}`,
+        (credit.client.contacts?.length ?? 0) > 0 &&
+        `${credit.client?.contacts[0]?.first_name} ${credit.client?.contacts[0]?.last_name}`,
     },
     {
       column: 'created_at',
@@ -984,7 +984,7 @@ export function useCreditColumns() {
           ? formatMoney(
               value,
               credit.client?.country_id,
-              credit.client?.settings.currency_id
+              credit.client?.settings?.currency_id
             )
           : `${formatNumber(value)} %`,
     },
@@ -992,7 +992,7 @@ export function useCreditColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, credit) => credit.documents.length,
+      format: (value, credit) => credit.documents?.length ?? 0,
     },
     {
       column: 'entity_state',
@@ -1035,7 +1035,7 @@ export function useCreditColumns() {
         formatMoney(
           value,
           credit.client?.country_id,
-          credit.client?.settings.currency_id
+          credit.client?.settings?.currency_id
         ),
     },
     {
@@ -1109,7 +1109,7 @@ export function useCreditColumns() {
         formatMoney(
           value,
           credit.client?.country_id,
-          credit.client?.settings.currency_id
+          credit.client?.settings?.currency_id
         ),
     },
     {
@@ -1128,7 +1128,7 @@ export function useCreditColumns() {
       column: 'tags',
       id: 'credit_tag_ids',
       label: t('tags'),
-      format: (value, credit) => <TagPills tags={credit.tags} />,
+      format: (value, credit) => <TagPills tags={credit?.tags || []} />,
     },
   ];
 

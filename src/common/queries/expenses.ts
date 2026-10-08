@@ -32,9 +32,9 @@ export function useBlankExpenseQuery(params: BlankQueryParams) {
     queryKey: [route('/api/v1/expenses/create')],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/expenses/create')).then(
-        (response) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/expenses/create'))
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     enabled: hasPermission('create_expense') ? (params.enabled ?? true) : false,
 

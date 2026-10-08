@@ -28,10 +28,12 @@ export function useBlankPurchaseOrderQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/purchase_orders', 'create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/purchase_orders/create')).then(
-        (response: GenericSingleResourceResponse<PurchaseOrder>) =>
-          response.data.data
-      ),
+      request('GET', endpoint('/api/v1/purchase_orders/create'))
+        .then(
+          (response: GenericSingleResourceResponse<PurchaseOrder>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

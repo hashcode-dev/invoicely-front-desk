@@ -321,7 +321,8 @@ export function usePurchaseOrderColumns() {
         id: 'id',
         label: t('contact_name'),
         format: (value, purchaseOrder) =>
-          purchaseOrder.vendor && (
+          purchaseOrder.vendor &&
+          (purchaseOrder.vendor.contacts?.length ?? 0) > 0 && (
             <CopyToClipboard text={purchaseOrder.vendor.contacts[0].email} />
           ),
       },
@@ -376,7 +377,7 @@ export function usePurchaseOrderColumns() {
         column: 'documents',
         id: 'documents',
         label: t('documents'),
-        format: (value, purchaseOrder) => purchaseOrder.documents.length,
+        format: (value, purchaseOrder) => purchaseOrder.documents?.length ?? 0,
       },
       {
         column: 'entity_state',
@@ -397,7 +398,7 @@ export function usePurchaseOrderColumns() {
         id: 'purchase_order_tag_ids',
         label: t('tags'),
         format: (value, purchaseOrder) => (
-          <TagPills tags={purchaseOrder.tags} />
+          <TagPills tags={purchaseOrder?.tags || []} />
         ),
       },
     ];

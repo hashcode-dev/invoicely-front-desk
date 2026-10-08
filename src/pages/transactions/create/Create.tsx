@@ -33,6 +33,35 @@ import { useHandleChange } from '../common/hooks/useHandleChange';
 import { useResolveCurrencySeparator } from '../common/hooks/useResolveCurrencySeparator';
 import { TransactionForm } from '../components/TransactionForm';
 
+const blankTransaction: Transaction = {
+  id: '',
+  account_type: '',
+  amount: 0,
+  archived_at: 0,
+  bank_account_id: 0,
+  bank_integration_id: '',
+  bank_transaction_rule_id: '',
+  base_type: ApiTransactionType.Credit,
+  category_id: 0,
+  category_type: '',
+  created_at: 0,
+  currency_id: '',
+  date: new Date().toISOString().split('T')[0],
+  description: '',
+  expense_id: '',
+  invoice_ids: '',
+  is_deleted: false,
+  ninja_category_id: '',
+  payment_id: '',
+  status_id: '1',
+  transaction_id: 0,
+  updated_at: 0,
+  vendor_id: '',
+  participant: '',
+  participant_name: '',
+  user_id: '',
+};
+
 export default function Create() {
   const [t] = useTranslation();
 
@@ -99,13 +128,12 @@ export default function Create() {
 
   useEffect(() => {
     if (!transaction) {
-      if (data) {
-        setTransaction({
-          ...data,
-          base_type: ApiTransactionType.Credit,
-          currency_id: company?.settings.currency_id,
-        });
-      }
+      const base = data ? { ...data } : { ...blankTransaction };
+      setTransaction({
+        ...base,
+        base_type: ApiTransactionType.Credit,
+        currency_id: company?.settings?.currency_id || '',
+      });
     } else {
       const resolvedCurrencySeparator = resolveCurrencySeparator(
         transaction.currency_id

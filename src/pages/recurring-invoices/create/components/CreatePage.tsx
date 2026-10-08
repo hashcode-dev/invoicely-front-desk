@@ -95,7 +95,7 @@ export default function CreatePage() {
                 <ProductsTable
                   type="product"
                   resource={recurringInvoice}
-                  items={recurringInvoice.line_items.filter((item) =>
+                  items={(recurringInvoice.line_items || []).filter((item) =>
                     [
                       InvoiceItemType.Product,
                       InvoiceItemType.UnpaidFee,
@@ -123,7 +123,7 @@ export default function CreatePage() {
                 <ProductsTable
                   type="task"
                   resource={recurringInvoice}
-                  items={recurringInvoice.line_items.filter(
+                  items={(recurringInvoice.line_items || []).filter(
                     (item) => item.type_id === InvoiceItemType.Task
                   )}
                   columns={taskColumns}

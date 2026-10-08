@@ -81,7 +81,7 @@ export default function Invoice() {
   const { validationResponse } = useCheckEInvoiceValidation({
     resource: invoice,
     enableQuery:
-      company?.settings.e_invoice_type === 'PEPPOL' &&
+      company?.settings?.e_invoice_type === 'PEPPOL' &&
       company?.tax_data?.acts_as_sender &&
       triggerValidationQuery &&
       id === invoice?.id,

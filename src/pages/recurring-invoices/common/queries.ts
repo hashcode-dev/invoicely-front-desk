@@ -55,10 +55,12 @@ export function useBlankRecurringInvoiceQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/recurring_invoices', 'create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/recurring_invoices/create')).then(
-        (response: GenericSingleResourceResponse<RecurringInvoice>) =>
-          response.data.data
-      ),
+      request('GET', endpoint('/api/v1/recurring_invoices/create'))
+        .then(
+          (response: GenericSingleResourceResponse<RecurringInvoice>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

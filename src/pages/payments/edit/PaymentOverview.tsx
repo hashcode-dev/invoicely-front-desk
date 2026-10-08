@@ -32,7 +32,7 @@ export function PaymentOverview(props: Props) {
     <div>
       <div
         className={classNames('border-t mt-6 pt-6 px-4 md:px-6', {
-          'pb-4': props.payment.paymentables.length,
+          'pb-4': Boolean(props.payment.paymentables?.length),
         })}
         style={{ borderColor: colors.$20 }}
       >
@@ -130,7 +130,7 @@ export function PaymentOverview(props: Props) {
         </div>
       </div>
 
-      {props.payment.paymentables.length ? (
+      {props.payment.paymentables?.length ? (
         <div className="pb-2">
           {props.payment.paymentables.map((value) => (
             <PaymentOverviewInvoice

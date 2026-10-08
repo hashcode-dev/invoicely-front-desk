@@ -424,7 +424,7 @@ export function useExpenseColumns() {
         formatMoney(
           calculateExpenseAmount(expense),
           expense.client?.country_id,
-          expense.currency_id || expense.client?.settings.currency_id
+          expense.currency_id || expense.client?.settings?.currency_id
         ),
     },
     {
@@ -499,7 +499,7 @@ export function useExpenseColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, expense) => expense.documents.length,
+      format: (value, expense) => expense.documents?.length ?? 0,
     },
     {
       column: 'exchange_rate',
@@ -521,7 +521,7 @@ export function useExpenseColumns() {
         formatMoney(
           calculateExpenseExclusiveAmount(expense),
           expense.client?.country_id,
-          expense.currency_id || expense.client?.settings.currency_id
+          expense.currency_id || expense.client?.settings?.currency_id
         ),
     },
     {
@@ -643,7 +643,7 @@ export function useExpenseColumns() {
       column: 'tags',
       id: 'expense_tag_ids',
       label: t('tags'),
-      format: (value, expense) => <TagPills tags={expense.tags} />,
+      format: (value, expense) => <TagPills tags={expense?.tags || []} />,
     },
   ];
 

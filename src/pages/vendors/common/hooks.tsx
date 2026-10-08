@@ -233,7 +233,7 @@ export function useVendorColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, vendor) => vendor.documents.length,
+      format: (value, vendor) => vendor.documents?.length ?? 0,
     },
     {
       column: 'id_number',
@@ -298,7 +298,7 @@ export function useVendorColumns() {
       column: 'tags',
       id: 'vendor_tag_ids',
       label: t('tags'),
-      format: (value, vendor) => <TagPills tags={vendor.tags} />,
+      format: (value, vendor) => <TagPills tags={vendor?.tags || []} />,
     },
   ];
 

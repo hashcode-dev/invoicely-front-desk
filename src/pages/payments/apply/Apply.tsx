@@ -144,7 +144,7 @@ export default function Apply() {
             {formatMoney(
               payment?.amount,
               payment.client?.country_id,
-              payment.client?.settings.currency_id
+              payment.client?.settings?.currency_id
             )}
           </Element>
 
@@ -152,7 +152,7 @@ export default function Apply() {
             {formatMoney(
               payment?.applied,
               payment.client?.country_id,
-              payment.client?.settings.currency_id
+              payment.client?.settings?.currency_id
             )}
           </Element>
 
@@ -160,13 +160,13 @@ export default function Apply() {
             {formatMoney(
               payment?.amount - payment?.applied,
               payment.client?.country_id,
-              payment.client?.settings.currency_id
+              payment.client?.settings?.currency_id
             )}
             {formik.values.invoices.length >= 1 &&
               `  - (${formatMoney(
                 calcApplyBalance(),
                 payment.client?.country_id,
-                payment.client?.settings.currency_id
+                payment.client?.settings?.currency_id
               )} ${t('remaining')})`}
           </Element>
         </>

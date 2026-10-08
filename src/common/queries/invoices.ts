@@ -50,9 +50,12 @@ export function useInvoiceQuery(params: InvoiceQueryParams) {
             id: params.id,
           }
         )
-      ).then(
-        (response: GenericSingleResourceResponse<Invoice>) => response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<Invoice>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
     enabled: Boolean(params.id),
@@ -66,9 +69,12 @@ export function useBlankInvoiceQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/invoices/create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/invoices/create')).then(
-        (response: GenericSingleResourceResponse<Invoice>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/invoices/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Invoice>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

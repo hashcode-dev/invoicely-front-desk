@@ -83,7 +83,7 @@ export default function Credit() {
     resource: credit,
     entity: 'credit',
     enableQuery:
-      company?.settings.e_invoice_type === 'PEPPOL' &&
+      company?.settings?.e_invoice_type === 'PEPPOL' &&
       company?.tax_data?.acts_as_sender &&
       triggerValidationQuery &&
       id === credit?.id,
@@ -118,7 +118,8 @@ export default function Credit() {
     if (data) {
       const _credit = cloneDeep(data);
 
-      _credit.line_items.map((item) => (item._id = v4()));
+      _credit.line_items = Array.isArray(_credit.line_items) ? _credit.line_items : [];
+      _credit.line_items.forEach((item) => (item._id = v4()));
 
       setCredit(_credit);
 

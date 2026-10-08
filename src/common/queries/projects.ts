@@ -24,9 +24,12 @@ export function useBlankProjectQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/projects/create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/projects/create')).then(
-        (response: GenericSingleResourceResponse<Project>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/projects/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Project>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

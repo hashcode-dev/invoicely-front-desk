@@ -15,21 +15,21 @@ export function getExchangeRate(
   if (fromCurrencyId == null || toCurrencyId == null) {
     return 1;
   }
-  const fromCurrency = statics?.currencies.find(
+  const fromCurrency = statics?.currencies?.find(
     (data: any) => data.id === fromCurrencyId
   );
-  const toCurrency = statics?.currencies.find(
+  const toCurrency = statics?.currencies?.find(
     (data: any) => data.id === toCurrencyId
   );
-  const baseCurrency = statics?.currencies.find((data: any) => data.id === '1');
+  const baseCurrency = statics?.currencies?.find((data: any) => data.id === '1');
 
   if (fromCurrency == baseCurrency) {
-    return toCurrency.exchange_rate;
+    return toCurrency?.exchange_rate ?? 1;
   }
 
   if (toCurrency == baseCurrency) {
     return 1 / (fromCurrency?.exchange_rate ?? 1);
   }
 
-  return toCurrency.exchange_rate * (1 / fromCurrency.exchange_rate);
+  return (toCurrency?.exchange_rate ?? 1) * (1 / (fromCurrency?.exchange_rate ?? 1));
 }

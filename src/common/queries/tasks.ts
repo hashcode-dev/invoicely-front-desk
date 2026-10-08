@@ -49,9 +49,12 @@ export function useBlankTaskQuery(options?: GenericQueryOptions) {
     queryKey: ['/api/v1/tasks/create'],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/tasks/create')).then(
-        (response: GenericSingleResourceResponse<Task>) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/tasks/create'))
+        .then(
+          (response: GenericSingleResourceResponse<Task>) =>
+            response?.data?.data ?? null
+        )
+        .catch(() => null),
 
     staleTime: Infinity,
 

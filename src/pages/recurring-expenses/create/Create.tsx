@@ -35,6 +35,60 @@ import { Details } from '../components/Details';
 import { Notes } from '../components/Notes';
 import { TaxSettings } from '../components/Taxes';
 
+const blankRecurringExpense: RecurringExpense = {
+  id: '',
+  user_id: '',
+  assigned_user_id: '',
+  vendor_id: '',
+  invoice_id: '',
+  client_id: '',
+  bank_id: '',
+  status_id: '1',
+  invoice_currency_id: '',
+  expense_currency_id: '',
+  currency_id: '',
+  category_id: '',
+  payment_type_id: '',
+  recurring_expense_id: '',
+  is_deleted: false,
+  should_be_invoiced: false,
+  invoice_documents: false,
+  amount: 0,
+  foreign_amount: 0,
+  exchange_rate: 1,
+  tax_name1: '',
+  tax_rate1: 0,
+  tax_name2: '',
+  tax_rate2: 0,
+  tax_name3: '',
+  tax_rate3: 0,
+  private_notes: '',
+  public_notes: '',
+  transaction_reference: '',
+  transaction_id: '',
+  date: new Date().toISOString().split('T')[0],
+  number: '',
+  payment_date: '',
+  custom_value1: '',
+  custom_value2: '',
+  custom_value3: '',
+  custom_value4: '',
+  updated_at: 0,
+  archived_at: 0,
+  created_at: 0,
+  project_id: '',
+  tax_amount1: 0,
+  tax_amount2: 0,
+  tax_amount3: 0,
+  uses_inclusive_taxes: false,
+  calculate_tax_by_amount: false,
+  frequency_id: RecurringExpensesFrequency.FREQUENCY_MONTHLY,
+  documents: [],
+  entity_type: 'recurring_expense',
+  remaining_cycles: 0,
+  next_send_date: '',
+};
+
 export default function Create() {
   const [t] = useTranslation();
 
@@ -75,11 +129,12 @@ export default function Create() {
       }
 
       if (
-        typeof data !== 'undefined' &&
         typeof value === 'undefined' &&
         searchParams.get('action') !== 'clone'
       ) {
-        const _recurringExpense = cloneDeep(data);
+        const _recurringExpense = data
+          ? cloneDeep(data)
+          : cloneDeep(blankRecurringExpense);
 
         _recurringExpense.frequency_id =
           RecurringExpensesFrequency.FREQUENCY_MONTHLY;
@@ -97,10 +152,10 @@ export default function Create() {
           payment_date: company?.mark_expenses_paid
             ? dayjs().format('YYYY-MM-DD')
             : '',
-          should_be_invoiced: company?.mark_expenses_invoiceable,
-          invoice_documents: company?.invoice_expense_documents,
+          should_be_invoiced: company?.mark_expenses_invoiceable ?? false,
+          invoice_documents: company?.invoice_expense_documents ?? false,
           calculate_tax_by_amount: taxInputType === 'by_amount',
-          uses_inclusive_taxes: company.expense_inclusive_taxes,
+          uses_inclusive_taxes: company?.expense_inclusive_taxes ?? false,
         };
       }
 

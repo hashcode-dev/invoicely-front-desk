@@ -993,8 +993,8 @@ export function useQuoteColumns() {
       sortKey: 'contact.email',
       format: (value, quote) =>
         quote.client &&
-        quote.client.contacts.length > 0 && (
-          <CopyToClipboard text={quote.client?.contacts[0].email} />
+        (quote.client.contacts?.length ?? 0) > 0 && (
+          <CopyToClipboard text={quote.client?.contacts[0]?.email} />
         ),
     },
     {
@@ -1004,8 +1004,8 @@ export function useQuoteColumns() {
       sortKey: 'contact.first_name',
       format: (value, quote) =>
         quote.client &&
-        quote.client.contacts.length > 0 &&
-        `${quote.client?.contacts[0].first_name} ${quote.client?.contacts[0].last_name}`,
+        (quote.client.contacts?.length ?? 0) > 0 &&
+        `${quote.client?.contacts[0]?.first_name} ${quote.client?.contacts[0]?.last_name}`,
     },
     {
       column: 'created_at',
@@ -1054,7 +1054,7 @@ export function useQuoteColumns() {
       column: 'documents',
       id: 'documents',
       label: t('documents'),
-      format: (value, quote) => quote.documents.length,
+      format: (value, quote) => quote.documents?.length ?? 0,
     },
     {
       column: 'entity_state',
