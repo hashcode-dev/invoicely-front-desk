@@ -14,12 +14,11 @@ import axios from 'axios';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import { useFormik } from 'formik';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Mail } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { FaSlack } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
-import { useColorScheme } from '$app/common/colors';
 import { endpoint, isHosted, isSelfHosted } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
@@ -57,7 +56,6 @@ interface Props {
 export function HelpSidebarIcons(props: Props) {
   const [t] = useTranslation();
 
-  const colors = useColorScheme();
   const user = useCurrentUser();
   const account = useCurrentAccount();
 
@@ -91,11 +89,15 @@ export function HelpSidebarIcons(props: Props) {
 
   const [isContactVisible, setIsContactVisible] = useState<boolean>(false);
   const [isAboutVisible, setIsAboutVisible] = useState<boolean>(false);
+  const [isHelpMenuOpen, setIsHelpMenuOpen] = useState<boolean>(false);
   const [cronsNotEnabledModal, setCronsNotEnabledModal] =
     useState<boolean>(false);
   const [disabledButton, setDisabledButton] = useState<boolean>(false);
   const [isUpdateModalVisible, setIsUpdateModalVisible] =
     useState<boolean>(false);
+  const helpMenuId = useId();
+  const helpMenuContainerRef = useRef<HTMLDivElement>(null);
+  const helpMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   const isMiniSidebar =
     Boolean(reactSettings.show_mini_sidebar) && !props.isCompactViewport;
@@ -106,6 +108,17 @@ export function HelpSidebarIcons(props: Props) {
     currentSystemInfo?.api_version &&
     currentSystemInfo.api_version !== latestVersion &&
     !currentSystemInfo?.is_docker;
+
+  const hasSchedulerError = Boolean(
+    isSelfHosted() && account && !account.is_scheduler_running
+  );
+  const hasSidebarAlert = Boolean(isUpdateAvailable || hasSchedulerError);
+  const sidebarAlertLabels = [
+    isUpdateAvailable ? t('update_available') : undefined,
+    hasSchedulerError ? t('error') : undefined,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   const formik = useFormik({
     initialValues: {
@@ -146,6 +159,33 @@ export function HelpSidebarIcons(props: Props) {
     window.addEventListener('open-contact-modal', handler);
     return () => window.removeEventListener('open-contact-modal', handler);
   }, []);
+
+  useEffect(() => {
+    if (!isHelpMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!helpMenuContainerRef.current?.contains(event.target as Node)) {
+        setIsHelpMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsHelpMenuOpen(false);
+        helpMenuButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isHelpMenuOpen]);
 
   return (
     <>
@@ -238,121 +278,135 @@ export function HelpSidebarIcons(props: Props) {
       />
 
       <nav
-        style={{ borderColor: colors.$5 }}
-        className={classNames('flex flex-wrap gap-1 py-4 text-white border-t', {
-          'justify-end': mobileNavbar,
-          'justify-around': !mobileNavbar,
-          'px-2': !isUpdateAvailable,
+        className={classNames('sidebar-footer-actions py-4 text-white', {
+          'mobile-navbar': mobileNavbar,
         })}
       >
         {!isMiniSidebar && !mobileNavbar && (
           <>
-            {isUpdateAvailable && (
-              <Tippy
-                duration={0}
-                content={t('update_available')}
-                className="rounded-md text-xs p-2 bg-[#F2F2F2]"
-              >
-                <button
-                  type="button"
-                  className="sidebar-footer-action"
-                  aria-label={String(t('update_available'))}
-                  onClick={() => setIsUpdateModalVisible(true)}
-                >
-                  <TriangleWarning color="white" size="1.3rem" />
-                </button>
-              </Tippy>
-            )}
-
-            {isSelfHosted() && account && !account.is_scheduler_running && (
-              <Tippy
-                duration={0}
-                content={t('error')}
-                className="rounded-md text-xs p-2 bg-[#F2F2F2]"
-              >
-                <button
-                  type="button"
-                  className="sidebar-footer-action"
-                  aria-label={String(t('error'))}
-                  onClick={() => setCronsNotEnabledModal(true)}
-                >
-                  <CircleWarning color="white" size="1.3rem" />
-                </button>
-              </Tippy>
-            )}
-
-            <Tippy
-              duration={0}
-              content={t('contact_us')}
-              className="rounded-md text-xs p-2 bg-[#F2F2F2]"
+            <div
+              className="sidebar-footer-menu-container"
+              ref={helpMenuContainerRef}
             >
-              {isHosted() ? (
-                <button
-                  type="button"
-                  className="sidebar-footer-action"
-                  aria-label={String(t('contact_us'))}
-                  onClick={() => setIsContactVisible(true)}
-                >
-                  <Mail size={21.5} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="sidebar-footer-action"
-                  aria-label={String(t('contact_us'))}
-                  onClick={() =>
-                    window.open('https://slack.invoiceninja.com', '_blank')
-                  }
-                >
-                  <Icon element={FaSlack} color="white" size={21.5} />
-                </button>
-              )}
-            </Tippy>
-
-            {!isUpdateAvailable && (
-              <Tippy
-                duration={0}
-                content={t('support_forum')}
-                className="rounded-md text-xs p-2 bg-[#F2F2F2]"
+              <button
+                ref={helpMenuButtonRef}
+                type="button"
+                className="sidebar-footer-action"
+                aria-label={String(
+                  sidebarAlertLabels
+                    ? `${t('help')}: ${sidebarAlertLabels}`
+                    : t('help')
+                )}
+                aria-expanded={isHelpMenuOpen}
+                aria-controls={helpMenuId}
+                onClick={() => setIsHelpMenuOpen((open) => !open)}
               >
-                <button
-                  type="button"
-                  className="sidebar-footer-action"
-                  aria-label={String(t('support_forum'))}
-                  onClick={() =>
-                    window.open('https://forum.invoiceninja.com', '_blank')
-                  }
-                >
-                  <Message color="white" size="1.3rem" />
-                </button>
-              </Tippy>
-            )}
-
-            {Boolean(
-              !(isSelfHosted() && account && !account.is_scheduler_running)
-            ) && (
-              <Tippy
-                duration={0}
-                content={t('user_guide')}
-                className="rounded-md text-xs p-2 bg-[#F2F2F2]"
-              >
-                <button
-                  type="button"
-                  className="sidebar-footer-action"
-                  aria-label={String(t('user_guide'))}
-                  onClick={() =>
-                    window.open(
-                      props.docsLink
-                        ? `https://invoiceninja.github.io/${props.docsLink}`
-                        : 'https://invoiceninja.github.io',
-                      '_blank'
-                    )
-                  }
-                >
+                {hasSidebarAlert ? (
+                  isUpdateAvailable ? (
+                    <TriangleWarning color="white" size="1.3rem" />
+                  ) : (
+                    <CircleWarning color="white" size="1.3rem" />
+                  )
+                ) : (
                   <CircleQuestion color="white" size="1.3rem" />
-                </button>
-              </Tippy>
-            )}
+                )}
+              </button>
+
+              <div
+                id={helpMenuId}
+                className="sidebar-footer-popover"
+                role="group"
+                aria-label={String(t('help'))}
+                hidden={!isHelpMenuOpen}
+              >
+                {isUpdateAvailable && (
+                  <button
+                    type="button"
+                    className="sidebar-footer-menu-action"
+                    onClick={() => {
+                      setIsHelpMenuOpen(false);
+                      setIsUpdateModalVisible(true);
+                    }}
+                  >
+                    <TriangleWarning color="white" size="1.1rem" />
+                    <span>{t('update_available')}</span>
+                  </button>
+                )}
+
+                {hasSchedulerError && (
+                  <button
+                    type="button"
+                    className="sidebar-footer-menu-action"
+                    onClick={() => {
+                      setIsHelpMenuOpen(false);
+                      setCronsNotEnabledModal(true);
+                    }}
+                  >
+                    <CircleWarning color="white" size="1.1rem" />
+                    <span>{t('error')}</span>
+                  </button>
+                )}
+
+                {isHosted() ? (
+                  <button
+                    type="button"
+                    className="sidebar-footer-menu-action"
+                    onClick={() => {
+                      setIsHelpMenuOpen(false);
+                      setIsContactVisible(true);
+                    }}
+                  >
+                    <Mail size={18} />
+                    <span>{t('contact_us')}</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="sidebar-footer-menu-action"
+                    onClick={() => {
+                      setIsHelpMenuOpen(false);
+                      window.open('https://slack.invoiceninja.com', '_blank');
+                    }}
+                  >
+                    <Icon element={FaSlack} color="white" size={18} />
+                    <span>{t('contact_us')}</span>
+                  </button>
+                )}
+
+                {!isUpdateAvailable && (
+                  <button
+                    type="button"
+                    className="sidebar-footer-menu-action"
+                    onClick={() => {
+                      setIsHelpMenuOpen(false);
+                      window.open('https://forum.invoiceninja.com', '_blank');
+                    }}
+                  >
+                    <Message color="white" size="1.1rem" />
+                    <span>{t('support_forum')}</span>
+                  </button>
+                )}
+
+                {!hasSchedulerError && (
+                  <button
+                    type="button"
+                    className="sidebar-footer-menu-action"
+                    onClick={() => {
+                      setIsHelpMenuOpen(false);
+                      window.open(
+                        props.docsLink
+                          ? `https://invoiceninja.github.io/${props.docsLink}`
+                          : 'https://invoiceninja.github.io',
+                        '_blank'
+                      );
+                    }}
+                  >
+                    <CircleQuestion color="white" size="1.1rem" />
+                    <span>{t('user_guide')}</span>
+                  </button>
+                )}
+              </div>
+            </div>
 
             <Tippy
               duration={0}
