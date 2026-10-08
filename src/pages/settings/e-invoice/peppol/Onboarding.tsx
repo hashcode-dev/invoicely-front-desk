@@ -24,7 +24,6 @@ import { useAccentColor } from '$app/common/hooks/useAccentColor';
 import { useCurrentAccount } from '$app/common/hooks/useCurrentAccount';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
-import { useIsWhitelabelled } from '$app/common/hooks/usePaidOrSelfhost';
 import { useRefreshCompanyUsers } from '$app/common/hooks/useRefreshCompanyUsers';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { CountrySelector } from '$app/components/CountrySelector';
@@ -200,7 +199,6 @@ interface StepProps {
 
 function PlanCheck({ onContinue }: StepProps) {
   const account = useCurrentAccount();
-  const isWhitelabelled = useIsWhitelabelled();
   const accentColor = useAccentColor();
 
   const { t } = useTranslation();
@@ -211,7 +209,7 @@ function PlanCheck({ onContinue }: StepProps) {
 
       return;
     }
-  }, [account?.plan, isWhitelabelled]);
+  }, [account?.plan, onContinue]);
 
   const form = useFormik({
     initialValues: {},
@@ -237,10 +235,6 @@ function PlanCheck({ onContinue }: StepProps) {
     },
   });
 
-  const buyWhitelabelUrl =
-    import.meta.env.VITE_WHITELABEL_INVOICE_URL ||
-    'https://invoiceninja.invoicing.co/client/subscriptions/O5xe7Rwd7r/purchase';
-
   return (
     <div className="space-y-5">
       <p className="text-lg">{isSelfHosted() ? t('license') : t('plan')}</p>
@@ -263,13 +257,6 @@ function PlanCheck({ onContinue }: StepProps) {
             id="checkLicenseForm"
             onSubmit={form.handleSubmit}
           ></form>
-          {!isWhitelabelled ? (
-            <div className="mt-2">
-              <Link to={buyWhitelabelUrl} external>
-                {t('purchase_license')}
-              </Link>
-            </div>
-          ) : null}
         </div>
       ) : null}
 

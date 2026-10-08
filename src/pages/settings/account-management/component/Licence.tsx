@@ -18,8 +18,6 @@ import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
 import { Divider } from '$app/components/cards/Divider';
 import { Button, InputField } from '$app/components/forms';
-import { ArrowRight } from '$app/components/icons/ArrowRight';
-import { CreditCard } from '$app/components/icons/CreditCard';
 import { LockCircle } from '$app/components/icons/LockCircle';
 import { Modal } from '$app/components/Modal';
 
@@ -35,10 +33,6 @@ export function License() {
   const [t] = useTranslation();
 
   const colors = useColorScheme();
-
-  const link =
-    import.meta.env.VITE_WHITELABEL_INVOICE_URL ||
-    'https://invoiceninja.invoicing.co/client/subscriptions/O5xe7Rwd7r/purchase';
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -94,28 +88,6 @@ export function License() {
       </div>
 
       <div className="flex flex-col w-full space-y-4 px-4 sm:px-6">
-        <Box
-          className="flex justify-between items-center p-4 border shadow-sm w-full rounded-md cursor-pointer"
-          onClick={() => window.open(link, '_blank')}
-          theme={{
-            backgroundColor: colors.$1,
-            hoverBackgroundColor: colors.$4,
-          }}
-          style={{ borderColor: colors.$24 }}
-        >
-          <div className="flex items-center space-x-2">
-            <CreditCard color={colors.$3} size="1.4rem" />
-
-            <span className="text-sm" style={{ color: colors.$3 }}>
-              {t('purchase_license')}
-            </span>
-          </div>
-
-          <div>
-            <ArrowRight color={colors.$3} size="1.4rem" strokeWidth="1.5" />
-          </div>
-        </Box>
-
         <Box
           className="flex space-x-2 items-center p-4 border shadow-sm w-full rounded-md cursor-pointer"
           onClick={() => setIsModalVisible(true)}

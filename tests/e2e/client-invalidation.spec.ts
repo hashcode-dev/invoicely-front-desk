@@ -48,14 +48,7 @@ test('test appropriate invalidation of clients', async ({ page }) => {
   // await page.getByRole('button', { name: 'Mark Sent' }).click();
 
   await page.getByRole('button', { name: 'Save' }).click();
-  // await page
-  //   .locator('div')
-  //   .filter({ hasText: /^Purchase White LabelSave$/ })
-  //   .getByRole('button')
-  //   .nth(3)
-  //   .click();
-
-  await page.locator('div').filter({ hasText: /^Purchase White LabelSave$/ }).getByRole('button').nth(2).click();
+  await page.getByRole('button', { name: 'Save' }).last().click();
 
   await page.getByRole('button', { name: 'Mark Sent' }).click();
   await page.getByRole('link', { name: 'View Client' }).click();
@@ -102,7 +95,7 @@ test('test appropriate invalidation of clients', async ({ page }) => {
 
   // await page.locator('#quantity').press('Tab');
   await page.getByRole('button', { name: 'Save' }).click();
-  await page.locator('div').filter({ hasText: /^Purchase White LabelSave$/ }).getByRole('button').nth(2).click();
+  await page.getByRole('button', { name: 'Save' }).last().click();
   await page.getByRole('button', { name: 'Mark Sent' }).click();
   await page.getByRole('link', { name: 'View Client' }).click();
 

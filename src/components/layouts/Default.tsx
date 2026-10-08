@@ -15,12 +15,9 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useColorScheme } from '$app/common/colors';
-import { isDemo, isHosted, isSelfHosted, trans } from '$app/common/helpers';
+import { isDemo, trans } from '$app/common/helpers';
 import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
-import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
-import { usePreventNavigation } from '$app/common/hooks/usePreventNavigation';
 import { useUnlockButtonForHosted } from '$app/common/hooks/useUnlockButtonForHosted';
-import { useUnlockButtonForSelfHosted } from '$app/common/hooks/useUnlockButtonForSelfHosted';
 import { Invoice } from '$app/common/interfaces/invoice';
 import { useSocketEvent } from '$app/common/queries/sockets';
 import { Breadcrumbs, Page } from '$app/components/Breadcrumbs';
@@ -66,16 +63,10 @@ export function Default(props: Props) {
 
   const colors = useColorScheme();
 
-  const preventNavigation = usePreventNavigation();
-
-  const user = useCurrentUser();
   const companyUser = useCurrentCompanyUser();
 
   const hostedUnlock = useUnlockButtonForHosted();
-  const selfHostedUnlock = useUnlockButtonForSelfHosted();
-
-  const shouldShowUnlockButton =
-    !isDemo() && (hostedUnlock || selfHostedUnlock);
+  const shouldShowUnlockButton = !isDemo() && hostedUnlock;
 
   const saveBtn = useAtomValue(saveBtnAtom);
   const navigationTopRightElement = useNavigationTopRightElement();
@@ -157,27 +148,9 @@ export function Default(props: Props) {
                 <button
                   type="button"
                   className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-sm transition-all"
-                  onClick={() => {
-                    if (
-                      isHosted() ||
-                      import.meta.env.VITE_ENABLE_NEW_ACCOUNT_MANAGEMENT ===
-                        'true'
-                    ) {
-                      return navigate('/settings/account_management');
-                    }
-
-                    preventNavigation({
-                      url: (isSelfHosted()
-                        ? import.meta.env.VITE_WHITELABEL_INVOICE_URL ||
-                          'https://invoiceninja.invoicing.co/client/subscriptions/O5xe7Rwd7r/purchase'
-                        : user?.company_user?.ninja_portal_url) as string,
-                      externalLink: true,
-                    });
-                  }}
+                  onClick={() => navigate('/settings/account_management')}
                 >
-                  <span>
-                    {isSelfHosted() ? t('white_label_button') : t('unlock_pro')}
-                  </span>
+                  <span>{t('unlock_pro')}</span>
                 </button>
               )}
 
