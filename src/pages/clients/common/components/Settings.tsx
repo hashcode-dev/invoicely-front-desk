@@ -44,15 +44,32 @@ export default function Settings() {
 
   const { data: paymentTermsResponse } = usePaymentTermsQuery({});
 
+  const paymentTerms = Array.isArray(paymentTermsResponse?.data?.data)
+    ? paymentTermsResponse.data.data
+    : [];
+  const sizes = Array.isArray(statics?.sizes) ? statics.sizes : [];
+  const industries = Array.isArray(statics?.industries)
+    ? statics.industries
+    : [];
+
   const handleChange = (property: string, value: string | number | boolean) => {
-    const $client = cloneDeep(client)!;
+    const $client = cloneDeep(client);
+
+    if (!$client) {
+      return;
+    }
+
+    const settingsProperty = property.startsWith('settings.')
+      ? property.slice('settings.'.length)
+      : property;
 
     if (
-      property !== 'currency_id' &&
-      $client.settings?.[property] !== undefined &&
+      settingsProperty !== 'currency_id' &&
+      property.startsWith('settings.') &&
+      $client.settings?.[settingsProperty] !== undefined &&
       value === ''
     ) {
-      delete $client.settings?.[property];
+      delete $client.settings[settingsProperty];
     } else {
       set($client, property, value);
     }
@@ -73,7 +90,7 @@ export default function Settings() {
             <CurrencySelector
               value={client?.settings?.currency_id || ''}
               onChange={(v) => handleChange('settings.currency_id', v)}
-              errorMessage={errors?.errors['settings.currency_id']}
+              errorMessage={errors?.errors?.['settings.currency_id']}
               dismissable
             />
           </Element>
@@ -84,7 +101,7 @@ export default function Settings() {
             <LanguageSelector
               value={client?.settings?.language_id || ''}
               onChange={(v) => handleChange('settings.language_id', v)}
-              errorMessage={errors?.errors['settings.language_id']}
+              errorMessage={errors?.errors?.['settings.language_id']}
               dismissable
             />
           </Element>
@@ -111,14 +128,14 @@ export default function Settings() {
             <SelectField
               id="settings.payment_terms"
               value={client?.settings?.payment_terms || ''}
-              errorMessage={errors?.errors['settings.payment_terms']}
+              errorMessage={errors?.errors?.['settings.payment_terms']}
               onValueChange={(value) =>
                 handleChange('settings.payment_terms', value)
               }
               withBlank
               customSelector
             >
-              {paymentTermsResponse.data.data
+              {paymentTerms
                 .filter((paymentTerm: PaymentTerm) =>
                   shouldPaymentTermBeVisible(
                     paymentTerm,
@@ -143,11 +160,11 @@ export default function Settings() {
               onValueChange={(value) =>
                 handleChange('settings.valid_until', value)
               }
-              errorMessage={errors?.errors['settings.valid_until']}
+              errorMessage={errors?.errors?.['settings.valid_until']}
               withBlank
               customSelector
             >
-              {paymentTermsResponse.data.data
+              {paymentTerms
                 .filter((paymentTerm: PaymentTerm) =>
                   shouldPaymentTermBeVisible(
                     paymentTerm,
@@ -170,7 +187,7 @@ export default function Settings() {
             onValueChange={(value) =>
               handleChange('settings.default_task_rate', parseFloat(value))
             }
-            errorMessage={errors?.errors['settings.default_task_rate']}
+            errorMessage={errors?.errors?.['settings.default_task_rate']}
           />
         </Element>
 
@@ -181,8 +198,8 @@ export default function Settings() {
               client?.settings?.send_reminders === true
                 ? 'enabled'
                 : client?.settings?.send_reminders === false
-                  ? 'disabled'
-                  : ''
+                ? 'disabled'
+                : ''
             }
             onValueChange={(value) =>
               handleChange(
@@ -191,7 +208,7 @@ export default function Settings() {
               )
             }
             withBlank
-            errorMessage={errors?.errors['settings.send_reminders']}
+            errorMessage={errors?.errors?.['settings.send_reminders']}
             customSelector
           >
             <option value="enabled">{t('enabled')}</option>
@@ -212,11 +229,11 @@ export default function Settings() {
               id="size_id"
               value={client?.size_id || ''}
               onValueChange={(value) => handleChange('size_id', value)}
-              errorMessage={errors?.errors.size_id}
+              errorMessage={errors?.errors?.size_id}
               withBlank
               customSelector
             >
-              {statics?.sizes.map(
+              {sizes.map(
                 (size: { id: string; name: string }, index: number) => (
                   <option key={index} value={size.id}>
                     {size.name}
@@ -232,12 +249,12 @@ export default function Settings() {
             <SelectField
               id="industry_id"
               value={client?.industry_id || ''}
-              errorMessage={errors?.errors.industry_id}
+              errorMessage={errors?.errors?.industry_id}
               onValueChange={(value) => handleChange('industry_id', value)}
               withBlank
               customSelector
             >
-              {statics?.industries.map(
+              {industries.map(
                 (size: { id: string; name: string }, index: number) => (
                   <option key={index} value={size.id}>
                     {size.name}

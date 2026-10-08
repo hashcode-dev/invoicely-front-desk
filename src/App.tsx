@@ -44,9 +44,63 @@ function Shell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigation = useNavigation();
   const reactSettings = useReactSettings();
-  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
+  const [isCompactViewport, setIsCompactViewport] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 920px)').matches
+  );
+  const isMiniSidebar =
+    Boolean(reactSettings.show_mini_sidebar) && !isCompactViewport;
   const [mobileOpen, setMobileOpen] = useState(false);
   const sideNavRef = React.useRef<HTMLElement>(null);
+  const sidebarRef = React.useRef<HTMLElement>(null);
+  const mobileToggleRef = React.useRef<HTMLButtonElement>(null);
+
+  function closeMobileNavigation() {
+    setMobileOpen(false);
+
+    if (isCompactViewport) {
+      mobileToggleRef.current?.focus();
+    }
+  }
+
+  React.useEffect(() => {
+    const compactViewport = window.matchMedia('(max-width: 920px)');
+    const handleViewportChange = () =>
+      setIsCompactViewport(compactViewport.matches);
+
+    compactViewport.addEventListener('change', handleViewportChange);
+
+    return () =>
+      compactViewport.removeEventListener('change', handleViewportChange);
+  }, []);
+
+  React.useEffect(() => {
+    if (isCompactViewport && !mobileOpen) {
+      sidebarRef.current?.setAttribute('inert', '');
+    } else {
+      sidebarRef.current?.removeAttribute('inert');
+    }
+  }, [isCompactViewport, mobileOpen]);
+
+  React.useEffect(() => {
+    if (!mobileOpen) {
+      return;
+    }
+
+    sideNavRef.current?.querySelector<HTMLElement>('a[href]')?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileOpen(false);
+        mobileToggleRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileOpen]);
 
   function handleLogout() {
     logout();
@@ -63,18 +117,20 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="app-shell">
       {mobileOpen && (
         <div
-          className="mobile-overlay md:hidden"
-          onClick={() => setMobileOpen(false)}
+          className="mobile-overlay"
+          onClick={closeMobileNavigation}
           aria-hidden="true"
         />
       )}
 
       <aside
+        ref={sidebarRef}
         className={classNames('sidebar', {
           mini: isMiniSidebar,
           'mobile-open': mobileOpen,
         })}
         onWheel={handleSidebarWheel}
+        aria-hidden={isCompactViewport && !mobileOpen}
       >
         <div className="brand-block">
           <div className="brand-logo">
@@ -90,11 +146,16 @@ function Shell({ children }: { children: React.ReactNode }) {
 
         {!isMiniSidebar && (
           <div className="company-switcher-container">
-            <CompanySwitcher />
+            <CompanySwitcher isCompactViewport={isCompactViewport} />
           </div>
         )}
 
-        <nav ref={sideNavRef} className="side-nav">
+        <nav
+          ref={sideNavRef}
+          className="side-nav"
+          id="primary-navigation"
+          aria-label="Primary navigation"
+        >
           {navigation.map((item) => {
             if (!item.visible) return null;
             const isItemActive =
@@ -103,7 +164,14 @@ function Shell({ children }: { children: React.ReactNode }) {
 
             const itemNode = (
               <div key={item.href} className="side-nav-group">
-                <div className="side-link-wrapper">
+                <div
+                  className={classNames('side-link-wrapper', {
+                    'has-quick-add':
+                      item.rightButton &&
+                      !isMiniSidebar &&
+                      item.rightButton.visible,
+                  })}
+                >
                   <NavLink
                     className={({ isActive }) =>
                       isActive || isItemActive
@@ -111,7 +179,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                         : 'side-link'
                     }
                     to={item.href}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMobileNavigation}
                   >
                     <span className="nav-icon">
                       <item.icon size="1.25rem" />
@@ -131,9 +199,10 @@ function Shell({ children }: { children: React.ReactNode }) {
                           item.rightButton.tooltipLabel ||
                           item.rightButton.label
                         }
+                        aria-label={item.rightButton.label}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setMobileOpen(false);
+                          closeMobileNavigation();
                         }}
                       >
                         <item.rightButton.icon size="0.95rem" />
@@ -154,7 +223,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                                 ? 'side-sub-link active'
                                 : 'side-sub-link'
                             }
-                            onClick={() => setMobileOpen(false)}
+                            onClick={closeMobileNavigation}
                           >
                             <span>{sub.name}</span>
                           </NavLink>
@@ -189,7 +258,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           type="button"
           onClick={() => {
             navigate('/invoices/create');
-            setMobileOpen(false);
+            closeMobileNavigation();
           }}
         >
           <span className="material-symbols-outlined">add</span>
@@ -197,7 +266,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </button>
 
         <div className="sidebar-footer">
-          <HelpSidebarIcons />
+          <HelpSidebarIcons isCompactViewport={isCompactViewport} />
         </div>
       </aside>
 
@@ -205,10 +274,13 @@ function Shell({ children }: { children: React.ReactNode }) {
         <header className="topbar">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <button
-              className="icon-btn md:hidden"
+              ref={mobileToggleRef}
+              className="icon-btn sidebar-toggle"
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation menu"
+              aria-expanded={mobileOpen}
+              aria-controls="primary-navigation"
             >
               <span className="material-symbols-outlined">menu</span>
             </button>

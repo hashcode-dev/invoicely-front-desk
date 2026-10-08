@@ -36,9 +36,19 @@ import { ExpandCollapseChevron } from './icons/ExpandCollapseChevron';
 import { Person } from './icons/Person';
 import { Plus } from './icons/Plus';
 
-const SwitcherDiv = styled.div`
+const SwitcherDiv = styled.button`
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
+  }
+
+  &:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
   }
 `;
 
@@ -61,7 +71,11 @@ const Panel = styled.div`
 const COMPANY_ROW_HEIGHT = '4rem';
 const ACTION_ROW_HEIGHT = '2.75rem';
 
-export function CompanySwitcher() {
+interface Props {
+  isCompactViewport?: boolean;
+}
+
+export function CompanySwitcher(props: Props = {}) {
   const [t] = useTranslation();
 
   const dispatch = useDispatch();
@@ -84,7 +98,8 @@ export function CompanySwitcher() {
   const currentUser = useCurrentUser();
   const reactSettings = useReactSettings();
 
-  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
+  const isMiniSidebar =
+    Boolean(reactSettings.show_mini_sidebar) && !props.isCompactViewport;
 
   const isDarkMode = colors.$0 === 'dark';
   const panelBackground = isDarkMode
@@ -216,6 +231,8 @@ export function CompanySwitcher() {
                     return (
                       <SwitcherDiv
                         key={index}
+                        type="button"
+                        aria-pressed={isActive}
                         className="flex items-center justify-between px-2 rounded-lg cursor-pointer"
                         theme={{ hoverColor: colors.$20 }}
                         style={{
@@ -272,6 +289,7 @@ export function CompanySwitcher() {
             <div className="flex flex-col gap-1 p-1.5">
               {shouldShowAddCompany && canUserAddCompany && isOwner && (
                 <SwitcherDiv
+                  type="button"
                   className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"
                   theme={{ hoverColor: colors.$20 }}
                   style={{ height: ACTION_ROW_HEIGHT }}
@@ -288,6 +306,7 @@ export function CompanySwitcher() {
 
               {(isAdmin || isOwner) && (
                 <SwitcherDiv
+                  type="button"
                   className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"
                   theme={{ hoverColor: colors.$20 }}
                   style={{ height: ACTION_ROW_HEIGHT }}
@@ -305,6 +324,7 @@ export function CompanySwitcher() {
               )}
 
               <SwitcherDiv
+                type="button"
                 className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"
                 theme={{ hoverColor: colors.$20 }}
                 style={{ height: ACTION_ROW_HEIGHT }}
@@ -329,8 +349,8 @@ export function CompanySwitcher() {
           onClick={() => setVisible((current) => !current)}
           className={
             isMiniSidebar
-              ? 'flex items-center justify-center'
-              : 'flex items-center justify-start w-full'
+              ? 'flex items-center justify-center min-h-[44px] min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40'
+              : 'flex items-center justify-start w-full min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40'
           }
         >
           {isMiniSidebar ? (

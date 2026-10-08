@@ -51,6 +51,7 @@ import { UpdateAppModal } from './UpdateAppModal';
 interface Props {
   docsLink?: string;
   mobileNavbar?: boolean;
+  isCompactViewport?: boolean;
 }
 
 export function HelpSidebarIcons(props: Props) {
@@ -96,7 +97,8 @@ export function HelpSidebarIcons(props: Props) {
   const [isUpdateModalVisible, setIsUpdateModalVisible] =
     useState<boolean>(false);
 
-  const isMiniSidebar = Boolean(reactSettings.show_mini_sidebar);
+  const isMiniSidebar =
+    Boolean(reactSettings.show_mini_sidebar) && !props.isCompactViewport;
 
   const isUpdateAvailable =
     isSelfHosted() &&
@@ -237,7 +239,7 @@ export function HelpSidebarIcons(props: Props) {
 
       <nav
         style={{ borderColor: colors.$5 }}
-        className={classNames('flex space-x-2.5 py-4 text-white border-t', {
+        className={classNames('flex flex-wrap gap-1 py-4 text-white border-t', {
           'justify-end': mobileNavbar,
           'justify-around': !mobileNavbar,
           'px-2': !isUpdateAvailable,
@@ -251,12 +253,14 @@ export function HelpSidebarIcons(props: Props) {
                 content={t('update_available')}
                 className="rounded-md text-xs p-2 bg-[#F2F2F2]"
               >
-                <div
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="sidebar-footer-action"
+                  aria-label={String(t('update_available'))}
                   onClick={() => setIsUpdateModalVisible(true)}
                 >
                   <TriangleWarning color="white" size="1.3rem" />
-                </div>
+                </button>
               </Tippy>
             )}
 
@@ -266,12 +270,14 @@ export function HelpSidebarIcons(props: Props) {
                 content={t('error')}
                 className="rounded-md text-xs p-2 bg-[#F2F2F2]"
               >
-                <div
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="sidebar-footer-action"
+                  aria-label={String(t('error'))}
                   onClick={() => setCronsNotEnabledModal(true)}
                 >
                   <CircleWarning color="white" size="1.3rem" />
-                </div>
+                </button>
               </Tippy>
             )}
 
@@ -281,21 +287,25 @@ export function HelpSidebarIcons(props: Props) {
               className="rounded-md text-xs p-2 bg-[#F2F2F2]"
             >
               {isHosted() ? (
-                <div
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="sidebar-footer-action"
+                  aria-label={String(t('contact_us'))}
                   onClick={() => setIsContactVisible(true)}
                 >
                   <Mail size={21.5} />
-                </div>
+                </button>
               ) : (
-                <div
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="sidebar-footer-action"
+                  aria-label={String(t('contact_us'))}
                   onClick={() =>
                     window.open('https://slack.invoiceninja.com', '_blank')
                   }
                 >
                   <Icon element={FaSlack} color="white" size={21.5} />
-                </div>
+                </button>
               )}
             </Tippy>
 
@@ -305,14 +315,16 @@ export function HelpSidebarIcons(props: Props) {
                 content={t('support_forum')}
                 className="rounded-md text-xs p-2 bg-[#F2F2F2]"
               >
-                <div
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="sidebar-footer-action"
+                  aria-label={String(t('support_forum'))}
                   onClick={() =>
                     window.open('https://forum.invoiceninja.com', '_blank')
                   }
                 >
                   <Message color="white" size="1.3rem" />
-                </div>
+                </button>
               </Tippy>
             )}
 
@@ -324,8 +336,10 @@ export function HelpSidebarIcons(props: Props) {
                 content={t('user_guide')}
                 className="rounded-md text-xs p-2 bg-[#F2F2F2]"
               >
-                <div
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="sidebar-footer-action"
+                  aria-label={String(t('user_guide'))}
                   onClick={() =>
                     window.open(
                       props.docsLink
@@ -336,7 +350,7 @@ export function HelpSidebarIcons(props: Props) {
                   }
                 >
                   <CircleQuestion color="white" size="1.3rem" />
-                </div>
+                </button>
               </Tippy>
             )}
 
@@ -345,12 +359,14 @@ export function HelpSidebarIcons(props: Props) {
               content={t('about')}
               className="rounded-md text-xs p-2 bg-[#F2F2F2]"
             >
-              <div
-                className="cursor-pointer"
+              <button
+                type="button"
+                className="sidebar-footer-action"
+                aria-label={String(t('about'))}
                 onClick={() => setIsAboutVisible(true)}
               >
                 <CircleInfo color="white" size="1.3rem" />
-              </div>
+              </button>
             </Tippy>
 
             <Tippy
@@ -358,8 +374,10 @@ export function HelpSidebarIcons(props: Props) {
               content={t('dark_mode')}
               className="rounded-md text-xs p-2 bg-[#F2F2F2]"
             >
-              <div
-                className="cursor-pointer"
+              <button
+                type="button"
+                className="sidebar-footer-action"
+                aria-label={String(t('dark_mode'))}
                 onClick={() => handleDarkLightMode(!reactSettings?.dark_mode)}
               >
                 {reactSettings?.dark_mode ? (
@@ -367,31 +385,37 @@ export function HelpSidebarIcons(props: Props) {
                 ) : (
                   <MoonStars color="white" size="1.3rem" />
                 )}
-              </div>
+              </button>
             </Tippy>
           </>
         )}
 
-        <Tippy
-          duration={0}
-          content={
-            <span style={{ fontSize: isMiniSidebar ? '0.6rem' : '0.75rem' }}>
-              {isMiniSidebar ? t('show_menu') : t('hide_menu')}
-            </span>
-          }
-          className="rounded-md text-xs p-2 bg-[#F2F2F2]"
-        >
-          <div
-            className="cursor-pointer"
-            onClick={() => handleCollapseExpandSidebar(!isMiniSidebar)}
+        {!props.isCompactViewport && (
+          <Tippy
+            duration={0}
+            content={
+              <span style={{ fontSize: isMiniSidebar ? '0.6rem' : '0.75rem' }}>
+                {isMiniSidebar ? t('show_menu') : t('hide_menu')}
+              </span>
+            }
+            className="rounded-md text-xs p-2 bg-[#F2F2F2]"
           >
-            {isMiniSidebar ? (
-              <OpenNavbarArrow color="#e5e7eb" size="1.5rem" />
-            ) : (
-              <CloseNavbarArrow color="#e5e7eb" size="1.35rem" />
-            )}
-          </div>
-        </Tippy>
+            <button
+              type="button"
+              className="sidebar-footer-action"
+              aria-label={String(
+                isMiniSidebar ? t('show_menu') : t('hide_menu')
+              )}
+              onClick={() => handleCollapseExpandSidebar(!isMiniSidebar)}
+            >
+              {isMiniSidebar ? (
+                <OpenNavbarArrow color="#e5e7eb" size="1.5rem" />
+              ) : (
+                <CloseNavbarArrow color="#e5e7eb" size="1.35rem" />
+              )}
+            </button>
+          </Tippy>
+        )}
       </nav>
     </>
   );
