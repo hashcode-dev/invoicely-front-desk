@@ -278,7 +278,7 @@ export function HelpSidebarIcons(props: Props) {
       />
 
       <nav
-        className={classNames('sidebar-footer-actions py-4 text-white', {
+        className={classNames('sidebar-footer-actions py-0 text-white', {
           'mobile-navbar': mobileNavbar,
         })}
       >
