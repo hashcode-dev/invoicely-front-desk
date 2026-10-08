@@ -255,7 +255,7 @@ export function UpgradeModal({ visible, onClose, onPaymentComplete }: Props) {
             description: 'Add E-Signatures',
             features: [
                 'Capture E-Signatures',
-                'Integrates Deeply With Invoice Ninja',
+                'Integrates Deeply With Invoicely',
                 'Unlimited Signature requests',
                 'API Access',
             ]
@@ -682,7 +682,7 @@ export function UpgradeModal({ visible, onClose, onPaymentComplete }: Props) {
                                                 </div>
                                                 {selectedMainPlan === 'enterprise' && (
                                                     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6">
-                                                        <span className="text-right">InvoiceNinja {t('users')}:</span>
+                                                        <span className="text-right">Invoicely {t('users')}:</span>
                                                         <span className="min-w-[5rem] text-right font-medium">{enterpriseUsers}</span>
                                                     </div>
                                                 )}

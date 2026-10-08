@@ -97,7 +97,7 @@ export function Plan2() {
                 <h3 className="font-semibold mb-3">Pro</h3>
                 <p className="flex items-center space-x-1">
                   <Check size={18} style={{ color: accentColor }} />
-                  <span className="block">Remove Invoice Ninja logo</span>
+                  <span className="block">Remove Invoicely logo</span>
                 </p>
                 <p className="flex items-center space-x-1">
                   <Check size={18} style={{ color: accentColor }} />

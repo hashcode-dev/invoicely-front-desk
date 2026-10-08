@@ -42,7 +42,11 @@ export default function Header() {
       headerStyle={{ borderColor: colors.$20 }}
     >
       <Editor
-        theme={colors.name === 'invoiceninja.dark' ? 'vs-dark' : 'light'}
+        theme={
+          colors.name === 'invoicely.dark' || colors.name === 'invoiceninja.dark'
+            ? 'vs-dark'
+            : 'light'
+        }
         defaultLanguage="twig"
         language="twig"
         value={payload.design?.design.header}

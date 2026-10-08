@@ -332,7 +332,7 @@ export default function Quickbooks() {
                           Field
                         </th>
                         <th scope="col" className="py-2 text-left font-medium">
-                          Invoice Ninja
+                          Invoicely
                         </th>
                         <th scope="col" className="py-2 text-left font-medium">
                           QuickBooks

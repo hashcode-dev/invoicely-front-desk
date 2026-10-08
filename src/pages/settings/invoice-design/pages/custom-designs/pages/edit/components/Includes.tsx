@@ -55,7 +55,11 @@ export default function Includes() {
         defaultLanguage="twig"
         language="twig"
         value={payload.design?.design.includes}
-        theme={colors.name === 'invoiceninja.dark' ? 'vs-dark' : 'light'}
+        theme={
+          colors.name === 'invoicely.dark' || colors.name === 'invoiceninja.dark'
+            ? 'vs-dark'
+            : 'light'
+        }
         options={{
           minimap: {
             enabled: false,

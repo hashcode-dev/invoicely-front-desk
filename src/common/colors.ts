@@ -25,7 +25,7 @@ import { useReactSettingsField } from './hooks/useReactSettings';
 // };
 
 export const darkColorScheme = {
-  name: 'invoiceninja.dark',
+  name: 'invoicely.dark',
   $0: 'dark',
   $1: '#121212',
   $2: '#121212',
@@ -55,7 +55,7 @@ export const darkColorScheme = {
 };
 
 export const lightColorScheme = {
-  name: 'invoiceninja.light',
+  name: 'invoicely.light',
   $0: 'light',
   $1: '#ffffff', // Primary background
   $2: '#f7f7f7', // Secondary background

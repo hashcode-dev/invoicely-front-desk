@@ -38,7 +38,7 @@ test('Can add a company and navigate to account management', async ({
 
   await expect(
     page.getByRole('heading', {
-      name: 'Welcome to Invoice Ninja',
+      name: 'Welcome to Invoicely',
     })
   ).toBeVisible();
 
@@ -50,7 +50,7 @@ test('Can add a company and navigate to account management', async ({
 
   await expect(
     page.getByRole('heading', {
-      name: 'Welcome to Invoice Ninja',
+      name: 'Welcome to Invoicely',
     })
   ).not.toBeVisible();
 

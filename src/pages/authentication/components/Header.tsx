@@ -16,7 +16,7 @@ export function Header() {
     <>
       <div className="flex justify-center py-8">
         <Link to="/">
-          <img src={Logo} alt="Invoice Ninja Logo" className="h-12" />
+          <img src={Logo} alt="Invoicely Logo" className="h-12" />
         </Link>
       </div>
     </>

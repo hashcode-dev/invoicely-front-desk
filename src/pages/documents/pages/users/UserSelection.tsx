@@ -49,7 +49,7 @@ export default function UserSelection() {
     UserWithDocuNinjaStatus[]
   >([]);
 
-  // Fetch Invoice Ninja users
+  // Fetch Invoicely users
   const { data: invoiceNinjaUsers, isLoading: isLoadingInvoiceUsers } =
     useUsersForDocuNinjaQuery();
 
@@ -139,10 +139,10 @@ export default function UserSelection() {
         (user, index, self) => index === self.findIndex((u) => u.id === user.id)
       );
 
-      // Create DocuNinja users for selected Invoice Ninja users
+      // Create DocuNinja users for selected Invoicely users
       const promises = uniqueSelectedUsers.map((user) => {
         const payload = {
-          id: user.id, // Pass the Invoice Ninja user ID
+          id: user.id, // Pass the Invoicely user ID
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
@@ -163,7 +163,7 @@ export default function UserSelection() {
 
       toast.success(t('docuninja_access_granted_successfully') as string);
 
-      // Refetch both DocuNinja users and Invoice Ninja users to update status
+      // Refetch both DocuNinja users and Invoicely users to update status
       $refetch(['docuninja_users']);
       $refetch(['users']);
 
