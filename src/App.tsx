@@ -182,7 +182,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                     onClick={closeMobileNavigation}
                   >
                     <span className="nav-icon">
-                      <item.icon size="1.25rem" />
+                      <item.icon size="1.25rem" color="white" />
                     </span>
                     {!isMiniSidebar && (
                       <span className="nav-label">{item.name}</span>
@@ -205,7 +205,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                           closeMobileNavigation();
                         }}
                       >
-                        <item.rightButton.icon size="0.95rem" />
+                        <item.rightButton.icon size="0.95rem" color="white" />
                       </NavLink>
                     )}
                 </div>
