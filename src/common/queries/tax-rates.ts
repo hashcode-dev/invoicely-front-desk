@@ -69,7 +69,8 @@ export function useBlankTaxRateQuery() {
 
     queryFn: () =>
       request('GET', endpoint('/api/v1/tax_rates/create')).then(
-        (response: GenericSingleResourceResponse<TaxRate>) => response.data.data
+        (response: GenericSingleResourceResponse<TaxRate>) =>
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,

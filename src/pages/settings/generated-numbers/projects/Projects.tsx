@@ -100,6 +100,7 @@ export function Projects() {
 
       {variables.map((item, index) => (
         <ClickableElement
+          as="div"
           onClick={() => setPattern(pattern + item)}
           key={index}
         >

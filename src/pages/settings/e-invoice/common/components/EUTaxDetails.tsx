@@ -46,7 +46,7 @@ export function EUTaxDetails() {
     }
 
     return get(
-      company.tax_data.regions[region].subregions,
+      company?.tax_data?.regions?.[region]?.subregions,
       `${iso31662}.vat_number`
     );
   };
@@ -236,7 +236,7 @@ function Configure() {
     }
 
     return !get(
-      company.tax_data.regions[region].subregions,
+      company?.tax_data?.regions?.[region]?.subregions,
       `${iso31662}.vat_number`
     );
   };

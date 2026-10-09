@@ -73,7 +73,7 @@ export function useBlankPaymentTermQuery() {
     queryFn: () =>
       request('GET', endpoint('/api/v1/payment_terms/create')).then(
         (response: GenericSingleResourceResponse<PaymentTerm>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,

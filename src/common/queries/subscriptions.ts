@@ -28,7 +28,7 @@ export function useBlankSubscriptionQuery() {
     queryFn: () =>
       request('GET', endpoint('/api/v1/subscriptions/create')).then(
         (response: GenericSingleResourceResponse<Subscription>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,
@@ -48,7 +48,7 @@ export function useSubscriptionQuery(params: { id: string | undefined }) {
         endpoint('/api/v1/subscriptions/:id', { id: params.id })
       ).then(
         (response: GenericSingleResourceResponse<Subscription>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,

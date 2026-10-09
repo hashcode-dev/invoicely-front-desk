@@ -62,8 +62,8 @@ export function useRecurringExpenseQuery(params: Params) {
         })
       ).then(
         (response: GenericSingleResourceResponse<RecurringExpense>) =>
-          response.data.data
-      ),
+          response?.data?.data ?? null
+      ).catch(() => null),
 
     enabled: (params.enabled ?? true) && Boolean(params.id),
     staleTime: Infinity,

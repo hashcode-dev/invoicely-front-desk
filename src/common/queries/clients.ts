@@ -58,8 +58,8 @@ export function useClientsQuery(props: Props) {
         })
       ).then(
         (response: GenericSingleResourceResponse<Client[]>) =>
-          response.data.data
-      ),
+          response?.data?.data ?? []
+      ).catch(() => []),
 
     enabled: props.enabled ?? true,
     staleTime: Infinity,
@@ -78,8 +78,9 @@ export function useClientQuery({ id, enabled }: GenericQueryOptions) {
           { id }
         )
       ).then(
-        (response: GenericSingleResourceResponse<Client>) => response.data.data
-      ),
+        (response: GenericSingleResourceResponse<Client>) =>
+          response?.data?.data ?? null
+      ).catch(() => null),
 
     enabled,
     staleTime: Infinity,

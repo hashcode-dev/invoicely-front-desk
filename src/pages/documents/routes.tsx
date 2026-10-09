@@ -262,6 +262,13 @@ const routes = (
             />
 
             <Route
+              path="users/create"
+              element={
+                <DocuNinjaGuard guards={[]} component={<UserSelection />} />
+              }
+            />
+
+            <Route
               path="users/selection"
               element={
                 <DocuNinjaGuard guards={[]} component={<UserSelection />} />

@@ -29,7 +29,7 @@ export function useBlankTaskStatusQuery(options?: GenericQueryOptions) {
     queryFn: () =>
       request('GET', endpoint('/api/v1/task_statuses/create')).then(
         (response: GenericSingleResourceResponse<TaskStatus>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,

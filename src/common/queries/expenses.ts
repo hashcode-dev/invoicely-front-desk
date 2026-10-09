@@ -57,7 +57,8 @@ export function useExpenseQuery(params: ExpenseParams) {
         endpoint('/api/v1/expenses/:id?include=category,vendor,client', {
           id: params.id,
         })
-      ).then((response) => response.data.data),
+      ).then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     enabled: (params.enabled ?? true) && Boolean(params.id),
     staleTime: Infinity,
@@ -93,8 +94,8 @@ export function useExpensesQuery(params: ExpensesParams) {
         )
       ).then(
         (response: GenericSingleResourceResponse<Expense[]>) =>
-          response.data.data
-      ),
+          response?.data?.data ?? []
+      ).catch(() => []),
 
     enabled: params.enabled ?? true,
     staleTime: Infinity,

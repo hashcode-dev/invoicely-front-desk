@@ -148,9 +148,15 @@ export function Table() {
       .finally(() => invalidateDocumentsQuery());
   };
 
+  const documentsList: Document[] = (Array.isArray(data?.data?.data)
+    ? data.data.data
+    : Array.isArray(data?.data)
+      ? data.data
+      : []) as Document[];
+
   useEffect(() => {
-    if (reactSettings.show_document_preview && data) {
-      (data.data.data as Document[]).forEach(async ({ id, hash, type }) => {
+    if (reactSettings.show_document_preview && documentsList.length > 0) {
+      documentsList.forEach(async ({ id, hash, type }) => {
         const alreadyExist = documentsUrls.find(
           ({ documentId }) => documentId === id
         );
@@ -182,7 +188,7 @@ export function Table() {
         }
       });
     }
-  }, [reactSettings, data?.data.data]);
+  }, [reactSettings, documentsList]);
 
   return (
     <>
@@ -203,7 +209,7 @@ export function Table() {
             </Tr>
           )}
 
-          {Boolean(data && !data.data.data.length && !isLoading) && (
+          {Boolean(data && !documentsList.length && !isLoading) && (
             <Tr
               className="border-b"
               style={{
@@ -214,12 +220,12 @@ export function Table() {
             </Tr>
           )}
 
-          {data &&
-            data.data.data.map((document: Document, index: number) => (
+          {documentsList.length > 0 &&
+            documentsList.map((document: Document, index: number) => (
               <Tr
                 key={document.id}
                 className={classNames({
-                  'border-b': index !== data.data.data.length - 1,
+                  'border-b': index !== documentsList.length - 1,
                 })}
                 style={{
                   borderColor: colors.$20,
@@ -319,7 +325,7 @@ export function Table() {
         </Tbody>
       </TableElement>
 
-      {data && (
+      {data?.data?.meta?.pagination && (
         <Pagination
           currentPage={currentPage}
           onPageChange={setCurrentPage}

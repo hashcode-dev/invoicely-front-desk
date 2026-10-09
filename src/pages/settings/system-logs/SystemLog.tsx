@@ -149,8 +149,18 @@ export function SystemLog() {
   };
 
   const getLog = (src: string) => {
-    return <JSONTree data={JSON.parse(src)} theme={jsonTreeTheme} />;
+    try {
+      return <JSONTree data={JSON.parse(src)} theme={jsonTreeTheme} />;
+    } catch {
+      return <span className="font-mono text-xs">{src}</span>;
+    }
   };
+
+  const systemLogsList: SystemLogRecord[] = (Array.isArray(data?.data?.data)
+    ? data.data.data
+    : Array.isArray(data?.data)
+      ? data.data
+      : []) as SystemLogRecord[];
 
   return (
     <Settings title={t('system_logs')} breadcrumbs={pages}>
@@ -167,7 +177,7 @@ export function SystemLog() {
         headerStyle={{ borderColor: colors.$20 }}
         withoutBodyPadding
       >
-        {data?.data.data.map(
+        {systemLogsList.map(
           (
             systemLog: SystemLogRecord,
             index: number,

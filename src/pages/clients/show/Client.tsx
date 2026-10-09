@@ -72,7 +72,7 @@ export default function Client() {
   ];
 
   const tabs = useTabs({
-    client,
+    client: client || undefined,
   });
   const actions = useActions({
     setIsPurgeOrMergeActionCalled,
@@ -96,7 +96,7 @@ export default function Client() {
       return (
         (client?.gateway_tokens?.length ?? 0) > 0 &&
         currentCards.includes(card) &&
-        shouldDisplayClientGatewaysAndAutoBill(client)
+        shouldDisplayClientGatewaysAndAutoBill(client || undefined)
       );
     }
 

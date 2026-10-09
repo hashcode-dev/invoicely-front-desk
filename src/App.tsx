@@ -158,9 +158,10 @@ function Shell({ children }: { children: React.ReactNode }) {
         >
           {navigation.map((item) => {
             if (!item.visible) return null;
-            const isItemActive =
-              location.pathname === item.href ||
-              location.pathname.startsWith(item.href + '/');
+            const isItemActive = item.href.startsWith('/settings')
+              ? location.pathname.startsWith('/settings')
+              : location.pathname === item.href ||
+                location.pathname.startsWith(item.href + '/');
 
             const itemNode = (
               <div key={item.href} className="side-nav-group">
@@ -215,18 +216,43 @@ function Shell({ children }: { children: React.ReactNode }) {
                     {item.subOptions.map(
                       (sub) =>
                         sub.visible && (
-                          <NavLink
+                          <div
                             key={sub.href}
-                            to={sub.href}
-                            className={({ isActive }) =>
-                              isActive || location.pathname.startsWith(sub.href)
-                                ? 'side-sub-link active'
-                                : 'side-sub-link'
-                            }
-                            onClick={closeMobileNavigation}
+                            className={classNames('side-link-wrapper', {
+                              'has-quick-add':
+                                sub.rightButton && sub.rightButton.visible,
+                            })}
                           >
-                            <span>{sub.name}</span>
-                          </NavLink>
+                            <NavLink
+                              to={sub.href}
+                              className={({ isActive }) =>
+                                isActive ||
+                                location.pathname.startsWith(sub.href)
+                                  ? 'side-sub-link active'
+                                  : 'side-sub-link'
+                              }
+                              onClick={closeMobileNavigation}
+                            >
+                              <span>{sub.name}</span>
+                            </NavLink>
+                            {sub.rightButton && sub.rightButton.visible && (
+                              <NavLink
+                                to={sub.rightButton.to}
+                                className="quick-add-btn"
+                                title={sub.rightButton.label}
+                                aria-label={sub.rightButton.label}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  closeMobileNavigation();
+                                }}
+                              >
+                                <sub.rightButton.icon
+                                  size="0.85rem"
+                                  color="white"
+                                />
+                              </NavLink>
+                            )}
+                          </div>
                         )
                     )}
                   </div>

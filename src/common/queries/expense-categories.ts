@@ -41,7 +41,7 @@ export function useExpenseCategoriesQuery(params: ExpenseCategoriesParams) {
         )
       ).then(
         (response: GenericSingleResourceResponse<ExpenseCategory[]>) =>
-          response.data.data
+          response?.data?.data ?? []
       ),
 
     enabled: params.enabled ?? true,
@@ -93,7 +93,7 @@ export function useBlankExpenseCategoryQuery() {
     queryFn: () =>
       request('GET', endpoint('/api/v1/expense_categories/create')).then(
         (response: GenericSingleResourceResponse<ExpenseCategory>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,

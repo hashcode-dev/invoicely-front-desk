@@ -28,9 +28,9 @@ export function useVendorQuery(params: VendorParams) {
     queryKey: ['/api/v1/vendors', params.id],
 
     queryFn: () =>
-      request('GET', endpoint('/api/v1/vendors/:id', { id: params.id })).then(
-        (response) => response.data.data
-      ),
+      request('GET', endpoint('/api/v1/vendors/:id', { id: params.id }))
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     enabled: (params.enabled ?? true) && Boolean(params.id),
     staleTime: Infinity,
@@ -74,10 +74,12 @@ export function useVendorsQuery(params: VendorsParams) {
             filter: params.filter ?? '',
           }
         )
-      ).then(
-        (response: GenericSingleResourceResponse<Vendor[]>) =>
-          response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<Vendor[]>) =>
+            response?.data?.data ?? []
+        )
+        .catch(() => []),
 
     enabled: params.enabled ?? true,
     staleTime: Infinity,

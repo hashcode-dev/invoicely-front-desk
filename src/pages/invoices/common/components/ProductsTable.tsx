@@ -114,54 +114,59 @@ export function ProductsTable(props: Props) {
         <Droppable droppableId="product-table">
           {(provided) => (
             <Tbody {...provided.droppableProps} innerRef={provided.innerRef}>
-              {items.map((lineItem, index) => (
-                <Draggable
-                  key={getLineItemIndex(lineItem)}
-                  draggableId={getLineItemIndex(lineItem).toString()}
-                  index={getLineItemIndex(lineItem)}
-                >
-                  {(provided) => (
-                    <Tr
-                      innerRef={provided.innerRef}
-                      key={getLineItemIndex(lineItem)}
-                      id={`line-item-${getLineItemIndex(lineItem)}`}
-                      tabIndex={index + 1}
-                      {...provided.draggableProps}
-                    >
-                      {columns.map((column, columnIndex, { length }) => (
-                        <Td
-                          width={resolveColumnWidth(column)}
-                          key={columnIndex}
-                        >
-                          {length - 1 !== columnIndex && (
-                            <div
-                              className={classNames({
-                                'flex justify-between items-center space-x-3':
-                                  columnIndex === 0,
-                              })}
-                            >
-                              {columnIndex === 0 ? (
-                                <button
-                                  {...provided.dragHandleProps}
-                                  onMouseEnter={(e) => e.currentTarget.focus()}
-                                >
-                                  <AlignJustify size={18} />
-                                </button>
-                              ) : null}
+              {items.map((lineItem, index) => {
+                const itemIndex =
+                  getLineItemIndex(lineItem) >= 0
+                    ? getLineItemIndex(lineItem)
+                    : index;
+                const draggableId =
+                  (lineItem as any)._id ||
+                  (lineItem as any).id ||
+                  `line-item-${index}`;
 
-                              {resolveInputField(
-                                column,
-                                getLineItemIndex(lineItem)
-                              )}
-                            </div>
-                          )}
+                return (
+                  <Draggable
+                    key={draggableId}
+                    draggableId={String(draggableId)}
+                    index={index}
+                  >
+                    {(provided) => (
+                      <Tr
+                        innerRef={provided.innerRef}
+                        key={draggableId}
+                        id={`line-item-${itemIndex}`}
+                        tabIndex={index + 1}
+                        {...provided.draggableProps}
+                      >
+                        {columns.map((column, columnIndex, { length }) => (
+                          <Td
+                            width={resolveColumnWidth(column)}
+                            key={columnIndex}
+                          >
+                            {length - 1 !== columnIndex && (
+                              <div
+                                className={classNames({
+                                  'flex justify-between items-center space-x-3':
+                                    columnIndex === 0,
+                                })}
+                              >
+                                {columnIndex === 0 ? (
+                                  <button
+                                    type="button"
+                                    {...provided.dragHandleProps}
+                                    onMouseEnter={(e) => e.currentTarget.focus()}
+                                  >
+                                    <AlignJustify size={18} />
+                                  </button>
+                                ) : null}
 
-                          {length - 1 === columnIndex && (
-                            <div className="flex justify-between items-center">
-                              {resolveInputField(
-                                column,
-                                getLineItemIndex(lineItem)
-                              )}
+                                {resolveInputField(column, itemIndex)}
+                              </div>
+                            )}
+
+                            {length - 1 === columnIndex && (
+                              <div className="flex justify-between items-center">
+                                {resolveInputField(column, itemIndex)}
 
                               {resource && (
                                 <button
@@ -185,7 +190,8 @@ export function ProductsTable(props: Props) {
                     </Tr>
                   )}
                 </Draggable>
-              ))}
+              );
+            })}
 
               {provided.placeholder}
 

@@ -26,7 +26,7 @@ export function useBlankScheduleQuery() {
     queryFn: () =>
       request('GET', endpoint('/api/v1/task_schedulers/create')).then(
         (response: GenericSingleResourceResponse<Schedule>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,
@@ -50,7 +50,7 @@ export function useScheduleQuery(params: ScheduleParams) {
         endpoint('/api/v1/task_schedulers/:id', { id: params.id })
       ).then(
         (response: GenericSingleResourceResponse<Schedule>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,

@@ -85,10 +85,10 @@ export function useGatewayUtilities(params: Params) {
     }
   };
 
-  const removeDuplicatedGateways = (gateways: CompanyGateway[]) => {
+  const removeDuplicatedGateways = (gateways: CompanyGateway[] = []) => {
     const uniqueGateways: Record<string, CompanyGateway> = {};
 
-    gateways.forEach((item) => {
+    (gateways ?? []).forEach((item) => {
       if (!uniqueGateways[item.id]) {
         uniqueGateways[item.id] = item;
       }
@@ -102,7 +102,11 @@ export function useGatewayUtilities(params: Params) {
       return;
     }
 
-    const apiGateways = companyGatewaysResponse.data.data as CompanyGateway[];
+    const apiGateways = (Array.isArray(companyGatewaysResponse?.data?.data)
+      ? companyGatewaysResponse.data.data
+      : Array.isArray(companyGatewaysResponse?.data)
+        ? companyGatewaysResponse.data
+        : []) as CompanyGateway[];
     const isActiveStatusOnly = status === 'active';
 
     // Archived/deleted gateways are removed from company_gateway_ids on bulk

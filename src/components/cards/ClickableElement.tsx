@@ -17,27 +17,35 @@ const ButtonStyled = styled.button`
   color: ${(props) => props.theme.color};
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
-  }: 
+  }
+`;
+
+const DivStyled = styled.div`
+  color: ${(props) => props.theme.color};
+  &:hover {
+    background-color: ${(props) => props.theme.hoverColor};
+  }
 `;
 
 const AStyled = styled.a`
   color: ${(props) => props.theme.color};
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
-  }: 
+  }
 `;
 
 const LinkStyled = styled(Link)`
   color: ${(props) => props.theme.color};
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
-  }: 
+  }
 `;
 
 interface Props extends CommonProps {
   to?: string;
   href?: string;
   disableNavigation?: boolean;
+  as?: 'div' | 'button';
 }
 
 export function ClickableElement(props: Props) {
@@ -69,6 +77,25 @@ export function ClickableElement(props: Props) {
       >
         {props.children}
       </AStyled>
+    );
+  }
+
+  if (props.as === 'div') {
+    return (
+      <DivStyled
+        theme={{ hoverColor: colors.$4, color: colors.$3 }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            props.onClick?.(e as any);
+          }
+        }}
+        onClick={props.onClick}
+        className={`${classes} cursor-pointer`}
+      >
+        {props.children}
+      </DivStyled>
     );
   }
 

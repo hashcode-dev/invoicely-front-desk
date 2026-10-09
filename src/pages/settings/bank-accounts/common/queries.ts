@@ -35,7 +35,7 @@ export function useBankAccountQuery(params: BankAccountParams) {
         endpoint('/api/v1/bank_integrations/:id', { id: params.id })
       ).then(
         (response: GenericSingleResourceResponse<BankAccount>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     enabled: (params.enabled ?? true) && (isAdmin || isOwner),
@@ -57,7 +57,7 @@ export function useBankAccountsQuery(params?: Params) {
         })
       ).then(
         (response: GenericSingleResourceResponse<BankAccount[]>) =>
-          response.data.data
+          response?.data?.data ?? []
       ),
 
     staleTime: Infinity,
@@ -73,7 +73,7 @@ export function useBlankBankAccountQuery() {
     queryFn: () =>
       request('GET', endpoint('/api/v1/bank_integrations/create')).then(
         (response: GenericSingleResourceResponse<BankAccount>) =>
-          response.data.data
+          response?.data?.data ?? null
       ),
 
     staleTime: Infinity,
