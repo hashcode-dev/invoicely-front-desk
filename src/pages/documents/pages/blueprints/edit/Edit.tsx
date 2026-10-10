@@ -76,29 +76,29 @@ export default function Edit() {
             <div className="space-y-4">
               <Element leftSide={t('name')}>
                 <div className="text-sm text-gray-600">
-                  {blueprintResponse?.data.data.name}
+                  {blueprintResponse?.data?.data?.name}
                 </div>
               </Element>
               <Element leftSide={t('description')}>
                 <div className="text-sm text-gray-600">
-                  {blueprintResponse?.data.data.description ||
+                  {blueprintResponse?.data?.data?.description ||
                     t('no_description')}
                 </div>
               </Element>
               <Element leftSide={t('created_at')}>
                 <div className="text-sm text-gray-600">
-                  {blueprintResponse?.data.data.created_at
+                  {blueprintResponse?.data?.data?.created_at
                     ? new Date(
-                        blueprintResponse?.data.data.created_at
+                        blueprintResponse?.data?.data?.created_at
                       ).toLocaleDateString()
                     : '-'}
                 </div>
               </Element>
               <Element leftSide={t('updated_at')}>
                 <div className="text-sm text-gray-600">
-                  {blueprintResponse?.data.data.updated_at
+                  {blueprintResponse?.data?.data?.updated_at
                     ? new Date(
-                        blueprintResponse?.data.data.updated_at
+                        blueprintResponse?.data?.data?.updated_at
                       ).toLocaleDateString()
                     : '-'}
                 </div>

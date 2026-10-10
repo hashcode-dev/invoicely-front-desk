@@ -35,10 +35,12 @@ export function useTaskQuery(params: TaskParams) {
       request(
         'GET',
         endpoint('/api/v1/tasks/:id?include=status', { id: params.id })
-      ).then((response) => response.data.data),
+      )
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     staleTime: Infinity,
-    enabled: params.enabled ?? Boolean(params.id),
+    enabled: (params.enabled ?? true) && Boolean(params.id),
   });
 }
 

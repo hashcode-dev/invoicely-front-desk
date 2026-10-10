@@ -59,7 +59,7 @@ export function Activity() {
           className="flex flex-col overflow-y-auto px-4"
           style={{ height: '18.9rem' }}
         >
-          {data?.data.data &&
+          {Array.isArray(data?.data?.data) &&
             data.data.data.map((record: ActivityRecord, index: number) => (
               <React.Fragment key={index}>
                 {activityElement(record)}

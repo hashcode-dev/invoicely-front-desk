@@ -111,7 +111,7 @@ export function ProductsTable(props: Props) {
         ))}
       </Thead>
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="product-table">
+        <Droppable droppableId={`product-table-${props.type}`}>
           {(provided) => (
             <Tbody {...provided.droppableProps} innerRef={provided.innerRef}>
               {items.map((lineItem, index) => {
@@ -137,6 +137,7 @@ export function ProductsTable(props: Props) {
                         id={`line-item-${itemIndex}`}
                         tabIndex={index + 1}
                         {...provided.draggableProps}
+                        {...provided.dragHandleProps}
                       >
                         {columns.map((column, columnIndex, { length }) => (
                           <Td
@@ -153,7 +154,6 @@ export function ProductsTable(props: Props) {
                                 {columnIndex === 0 ? (
                                   <button
                                     type="button"
-                                    {...provided.dragHandleProps}
                                     onMouseEnter={(e) => e.currentTarget.focus()}
                                   >
                                     <AlignJustify size={18} />

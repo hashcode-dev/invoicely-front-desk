@@ -52,14 +52,14 @@ export function Edit() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      num_days: data?.data.data.num_days || 0,
+      num_days: data?.data?.data?.num_days || 0,
     },
     onSubmit: (values: Partial<PaymentTerm>) => {
       toast.processing();
 
       request(
         'PUT',
-        endpoint('/api/v1/payment_terms/:id', { id: data?.data.data.id }),
+        endpoint('/api/v1/payment_terms/:id', { id: data?.data?.data?.id }),
         values
       )
         .then(() => toast.success('updated_payment_term'))

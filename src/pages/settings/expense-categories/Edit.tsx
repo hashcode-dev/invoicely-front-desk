@@ -103,9 +103,13 @@ export function Edit() {
   };
 
   useEffect(() => {
-    setDocumentTitle(data?.data.data.name);
+    if (data?.data?.data?.name) {
+      setDocumentTitle(data.data.data.name);
+    }
 
-    setExpenseCategory(data?.data.data);
+    if (data?.data?.data) {
+      setExpenseCategory(data.data.data);
+    }
   }, [data]);
 
   return (

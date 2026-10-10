@@ -23,7 +23,9 @@ export function useClientResolver() {
         request(
           'GET',
           endpoint('/api/v1/clients/:id?include=group_settings', { id })
-        ).then((response) => response.data.data),
+        )
+          .then((response) => response?.data?.data ?? ({} as Client))
+          .catch(() => ({} as Client)),
       staleTime: Infinity,
     });
   };

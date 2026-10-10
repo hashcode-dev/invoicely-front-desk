@@ -140,7 +140,7 @@ export function Create() {
 
     const isDuplicating =
       gateway &&
-      companyGatewaysResponse?.data.data.some(
+      companyGatewaysResponse?.data?.data?.some(
         (companyGateway: CompanyGateway) =>
           companyGateway.gateway_key === gateway?.key
       );
@@ -286,7 +286,7 @@ export function Create() {
   }, [gateways]);
 
   useEffect(() => {
-    if (blankCompanyGateway?.data.data && companyGateway === undefined) {
+    if (blankCompanyGateway?.data?.data && companyGateway === undefined) {
       setCompanyGateway(blankCompanyGateway.data.data);
     }
   }, [blankCompanyGateway, gateway]);

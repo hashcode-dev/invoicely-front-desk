@@ -71,14 +71,14 @@ export function Edit() {
 
   useEffect(() => {
     if (
-      response?.data.data &&
+      response?.data?.data &&
       response.data.data.email === currentUser?.email
     ) {
       navigate('/settings/user_details');
-    } else {
-      setUser(response?.data.data);
+    } else if (response?.data?.data) {
+      setUser(response.data.data);
     }
-  }, [response?.data.data]);
+  }, [response?.data?.data]);
 
   const onSave = () => {
     if (isFormBusy) {

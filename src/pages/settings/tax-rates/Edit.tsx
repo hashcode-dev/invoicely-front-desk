@@ -53,7 +53,9 @@ export function Edit() {
   const colors = useColorScheme();
 
   useEffect(() => {
-    setDocumentTitle(data?.data.data.name);
+    if (data?.data?.data?.name) {
+      setDocumentTitle(data.data.data.name);
+    }
   }, [data]);
 
   const invalidatePaymentTermCache = () => {
@@ -63,8 +65,8 @@ export function Edit() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: data?.data.data.name || '',
-      rate: data?.data.data.rate || 0,
+      name: data?.data?.data?.name || '',
+      rate: data?.data?.data?.rate || 0,
     },
     onSubmit: (value) => {
       setErrors({});

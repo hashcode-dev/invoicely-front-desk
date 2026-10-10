@@ -60,7 +60,7 @@ export default function Product() {
     },
   ];
 
-  const tabs = useTabs({ product: productData?.data.data });
+  const tabs = useTabs({ product: productData?.data?.data });
 
   const [searchParams, setSearchParams] = useSearchParams();
 

@@ -45,7 +45,9 @@ export function useProjectQuery(params: { id: string | undefined }) {
       request(
         'GET',
         endpoint('/api/v1/projects/:id?include=client', { id: params.id })
-      ).then((response) => response.data.data),
+      )
+        .then((response) => response?.data?.data ?? null)
+        .catch(() => null),
 
     staleTime: Infinity,
     enabled: Boolean(params.id),
@@ -66,10 +68,12 @@ export function useProjectsQuery(params?: Params) {
         endpoint('/api/v1/projects?status=:status&per_page=1000', {
           status: params?.status?.join(',') ?? 'all',
         })
-      ).then(
-        (response: GenericSingleResourceResponse<Project[]>) =>
-          response.data.data
-      ),
+      )
+        .then(
+          (response: GenericSingleResourceResponse<Project[]>) =>
+            response?.data?.data ?? []
+        )
+        .catch(() => []),
 
     staleTime: Infinity,
   });

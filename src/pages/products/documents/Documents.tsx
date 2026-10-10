@@ -48,12 +48,12 @@ export default function Documents() {
           onSuccess={invalidateQuery}
           disableUpload={
             !hasPermission('edit_product') &&
-            !entityAssigned(product?.data.data)
+            !entityAssigned(product?.data?.data)
           }
           widgetOnly
         />
 
-        {product?.data.data && (
+        {product?.data?.data && (
           <DocumentsTable
             documents={product.data.data.documents}
             onDocumentDelete={invalidateQuery}

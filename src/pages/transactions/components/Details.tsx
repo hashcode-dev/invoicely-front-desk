@@ -123,7 +123,7 @@ export function Details(props: Props) {
       );
 
       setMatchedExpenses(filteredMatchedExpenses);
-      setMatchedExpenseCategory(expenseCategoryResponse?.data.data);
+      setMatchedExpenseCategory(expenseCategoryResponse?.data?.data);
       setMatchedPayment(paymentResponse ?? undefined);
     }
   }, [

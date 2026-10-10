@@ -61,7 +61,7 @@ export function Create() {
 
   useEffect(() => {
     setUser({
-      ...response?.data.data,
+      ...response?.data?.data,
       company_user: {
         permissions: '',
         notifications: {
@@ -84,7 +84,7 @@ export function Create() {
         ninja_portal_url: '',
       },
     });
-  }, [response?.data.data]);
+  }, [response?.data?.data]);
 
   const onSave = (password: string, isPasswordRequired: boolean) => {
     if (isFormBusy) {

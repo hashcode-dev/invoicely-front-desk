@@ -18,11 +18,12 @@ export default function useDoesTaxRateExistByComboValue() {
   });
 
   return (taxName: string, taxRate: number) => {
-    if (!taxes?.data.data || !taxName || !taxRate) return true;
+    const taxList = (taxes?.data?.data ?? taxes?.data ?? []) as TaxRate[];
+    if (!Array.isArray(taxList) || !taxList.length || !taxName || !taxRate) return true;
 
-    return taxes?.data.data.some(
+    return taxList.some(
       (tax: TaxRate) =>
-        tax.name.toLowerCase() === taxName.toLowerCase() && tax.rate === taxRate
+        tax?.name?.toLowerCase() === taxName.toLowerCase() && tax?.rate === taxRate
     );
   };
 }

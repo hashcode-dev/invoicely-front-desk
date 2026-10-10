@@ -11,18 +11,19 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
+import { Vendor } from '$app/common/interfaces/vendor';
 
 export function useVendorResolver() {
   const queryClient = useQueryClient();
 
   const find = (id: string) => {
-    return queryClient.fetchQuery({
+    return queryClient.fetchQuery<Vendor>({
       queryKey: ['/api/v1/vendors', id],
 
       queryFn: () =>
-        request('GET', endpoint('/api/v1/vendors/:id', { id })).then(
-          (response) => response.data.data
-        ),
+        request('GET', endpoint('/api/v1/vendors/:id', { id }))
+          .then((response) => response?.data?.data ?? ({} as Vendor))
+          .catch(() => ({} as Vendor)),
 
       staleTime: Infinity,
     });

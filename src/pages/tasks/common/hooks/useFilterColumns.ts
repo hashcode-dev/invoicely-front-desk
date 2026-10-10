@@ -20,13 +20,18 @@ export function useFilterColumns() {
       column_id: 'assigned_user_id',
       query_identifier: 'assigned_user_ids',
       options:
-        users?.data.data.map((user: User) => ({
+        (Array.isArray(users?.data?.data)
+          ? users.data.data
+          : Array.isArray(users?.data)
+          ? users.data
+          : []
+        ).map((user: User) => ({
           label:
             user.first_name || user.last_name
               ? `${user.first_name} ${user.last_name}`
               : user.email,
           value: user.id,
-        })) || [],
+        })),
     },
     {
       column_id: 'project_id',
