@@ -161,7 +161,6 @@ export function Tabs(props: Props) {
                 style={{
                   width: horizontalPaddingWidth,
                   height: paddingTabsHeight,
-                  borderBottom: `1px solid ${colors.$20}`,
                   flexShrink: 0,
                 }}
               />
@@ -188,7 +187,7 @@ export function Tabs(props: Props) {
             )}
 
             <div
-              className={classNames('border-b border-slate-200 dark:border-slate-800', {
+              className={classNames({
                 'flex-1': !withHorizontalPadding || fullRightPadding,
               })}
               style={{
@@ -208,8 +207,8 @@ export function Tabs(props: Props) {
 
           {props.rightSide && (
             <div
-              className="flex items-center border-b pl-4"
-              style={{ borderColor: colors.$20, height: '2.8rem' }}
+              className="flex items-center pl-4"
+              style={{ height: '2.8rem' }}
             >
               {props.rightSide}
             </div>

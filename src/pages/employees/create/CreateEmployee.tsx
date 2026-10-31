@@ -117,9 +117,6 @@ export default function CreateEmployee() {
       title={t('new_employee', 'New Employee')}
       breadcrumbs={pages}
       docsLink="/docs/advanced-settings/#user_management"
-      onSaveClick={handleSave}
-      disableSaveButton={isSubmitting}
-      saveButtonLabel={t('create_employee', 'Create Employee')}
     >
       {orgId && (
         <div className="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-zinc-800/80 border border-blue-200 dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
