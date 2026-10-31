@@ -32,6 +32,26 @@ export function ScrollToTop(props: any) {
       return;
     }
 
+    if (location.hash) {
+      const targetId = location.hash.replace(/^#/, '');
+      if (targetId) {
+        const scrollToTarget = () => {
+          const element = document.getElementById(targetId);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+            return true;
+          }
+          return false;
+        };
+
+        if (!scrollToTarget()) {
+          const rafId = requestAnimationFrame(scrollToTarget);
+          return () => cancelAnimationFrame(rafId);
+        }
+        return;
+      }
+    }
+
     window.scrollTo(0, 0);
   }, [location]);
 
