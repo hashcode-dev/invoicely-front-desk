@@ -90,14 +90,6 @@ export function LoginPage() {
 
       {/* ── Right form panel ── */}
       <div className="login-form-panel">
-        <button
-          type="button"
-          className="login-back-home"
-          onClick={() => navigate('/')}
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-          Back to Home
-        </button>
         <div className="login-form-card">
           <div className="login-form-header">
             <h2 className="login-form-title">Welcome back</h2>
@@ -111,7 +103,6 @@ export function LoginPage() {
               onError={handleGoogleError}
               theme="outline"
               size="large"
-              width="360"
               text="signin_with"
               shape="rectangular"
             />
