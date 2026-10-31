@@ -61,11 +61,18 @@ export function LoginPage() {
       {/* ── Left branding panel ── */}
       <div className="login-brand-panel">
         <div className="login-brand-inner">
-          <div className="login-logo-wrap">
-            <span className="material-symbols-outlined login-logo-icon">account_balance</span>
+          <div
+            className="login-brand-header"
+            onClick={() => navigate('/')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/')}
+          >
+            <div className="login-brand-icon">
+              <span className="material-symbols-outlined">account_balance</span>
+            </div>
+            <span className="login-brand-name">Invoicely</span>
           </div>
-          <h1 className="login-brand-name">Invoicely</h1>
-          <p className="login-brand-tagline">Enterprise Suite</p>
 
           <div className="login-features">
             {[
