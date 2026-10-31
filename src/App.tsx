@@ -377,6 +377,8 @@ export function App() {
 
         {/* Auth routes */}
         <Route element={<LoginPage />} path="/login" />
+        <Route element={<LoginPage initialMode="employee" />} path="/employee-login" />
+        <Route element={<LoginPage initialMode="employee" />} path="/login/employee" />
 
         {/* Protected app routes — wrapped in Shell + RequireAuth */}
         <Route

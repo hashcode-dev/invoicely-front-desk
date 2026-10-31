@@ -12,6 +12,7 @@ import { AxiosError } from 'axios';
 import classNames from 'classnames';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { useColorScheme } from '$app/common/colors';
 import {
   authenticatePasskey,
@@ -39,12 +40,27 @@ import { OrDivider } from './components/OrDivider';
 import { SignInProviders } from './components/SignInProviders';
 
 type Step = 'email' | 'credentials';
+type LoginMode = 'organization' | 'employee';
 
-export function Login() {
+interface Props {
+  initialMode?: LoginMode;
+}
+
+export function Login(props: Props) {
   useTitle('login');
 
   const accentColor = useAccentColor();
   const colors = useColorScheme();
+  const [searchParams] = useSearchParams();
+
+  const defaultMode: LoginMode =
+    props.initialMode ||
+    (searchParams.get('mode') === 'employee' ? 'employee' : 'organization');
+
+  const [loginMode, setLoginMode] = useState<LoginMode>(defaultMode);
+  const [organizationId, setOrganizationId] = useState<string>('');
+  const [employeeId, setEmployeeId] = useState<string>('');
+  const [employeePassword, setEmployeePassword] = useState<string>('');
 
   const [message, setMessage] = useState<string | undefined>(undefined);
   const [errors, setErrors] = useState<LoginValidation | undefined>(undefined);
@@ -229,6 +245,41 @@ export function Login() {
     setStep('email');
   };
 
+  const handleEmployeeLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(undefined);
+    setErrors(undefined);
+
+    if (!organizationId.trim()) {
+      setMessage('Organization ID is required');
+      return;
+    }
+    if (!employeeId.trim()) {
+      setMessage('Employee ID or Email is required');
+      return;
+    }
+    if (!employeePassword) {
+      setMessage('Password is required');
+      return;
+    }
+
+    setIsFormBusy(true);
+
+    request('POST', endpoint('/api/v1/auth/employee_login'), {
+      organization_id: organizationId.trim(),
+      employee_id: employeeId.trim(),
+      password: employeePassword,
+    })
+      .then((response) => login(response))
+      .catch((error) => {
+        const errorMsg =
+          error.response?.data?.message ||
+          (t('invalid_credentials') as string);
+        setMessage(errorMsg);
+      })
+      .finally(() => setIsFormBusy(false));
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-8">
       <Header />
@@ -242,175 +293,255 @@ export function Login() {
             {t('login')}
           </h2>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-
-              if (isEmailStep) {
-                handleContinue();
-              } else {
-                handleLogin(e.currentTarget);
-              }
-            }}
-            className="my-6 space-y-4"
+          <div
+            className="flex rounded-lg p-1 my-4 border text-sm font-medium shadow-inner"
+            style={{ backgroundColor: colors.$2, borderColor: colors.$5 }}
           >
-            {isEmailStep && (
-              <InputField
-                type="email"
-                autoComplete="username"
-                label={t('email_address')}
-                errorMessage={errors?.email}
-                name="email"
-                value={email}
-                onValueChange={(value) => setEmail(value)}
-                changeOverride
-              />
-            )}
+            <button
+              type="button"
+              className={`flex-1 py-2 px-3 rounded-md transition-all text-center flex items-center justify-center space-x-2 ${
+                loginMode === 'organization'
+                  ? 'bg-blue-600 text-white shadow font-semibold'
+                  : 'hover:text-gray-900 text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-800'
+              }`}
+              onClick={() => {
+                setLoginMode('organization');
+                setMessage(undefined);
+              }}
+            >
+              <span>🏢 Organization Login</span>
+            </button>
+            <button
+              type="button"
+              className={`flex-1 py-2 px-3 rounded-md transition-all text-center flex items-center justify-center space-x-2 ${
+                loginMode === 'employee'
+                  ? 'bg-blue-600 text-white shadow font-semibold'
+                  : 'hover:text-gray-900 text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-800'
+              }`}
+              onClick={() => {
+                setLoginMode('employee');
+                setMessage(undefined);
+              }}
+            >
+              <span>👤 Employee Login</span>
+            </button>
+          </div>
 
-            {!isEmailStep && (
-              <>
-                <input
-                  type="hidden"
-                  name="email"
-                  value={confirmedEmail}
-                  readOnly
-                  autoComplete="username"
-                />
+          {loginMode === 'organization' ? (
+            <>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
 
-                <div
-                  className="flex items-center justify-between rounded px-3 py-2 border"
-                  style={{ borderColor: colors.$5 }}
-                >
-                  <span
-                    className="truncate text-sm"
-                    style={{ color: colors.$3 }}
-                  >
-                    {confirmedEmail}
-                  </span>
-
-                  <div
-                    className="text-sm hover:underline cursor-pointer shrink-0 ml-3"
-                    onClick={handleBackToEmail}
-                    style={{ color: accentColor }}
-                  >
-                    {t('change')}
-                  </div>
-                </div>
-
-                {showPassword && (
-                  <>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-x-3">
-                        <InputLabel className="truncate">
-                          {t('password')}
-                        </InputLabel>
-
-                        <Link className="truncate" to="/recover_password">
-                          {t('forgot_password')}
-                        </Link>
-                      </div>
-                    </div>
-
-                    <InputField
-                      type="password"
-                      autoComplete="current-password"
-                      id="password"
-                      errorMessage={errors?.password}
-                      name="password"
-                      value={password}
-                      onValueChange={(value) => setPassword(value)}
-                      changeOverride
-                    />
-                  </>
-                )}
-
-                {showTwoFactor && (
+                  if (isEmailStep) {
+                    handleContinue();
+                  } else {
+                    handleLogin(e.currentTarget);
+                  }
+                }}
+                className="my-6 space-y-4"
+              >
+                {isEmailStep && (
                   <InputField
-                    type="text"
-                    autoComplete="one-time-code"
-                    label={`2FA - ${t('one_time_password')}`}
-                    id="one_time_password"
-                    errorMessage={errors?.one_time_password}
-                    name="one_time_password"
-                    value={oneTimePassword}
-                    onValueChange={(value) => setOneTimePassword(value)}
+                    type="email"
+                    autoComplete="username"
+                    label={t('email_address')}
+                    errorMessage={errors?.email}
+                    name="email"
+                    value={email}
+                    onValueChange={(value) => setEmail(value)}
                     changeOverride
                   />
                 )}
 
-                {(showSecret || showTwoFactor) && (
-                  <div className="space-y-2">
-                    <div
-                      className={classNames(
-                        'flex flex-col lg:flex-row items-center',
-                        {
-                          'justify-between': showSecret,
-                          'justify-end': isHosted(),
-                        }
-                      )}
-                    >
-                      {showSecret && <InputLabel>{t('secret')}</InputLabel>}
+                {!isEmailStep && (
+                  <>
+                    <input
+                      type="hidden"
+                      name="email"
+                      value={confirmedEmail}
+                      readOnly
+                      autoComplete="username"
+                    />
 
-                      {isHosted() && showTwoFactor && (
-                        <div
-                          className="text-sm hover:underline cursor-pointer"
-                          onClick={() => setIsDisable2faModalOpen(true)}
-                          style={{ color: accentColor }}
-                        >
-                          {t('disable_2fa')}
-                        </div>
-                      )}
+                    <div
+                      className="flex items-center justify-between rounded px-3 py-2 border"
+                      style={{ borderColor: colors.$5 }}
+                    >
+                      <span
+                        className="truncate text-sm"
+                        style={{ color: colors.$3 }}
+                      >
+                        {confirmedEmail}
+                      </span>
+
+                      <div
+                        className="text-sm hover:underline cursor-pointer shrink-0 ml-3"
+                        onClick={handleBackToEmail}
+                        style={{ color: accentColor }}
+                      >
+                        {t('change')}
+                      </div>
                     </div>
+
+                    {showPassword && (
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-x-3">
+                            <InputLabel className="truncate">
+                              {t('password')}
+                            </InputLabel>
+
+                            <Link className="truncate" to="/recover_password">
+                              {t('forgot_password')}
+                            </Link>
+                          </div>
+                        </div>
+
+                        <InputField
+                          type="password"
+                          autoComplete="current-password"
+                          id="password"
+                          errorMessage={errors?.password}
+                          name="password"
+                          value={password}
+                          onValueChange={(value) => setPassword(value)}
+                          changeOverride
+                        />
+                      </>
+                    )}
+
+                    {showTwoFactor && (
+                      <InputField
+                        type="text"
+                        autoComplete="one-time-code"
+                        label={`2FA - ${t('one_time_password')}`}
+                        id="one_time_password"
+                        errorMessage={errors?.one_time_password}
+                        name="one_time_password"
+                        value={oneTimePassword}
+                        onValueChange={(value) => setOneTimePassword(value)}
+                        changeOverride
+                      />
+                    )}
+
+                    {(showSecret || showTwoFactor) && (
+                      <div className="space-y-2">
+                        <div
+                          className={classNames(
+                            'flex flex-col lg:flex-row items-center',
+                            {
+                              'justify-between': showSecret,
+                              'justify-end': isHosted(),
+                            }
+                          )}
+                        >
+                          {showSecret && <InputLabel>{t('secret')}</InputLabel>}
+
+                          {isHosted() && showTwoFactor && (
+                            <div
+                              className="text-sm hover:underline cursor-pointer"
+                              onClick={() => setIsDisable2faModalOpen(true)}
+                              style={{ color: accentColor }}
+                            >
+                              {t('disable_2fa')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {showSecret && (
+                      <InputField
+                        type="password"
+                        autoComplete="on"
+                        placeholder={t('plaid_optional')}
+                        name="secret"
+                      />
+                    )}
+                  </>
+                )}
+
+                <ErrorMessage className="mt-4">{message}</ErrorMessage>
+
+                {(isEmailStep || showPassword) && (
+                  <Button disabled={isFormBusy} className="mt-4" variant="block">
+                    {isEmailStep ? t('continue') : t('login')}
+                  </Button>
+                )}
+
+                {!isEmailStep && isWebAuthnSupported && (
+                  <div className="space-y-4">
+                    {showPassword && <OrDivider />}
+
+                    <Button
+                      behavior="button"
+                      type={showPassword ? 'secondary' : 'primary'}
+                      disabled={isFormBusy}
+                      variant="block"
+                      onClick={handlePasskeyLogin}
+                    >
+                      {t('login_with_passkey')}
+                    </Button>
                   </div>
                 )}
+              </form>
 
-                {showSecret && (
-                  <InputField
-                    type="password"
-                    autoComplete="on"
-                    placeholder={t('plaid_optional')}
-                    name="secret"
-                  />
-                )}
-              </>
-            )}
+              {isHosted() && isEmailStep && (
+                <div className="mb-6 space-y-6">
+                  <OrDivider />
 
-            <ErrorMessage className="mt-4">{message}</ErrorMessage>
+                  <SignInProviders />
+                </div>
+              )}
 
-            {(isEmailStep || showPassword) && (
-              <Button disabled={isFormBusy} className="mt-4" variant="block">
-                {isEmailStep ? t('continue') : t('login')}
-              </Button>
-            )}
-
-            {!isEmailStep && isWebAuthnSupported && (
-              <div className="space-y-4">
-                {showPassword && <OrDivider />}
-
-                <Button
-                  behavior="button"
-                  type={showPassword ? 'secondary' : 'primary'}
-                  disabled={isFormBusy}
-                  variant="block"
-                  onClick={handlePasskeyLogin}
-                >
-                  {t('login_with_passkey')}
-                </Button>
+              <div className="flex justify-center">
+                {isHosted() && <Link to="/register">{t('register_label')}</Link>}
               </div>
-            )}
-          </form>
+            </>
+          ) : (
+            <form onSubmit={handleEmployeeLogin} className="my-6 space-y-4">
+              <InputField
+                label="Organization ID"
+                placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                name="organization_id"
+                value={organizationId}
+                onValueChange={(val) => setOrganizationId(val)}
+                changeOverride
+                required
+              />
 
-          {isHosted() && isEmailStep && (
-            <div className="mb-6 space-y-6">
-              <OrDivider />
+              <InputField
+                label="Employee ID or Email"
+                placeholder="e.g. EMP-101 or alice@company.com"
+                name="employee_id"
+                value={employeeId}
+                onValueChange={(val) => setEmployeeId(val)}
+                changeOverride
+                required
+              />
 
-              <SignInProviders />
-            </div>
+              <div className="space-y-2">
+                <InputLabel>{t('password')}</InputLabel>
+                <InputField
+                  type="password"
+                  autoComplete="current-password"
+                  id="employee_password"
+                  name="password"
+                  value={employeePassword}
+                  onValueChange={(val) => setEmployeePassword(val)}
+                  changeOverride
+                  required
+                />
+              </div>
+
+              <ErrorMessage className="mt-4">{message}</ErrorMessage>
+
+              <Button disabled={isFormBusy} className="mt-4" variant="block">
+                Sign in to Workspace
+              </Button>
+            </form>
           )}
-
-          <div className="flex justify-center">
-            {isHosted() && <Link to="/register">{t('register_label')}</Link>}
-          </div>
         </div>
 
         {isHosted() && (

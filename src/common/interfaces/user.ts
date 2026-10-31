@@ -46,6 +46,7 @@ export interface User extends Timestamps {
   last_name: string;
   google_2fa_secret: boolean;
   has_password: boolean;
+  password?: string;
   passkey_enabled?: boolean;
   passkey_count?: number;
   is_deleted: boolean;
@@ -62,4 +63,5 @@ export interface User extends Timestamps {
   referral_code?: string;
   referral_meta?: ReferralMeta;
   settings?: UserSettings;
+  organization_id?: string;
 }
