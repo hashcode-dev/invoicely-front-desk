@@ -25,10 +25,10 @@ export function LoginPage(props: Props) {
   const [password, setPassword] = useState('password');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Employee Login State
-  const [organizationId, setOrganizationId] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
-  const [employeePassword, setEmployeePassword] = useState('');
+  // Employee Login State (pre-filled with default test credentials)
+  const [organizationId, setOrganizationId] = useState('550e8400-e29b-41d4-a716-446655440000');
+  const [employeeId, setEmployeeId] = useState('employee@invoicely.com');
+  const [employeePassword, setEmployeePassword] = useState('password');
   const [showEmployeePassword, setShowEmployeePassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);

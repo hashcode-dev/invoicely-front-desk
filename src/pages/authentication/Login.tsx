@@ -58,9 +58,9 @@ export function Login(props: Props) {
     (searchParams.get('mode') === 'employee' ? 'employee' : 'organization');
 
   const [loginMode, setLoginMode] = useState<LoginMode>(defaultMode);
-  const [organizationId, setOrganizationId] = useState<string>('');
-  const [employeeId, setEmployeeId] = useState<string>('');
-  const [employeePassword, setEmployeePassword] = useState<string>('');
+  const [organizationId, setOrganizationId] = useState<string>('550e8400-e29b-41d4-a716-446655440000');
+  const [employeeId, setEmployeeId] = useState<string>('employee@invoicely.com');
+  const [employeePassword, setEmployeePassword] = useState<string>('password');
 
   const [message, setMessage] = useState<string | undefined>(undefined);
   const [errors, setErrors] = useState<LoginValidation | undefined>(undefined);
