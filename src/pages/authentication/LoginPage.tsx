@@ -211,223 +211,229 @@ export function LoginPage(props: Props) {
             </button>
           </div>
 
-          {loginMode === 'organization' ? (
-            <>
-              {/* Google Login */}
-              <div className="login-google-wrap">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="outline"
-                  size="large"
-                  text="signin_with"
-                  shape="rectangular"
-                />
-              </div>
-
-              {/* Divider */}
-              <div className="login-divider">
-                <span className="login-divider-line" />
-                <span className="login-divider-text">or continue with email</span>
-                <span className="login-divider-line" />
-              </div>
-
-              {/* Email / Password Form */}
-              <form className="login-form" onSubmit={handleOrgSubmit} noValidate>
-                <div className="login-field-group">
-                  <label className="login-label" htmlFor="login-email">
-                    Email address
-                  </label>
-                  <div className="login-input-wrap">
-                    <span className="login-input-icon material-symbols-outlined">mail</span>
-                    <input
-                      id="login-email"
-                      className="login-input"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="you@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
+          {/* ── Mode Container with fixed space & smooth fade ── */}
+          <div className="login-mode-container">
+            {loginMode === 'organization' ? (
+              <div key="org" className="login-mode-content">
+                {/* Google Login */}
+                <div className="login-google-wrap">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    theme="outline"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                  />
                 </div>
 
-                <div className="login-field-group">
-                  <div className="login-label-row">
-                    <label className="login-label" htmlFor="login-password">
-                      Password
+                {/* Divider */}
+                <div className="login-divider">
+                  <span className="login-divider-line" />
+                  <span className="login-divider-text">or continue with email</span>
+                  <span className="login-divider-line" />
+                </div>
+
+                {/* Email / Password Form */}
+                <form className="login-form" onSubmit={handleOrgSubmit} noValidate>
+                  <div className="login-field-group">
+                    <label className="login-label" htmlFor="login-email">
+                      Email address
                     </label>
-                    <button type="button" className="login-forgot-link">
-                      Forgot password?
-                    </button>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon material-symbols-outlined">mail</span>
+                      <input
+                        id="login-email"
+                        className="login-input"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@company.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="login-input-wrap">
-                    <span className="login-input-icon material-symbols-outlined">lock</span>
-                    <input
-                      id="login-password"
-                      className="login-input login-input-password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="login-toggle-password"
-                      onClick={() => setShowPassword((v) => !v)}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      <span className="material-symbols-outlined">
-                        {showPassword ? 'visibility_off' : 'visibility'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
 
-                {error && (
-                  <div className="login-error" role="alert">
-                    <span className="material-symbols-outlined">error</span>
-                    {error}
+                  <div className="login-field-group">
+                    <div className="login-label-row">
+                      <label className="login-label" htmlFor="login-password">
+                        Password
+                      </label>
+                      <button type="button" className="login-forgot-link">
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon material-symbols-outlined">lock</span>
+                      <input
+                        id="login-password"
+                        className="login-input login-input-password"
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="login-toggle-password"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
                   </div>
-                )}
 
-                <button
-                  id="login-submit"
-                  className="login-submit-btn"
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="login-spinner" />
-                  ) : (
-                    <>
-                      Sign in
-                      <span className="material-symbols-outlined">arrow_forward</span>
-                    </>
+                  {error && (
+                    <div className="login-error" role="alert">
+                      <span className="material-symbols-outlined">error</span>
+                      {error}
+                    </div>
                   )}
-                </button>
-              </form>
 
-              <p className="login-register-prompt">
-                Don&apos;t have an account?{' '}
-                <button type="button" className="login-register-link">
-                  Request access
-                </button>
-              </p>
-            </>
-          ) : (
-            <>
-              {/* Employee Login Form */}
-              <form className="login-form" onSubmit={handleEmployeeSubmit} noValidate>
-                <div className="login-field-group">
-                  <label className="login-label" htmlFor="login-org-id">
-                    Organization ID
-                  </label>
-                  <div className="login-input-wrap">
-                    <span className="login-input-icon material-symbols-outlined">corporate_fare</span>
-                    <input
-                      id="login-org-id"
-                      className="login-input"
-                      type="text"
-                      placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-                      value={organizationId}
-                      onChange={(e) => setOrganizationId(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="login-field-group">
-                  <label className="login-label" htmlFor="login-employee-id">
-                    Employee ID or Email
-                  </label>
-                  <div className="login-input-wrap">
-                    <span className="login-input-icon material-symbols-outlined">badge</span>
-                    <input
-                      id="login-employee-id"
-                      className="login-input"
-                      type="text"
-                      placeholder="e.g. EMP-101 or alice@company.com"
-                      value={employeeId}
-                      onChange={(e) => setEmployeeId(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="login-field-group">
-                  <div className="login-label-row">
-                    <label className="login-label" htmlFor="login-emp-password">
-                      Password
+                  <button
+                    id="login-submit"
+                    className="login-submit-btn"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="login-spinner" />
+                    ) : (
+                      <>
+                        Sign in
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div key="emp" className="login-mode-content">
+                {/* Employee Login Form */}
+                <form className="login-form" onSubmit={handleEmployeeSubmit} noValidate>
+                  <div className="login-field-group">
+                    <label className="login-label" htmlFor="login-org-id">
+                      Organization ID
                     </label>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon material-symbols-outlined">corporate_fare</span>
+                      <input
+                        id="login-org-id"
+                        className="login-input"
+                        type="text"
+                        placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                        value={organizationId}
+                        onChange={(e) => setOrganizationId(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="login-input-wrap">
-                    <span className="login-input-icon material-symbols-outlined">lock</span>
-                    <input
-                      id="login-emp-password"
-                      className="login-input login-input-password"
-                      type={showEmployeePassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      value={employeePassword}
-                      onChange={(e) => setEmployeePassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="login-toggle-password"
-                      onClick={() => setShowEmployeePassword((v) => !v)}
-                      aria-label={showEmployeePassword ? 'Hide password' : 'Show password'}
-                    >
-                      <span className="material-symbols-outlined">
-                        {showEmployeePassword ? 'visibility_off' : 'visibility'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
 
-                {error && (
-                  <div className="login-error" role="alert">
-                    <span className="material-symbols-outlined">error</span>
-                    {error}
+                  <div className="login-field-group">
+                    <label className="login-label" htmlFor="login-employee-id">
+                      Employee ID or Email
+                    </label>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon material-symbols-outlined">badge</span>
+                      <input
+                        id="login-employee-id"
+                        className="login-input"
+                        type="text"
+                        placeholder="e.g. EMP-101 or alice@company.com"
+                        value={employeeId}
+                        onChange={(e) => setEmployeeId(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
-                )}
 
-                <button
-                  id="login-emp-submit"
-                  className="login-submit-btn"
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="login-spinner" />
-                  ) : (
-                    <>
-                      Sign in to Workspace
-                      <span className="material-symbols-outlined">arrow_forward</span>
-                    </>
+                  <div className="login-field-group">
+                    <div className="login-label-row">
+                      <label className="login-label" htmlFor="login-emp-password">
+                        Password
+                      </label>
+                    </div>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon material-symbols-outlined">lock</span>
+                      <input
+                        id="login-emp-password"
+                        className="login-input login-input-password"
+                        type={showEmployeePassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        value={employeePassword}
+                        onChange={(e) => setEmployeePassword(e.target.value)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="login-toggle-password"
+                        onClick={() => setShowEmployeePassword((v) => !v)}
+                        aria-label={showEmployeePassword ? 'Hide password' : 'Show password'}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showEmployeePassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="login-error" role="alert">
+                      <span className="material-symbols-outlined">error</span>
+                      {error}
+                    </div>
                   )}
-                </button>
-              </form>
-            </>
-          )}
 
-          <p className="login-register-prompt" style={{ marginTop: '16px' }}>
-            <button
-              type="button"
-              className="login-register-link"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-              onClick={() => navigate('/')}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>
-                home
-              </span>
-              Go back to homepage
-            </button>
-          </p>
+                  <button
+                    id="login-emp-submit"
+                    className="login-submit-btn"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="login-spinner" />
+                    ) : (
+                      <>
+                        Sign in to Workspace
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {/* ── Fixed Footer Prompts ── */}
+          <div className="login-form-footer">
+            <p className="login-register-prompt">
+              Don&apos;t have an account?{' '}
+              <button type="button" className="login-register-link">
+                Request access
+              </button>
+            </p>
+
+            <p className="login-register-prompt" style={{ marginTop: '12px' }}>
+              <button
+                type="button"
+                className="login-register-link"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                onClick={() => navigate('/')}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>
+                  home
+                </span>
+                Go back to homepage
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
