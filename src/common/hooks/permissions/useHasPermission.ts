@@ -67,6 +67,8 @@ export type Permissions =
   | EmailPermissions
   | DocumentPermissions;
 
+import { isEmployeeUser } from '../useIsEmployee';
+
 export function useHasPermission() {
   const user = useCurrentCompanyUser();
 
@@ -75,8 +77,27 @@ export function useHasPermission() {
       const demoSession = sessionStorage.getItem('invoicely_auth_user');
       const token = localStorage.getItem('X-NINJA-TOKEN');
       if (demoSession || token === 'demo-token') {
+        if (isEmployeeUser()) {
+          const employeeDefaultPerms = [
+            'view_all',
+            'create_invoice',
+            'view_invoice',
+            'create_client',
+            'view_client',
+            'create_product',
+            'view_product',
+            'view_dashboard',
+          ];
+          return employeeDefaultPerms.includes(permission);
+        }
         return true;
       }
+    }
+
+    const isEmployee = isEmployeeUser(user);
+    if (isEmployee) {
+      const permissions = user?.permissions ?? '';
+      return Boolean(permissions.includes(permission));
     }
 
     const permissions = user?.permissions ?? '';
@@ -95,9 +116,17 @@ export function useHasPermission() {
 
 export function useAdmin() {
   const user = useCurrentCompanyUser();
+  const isEmployee = isEmployeeUser(user);
+
+  if (isEmployee) {
+    return {
+      isAdmin: false,
+      isOwner: false,
+    };
+  }
 
   return {
     isAdmin: Boolean(user?.is_admin),
-    isOwner: Boolean(user?.is_owner || user?.is_owner),
+    isOwner: Boolean(user?.is_owner),
   };
 }

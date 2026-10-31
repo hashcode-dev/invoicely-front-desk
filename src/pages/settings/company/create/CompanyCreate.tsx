@@ -21,6 +21,7 @@ import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
 import { useDocuNinjaActions } from '$app/common/hooks/useDocuNinjaActions';
+import { useIsEmployee } from '$app/common/hooks/useIsEmployee';
 import {
   resetChanges,
   updateCompanyUsers,
@@ -35,6 +36,11 @@ interface Props {
 }
 
 export function CompanyCreate(props: Props) {
+  const isEmployee = useIsEmployee();
+  if (isEmployee) {
+    return null;
+  }
+
   const [t] = useTranslation();
 
   const dispatch = useDispatch();

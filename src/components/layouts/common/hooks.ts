@@ -15,6 +15,7 @@ import { useLocation } from 'react-router-dom';
 import { isDemo } from '$app/common/helpers';
 import { useAdmin } from '$app/common/hooks/permissions/useHasPermission';
 import { useCurrentSettingsLevel } from '$app/common/hooks/useCurrentSettingsLevel';
+import { useIsEmployee } from '$app/common/hooks/useIsEmployee';
 
 export interface SettingsRoute {
   name: string;
@@ -30,6 +31,7 @@ export function useSettingsRoutes() {
   const { isCompanySettingsActive } = useCurrentSettingsLevel();
 
   const { isOwner, isAdmin } = useAdmin();
+  const isEmployee = useIsEmployee();
 
   const basic: SettingsRoute[] = [
     {
@@ -42,7 +44,7 @@ export function useSettingsRoutes() {
       name: t('user_details'),
       href: '/settings/user_details',
       current: location.pathname.startsWith('/settings/user_details'),
-      enabled: isCompanySettingsActive,
+      enabled: !isEmployee && isCompanySettingsActive,
     },
     {
       name: t('localization'),

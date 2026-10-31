@@ -10,6 +10,7 @@ import { isHosted } from '$app/common/helpers';
 import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
+import { useIsEmployee } from '$app/common/hooks/useIsEmployee';
 import { useResolvedShortcuts } from '$app/common/hooks/useReactSettings';
 import { ArrowsTransaction } from '$app/components/icons/ArrowsTransaction';
 import { ChartLine } from '$app/components/icons/ChartLine';
@@ -41,6 +42,7 @@ export function useNavigation() {
   const hasPermission = useHasPermission();
   const companyUser = useCurrentCompanyUser();
   const company = useCurrentCompany();
+  const isEmployee = useIsEmployee();
 
   const [cache, setCache] = useAtom($cache);
   const [cachedLanguage, setCachedLanguage] = useAtom($navigationLanguage);
@@ -347,8 +349,10 @@ export function useNavigation() {
           : '/settings/user_details',
       icon: Gear,
       visible:
-        Boolean(company) ||
-        Boolean(sessionStorage.getItem('invoicely_auth_user')),
+        !isEmployee &&
+        (companyUser?.is_admin || companyUser?.is_owner || false) &&
+        (Boolean(company) ||
+          Boolean(sessionStorage.getItem('invoicely_auth_user'))),
     },
   ];
 
@@ -360,7 +364,7 @@ export function useNavigation() {
     }
 
     setCache(initialNavigation);
-  }, [i18n.language, company?.settings?.translations, companyUser, company]);
+  }, [i18n.language, company?.settings?.translations, companyUser, company, isEmployee]);
 
   useEffect(() => {
     window.addEventListener('navigation.changeVisibility', (event) => {

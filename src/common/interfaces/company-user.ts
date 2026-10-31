@@ -59,6 +59,8 @@ export interface CompanyUser {
   token: Token;
   account: Account;
   react_settings: ReactSettings;
+  is_employee?: boolean;
+  role?: string;
 }
 
 export interface Settings {

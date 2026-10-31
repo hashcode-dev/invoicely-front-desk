@@ -20,6 +20,7 @@ import { AuthenticationTypes } from '$app/common/dtos/authentication';
 import { freePlan } from '$app/common/guards/guards/free-plan';
 import { isDemo, isHosted, isSelfHosted } from '$app/common/helpers';
 import { useAdmin } from '$app/common/hooks/permissions/useHasPermission';
+import { useIsEmployee } from '$app/common/hooks/useIsEmployee';
 import { useAccentColor } from '$app/common/hooks/useAccentColor';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 import { useCurrentUser } from '$app/common/hooks/useCurrentUser';
@@ -92,6 +93,7 @@ export function CompanySwitcher(props: Props = {}) {
   const accentColor = useAccentColor();
   const companyName = useCompanyName();
   const { isAdmin, isOwner } = useAdmin();
+  const isEmployee = useIsEmployee();
   const currentCompany = useCurrentCompany();
   const { flushData } = useDocuNinjaActions();
 
@@ -287,7 +289,7 @@ export function CompanySwitcher(props: Props = {}) {
             </div>
 
             <div className="flex flex-col gap-1 p-1.5">
-              {shouldShowAddCompany && canUserAddCompany && isOwner && (
+              {shouldShowAddCompany && canUserAddCompany && isOwner && !isEmployee && (
                 <SwitcherDiv
                   type="button"
                   className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"
@@ -304,7 +306,7 @@ export function CompanySwitcher(props: Props = {}) {
                 </SwitcherDiv>
               )}
 
-              {(isAdmin || isOwner) && (
+              {!isEmployee && (isAdmin || isOwner) && (
                 <SwitcherDiv
                   type="button"
                   className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"

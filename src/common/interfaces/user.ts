@@ -64,4 +64,8 @@ export interface User extends Timestamps {
   referral_meta?: ReferralMeta;
   settings?: UserSettings;
   organization_id?: string;
+  is_employee?: boolean;
+  is_admin?: boolean;
+  is_owner?: boolean;
+  role?: string;
 }

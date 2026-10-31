@@ -46,6 +46,8 @@ export function LoginPage(props: Props) {
           email,
           name: email.split('@')[0],
           avatar: email.slice(0, 2).toUpperCase(),
+          role: 'organization',
+          is_employee: false,
         });
         navigate('/dashboard');
       } else {
@@ -85,6 +87,8 @@ export function LoginPage(props: Props) {
         email: employeeId.trim(),
         name: employeeId.includes('@') ? employeeId.split('@')[0] : `Employee (${employeeId})`,
         avatar: 'EM',
+        role: 'employee',
+        is_employee: true,
       });
       navigate('/dashboard');
     } catch (err: any) {
@@ -96,6 +100,8 @@ export function LoginPage(props: Props) {
           email: employeeId.trim(),
           name: employeeId.includes('@') ? employeeId.split('@')[0] : `Employee (${employeeId})`,
           avatar: 'EM',
+          role: 'employee',
+          is_employee: true,
         });
         navigate('/dashboard');
       } else {
@@ -116,9 +122,17 @@ export function LoginPage(props: Props) {
           name: payload.name ?? 'Google User',
           avatar: (payload.name ?? 'GU').slice(0, 2).toUpperCase(),
           picture: payload.picture,
+          role: 'organization',
+          is_employee: false,
         });
       } catch {
-        login({ email: 'user@gmail.com', name: 'Google User', avatar: 'GU' });
+        login({
+          email: 'user@gmail.com',
+          name: 'Google User',
+          avatar: 'GU',
+          role: 'organization',
+          is_employee: false,
+        });
       }
       navigate('/dashboard');
     }

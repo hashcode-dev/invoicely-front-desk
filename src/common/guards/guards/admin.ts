@@ -8,12 +8,23 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
+import { isEmployeeUser } from '$app/common/hooks/useIsEmployee';
 import { Guard } from '../Guard';
 
 export function admin(): Guard {
-  return ({ companyUser }) => Promise.resolve(Boolean(companyUser?.is_admin));
+  return ({ companyUser }) => {
+    if (isEmployeeUser(companyUser)) {
+      return Promise.resolve(false);
+    }
+    return Promise.resolve(Boolean(companyUser?.is_admin));
+  };
 }
 
 export function owner(): Guard {
-  return ({ companyUser }) => Promise.resolve(Boolean(companyUser?.is_owner));
+  return ({ companyUser }) => {
+    if (isEmployeeUser(companyUser)) {
+      return Promise.resolve(false);
+    }
+    return Promise.resolve(Boolean(companyUser?.is_owner));
+  };
 }

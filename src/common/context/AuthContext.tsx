@@ -5,6 +5,8 @@ export type AuthUser = {
   name: string;
   avatar: string;
   picture?: string;
+  role?: 'organization' | 'employee' | 'admin' | 'owner';
+  is_employee?: boolean;
 };
 
 type AuthContextType = {

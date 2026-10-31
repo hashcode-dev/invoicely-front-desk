@@ -20,7 +20,10 @@ import { or } from '$app/common/guards/guards/or';
 import { isHosted } from '$app/common/helpers';
 
 export const settingsRoutes = (
-  <Route path="/settings">
+  <Route
+    path="/settings"
+    element={<Guard guards={[admin()]} component={<Outlet />} />}
+  >
     <Route path="user_details" element={<Settings.UserDetails />}>
       <Route path="" element={<Settings.UserDetailsComponent />} />
       <Route path="password" element={<Settings.Password />} />
@@ -39,9 +42,8 @@ export const settingsRoutes = (
       />
     </Route>
 
-    <Route element={<Guard guards={[admin()]} component={<Outlet />} />}>
-      <Route path="" element={<Settings.Settings />} />
-      <Route path="company_details" element={<Settings.CompanyDetails />}>
+    <Route path="" element={<Settings.Settings />} />
+    <Route path="company_details" element={<Settings.CompanyDetails />}>
         <Route path="" element={<Settings.Details />} />
         <Route path="address" element={<Settings.Address />} />
         <Route path="logo" element={<Settings.Logo />} />
@@ -319,5 +321,4 @@ export const settingsRoutes = (
 
       {invoiceDesignRoutes}
     </Route>
-  </Route>
 );

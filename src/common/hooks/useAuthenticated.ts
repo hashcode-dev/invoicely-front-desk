@@ -37,18 +37,26 @@ export function useAuthenticated(): boolean {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    let parsedUser = { email: 'user@invoicely.com', name: 'Invoicely User' };
+    try {
+      if (demoSession) {
+        parsedUser = JSON.parse(demoSession);
+      }
+    } catch {
+      // Ignore invalid session JSON
+    }
+
+    const isEmployee =
+      Boolean((parsedUser as any).role === 'employee') ||
+      Boolean((parsedUser as any).is_employee === true);
+
+    const expectedUserId = isEmployee ? 'demo-employee-id' : 'demo-user-id';
+    const currentUserId = user.user?.id;
+
     if (
       (demoSession || token === 'demo-token') &&
-      (!user.authenticated || !user.user?.id || !(user.user as any)?.is_admin)
+      (!user.authenticated || currentUserId !== expectedUserId)
     ) {
-      let parsedUser = { email: 'user@invoicely.com', name: 'Invoicely User' };
-      try {
-        if (demoSession) {
-          parsedUser = JSON.parse(demoSession);
-        }
-      } catch {
-        // Ignore invalid session JSON
-      }
 
       const mockCompany = {
         id: 'demo-company-id',
@@ -143,14 +151,18 @@ export function useAuthenticated(): boolean {
       };
 
       const mockUserObj = {
-        id: 'demo-user-id',
-        first_name: parsedUser.name || 'User',
+        id: expectedUserId,
+        first_name: parsedUser.name || (isEmployee ? 'Employee' : 'User'),
         last_name: '',
-        email: parsedUser.email || 'user@invoicely.com',
+        email: parsedUser.email || (isEmployee ? 'employee@invoicely.com' : 'user@invoicely.com'),
         account: { default_company_id: 'demo-company-id' },
-        permissions: 'create_all,view_all,edit_all,view_dashboard,view_reports',
-        is_admin: true,
-        is_owner: true,
+        permissions: isEmployee
+          ? 'view_all,create_invoice,view_invoice,create_client,view_client,create_product,view_product,view_dashboard'
+          : 'create_all,view_all,edit_all,view_dashboard,view_reports',
+        is_admin: !isEmployee,
+        is_owner: !isEmployee,
+        is_employee: isEmployee,
+        role: isEmployee ? 'employee' : 'organization',
       };
 
       const mockCompanyUser = {
@@ -158,10 +170,14 @@ export function useAuthenticated(): boolean {
         user: mockUserObj,
         account: { default_company_id: 'demo-company-id' },
         notifications: { email: [] },
-        permissions: 'create_all,view_all,edit_all,view_dashboard,view_reports',
-        is_admin: true,
-        is_owner: true,
+        permissions: isEmployee
+          ? 'view_all,create_invoice,view_invoice,create_client,view_client,create_product,view_product,view_dashboard'
+          : 'create_all,view_all,edit_all,view_dashboard,view_reports',
+        is_admin: !isEmployee,
+        is_owner: !isEmployee,
         is_locked: false,
+        is_employee: isEmployee,
+        role: isEmployee ? 'employee' : 'organization',
         settings: {
           accent_color: '#004bca',
         },
