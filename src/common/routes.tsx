@@ -36,6 +36,7 @@ import { settingsRoutes } from '$app/pages/settings/routes';
 import { taskRoutes } from '$app/pages/tasks/routes';
 import { transactionRoutes } from '$app/pages/transactions/routes';
 import { vendorRoutes } from '$app/pages/vendors/routes';
+import { employeeRoutes } from '$app/pages/employees/routes';
 import { HostedRoute } from '../components/HostedRoute';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { Guard } from './guards/Guard';
@@ -73,6 +74,7 @@ export const routes = (
       {projectRoutes}
       {taskRoutes}
       {vendorRoutes}
+      {employeeRoutes}
       {purchaseOrderRoutes}
       {expenseRoutes}
       {recurringExpenseRoutes}

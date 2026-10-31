@@ -93,6 +93,11 @@ const navigationShortcuts: ShortcutDefinition[] = [
     action: { type: 'navigate', to: '/transactions/create' },
   },
   {
+    id: 'create_employee',
+    labelKey: 'new_employee',
+    action: { type: 'navigate', to: '/employees/create' },
+  },
+  {
     id: 'create_document',
     labelKey: 'new_document',
     action: { type: 'navigate', to: '/docuninja/create' },

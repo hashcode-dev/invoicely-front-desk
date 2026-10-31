@@ -303,6 +303,23 @@ export function useNavigation() {
       visible: hasPermission('view_reports'),
     },
     {
+      name: t('employees', 'Employees'),
+      href: '/employees',
+      icon: Users,
+      visible:
+        !isEmployee &&
+        (companyUser?.is_admin || companyUser?.is_owner || false || Boolean(sessionStorage.getItem('invoicely_auth_user'))),
+      rightButton: {
+        icon: Plus,
+        to: '/employees/create',
+        label: t('new_employee', 'New Employee'),
+        visible:
+          !isEmployee &&
+          (companyUser?.is_admin || companyUser?.is_owner || false || Boolean(sessionStorage.getItem('invoicely_auth_user'))),
+        tooltipLabel: tooltipFor('create_employee' as ShortcutId) || (t('create_employee') as string),
+      },
+    },
+    {
       name: t('docuninja'),
       href: '/docuninja',
       icon: ArrowsTransaction,

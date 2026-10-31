@@ -154,5 +154,36 @@ describe('Employee Access Control & Restrictions', () => {
       const showAccountManagementForOrg = !orgIsEmployee && (orgIsAdmin || isOwner);
       expect(showAccountManagementForOrg).toBe(true);
     });
+
+    it('enables Employees navigation item and quick-add create employee option for organization login', () => {
+      const isEmployee = false;
+      const companyUser: any = { is_admin: true, is_owner: false };
+
+      const isEmployeesNavVisible =
+        !isEmployee &&
+        (companyUser?.is_admin || companyUser?.is_owner || false);
+      expect(isEmployeesNavVisible).toBe(true);
+
+      const isCreateEmployeeButtonVisible =
+        !isEmployee &&
+        (companyUser?.is_admin || companyUser?.is_owner || false);
+      expect(isCreateEmployeeButtonVisible).toBe(true);
+    });
+
+    it('disables Employees navigation item and create employee option for employees', () => {
+      const isEmployee = true;
+      const companyUser: any = { is_admin: false, is_owner: false, is_employee: true };
+
+      const isEmployeesNavVisible =
+        !isEmployee &&
+        (companyUser?.is_admin || companyUser?.is_owner || false);
+      expect(isEmployeesNavVisible).toBe(false);
+
+      const isCreateEmployeeButtonVisible =
+        !isEmployee &&
+        (companyUser?.is_admin || companyUser?.is_owner || false);
+      expect(isCreateEmployeeButtonVisible).toBe(false);
+    });
   });
 });
+

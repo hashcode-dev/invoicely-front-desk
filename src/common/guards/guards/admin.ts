@@ -28,3 +28,29 @@ export function owner(): Guard {
     return Promise.resolve(Boolean(companyUser?.is_owner));
   };
 }
+
+export function organization(): Guard {
+  return ({ companyUser }) => {
+    if (isEmployeeUser(companyUser)) {
+      return Promise.resolve(false);
+    }
+    if (companyUser?.is_admin || companyUser?.is_owner) {
+      return Promise.resolve(true);
+    }
+    try {
+      const session = typeof sessionStorage !== 'undefined'
+        ? sessionStorage.getItem('invoicely_auth_user')
+        : null;
+      if (session) {
+        const parsed = JSON.parse(session);
+        if (parsed.role === 'organization' || parsed.role === 'admin' || parsed.role === 'owner') {
+          return Promise.resolve(true);
+        }
+      }
+    } catch {
+      // Ignore JSON parse errors
+    }
+    return Promise.resolve(false);
+  };
+}
+
