@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiShield, FiLock, FiMail, FiArrowRight, FiAlertCircle } from 'react-icons/fi';
 import { adminApi } from './common/admin-api';
 
 export function SuperAdminLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -46,65 +46,79 @@ export function SuperAdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-blue-500 selection:text-white">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-4 shadow-lg shadow-indigo-500/10">
-          <FiShield className="w-10 h-10" />
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25 mb-4">
+          <span className="material-symbols-outlined text-3xl">account_balance</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          INVOICELY <span className="text-indigo-400">OPERATOR HQ</span>
-        </h2>
-        <p className="mt-2 text-xs sm:text-sm text-slate-400">
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+          Invoicely <span className="text-blue-600 dark:text-blue-400">Operator HQ</span>
+        </h1>
+        <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
           SaaS Operator Command Console • Super-Admin Authentication
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-slate-900 py-8 px-6 sm:px-10 shadow-2xl rounded-2xl border border-slate-800">
-          <form className="space-y-5" onSubmit={handleSubmit}>
+        <div className="bg-white dark:bg-slate-900 py-8 px-6 sm:px-10 rounded-2xl border border-slate-200 dark:border-slate-800 card-shadow">
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
             {errorMessage && (
-              <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-start space-x-2.5 text-rose-300 text-xs">
-                <FiAlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-rose-400" />
+              <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 flex items-start space-x-2.5 text-red-700 dark:text-red-400 text-xs font-medium" role="alert">
+                <span className="material-symbols-outlined text-base mt-0.5 flex-shrink-0">error</span>
                 <span className="leading-relaxed">{errorMessage}</span>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5" htmlFor="operator-email">
                 Operator Email
               </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                  <FiMail className="w-4 h-4" />
+              <div className="relative rounded-xl">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <span className="material-symbols-outlined text-lg">mail</span>
                 </div>
                 <input
+                  id="operator-email"
                   type="email"
                   required
                   autoFocus
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@invoicely.com"
-                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                Master Security Password
-              </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                  <FiLock className="w-4 h-4" />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400" htmlFor="operator-password">
+                  Security Password
+                </label>
+              </div>
+              <div className="relative rounded-xl">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <span className="material-symbols-outlined text-lg">lock</span>
                 </div>
                 <input
-                  type="password"
+                  id="operator-password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  className="w-full min-h-[44px] pl-10 pr-11 py-2.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <span className="material-symbols-outlined text-lg">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -112,18 +126,28 @@ export function SuperAdminLogin() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center space-x-2 py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition"
+                className="w-full min-h-[44px] px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 active:scale-[0.98] text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:opacity-50"
               >
                 <span>{isLoading ? 'Verifying Super-Admin Credentials...' : 'Authenticate & Enter Console'}</span>
-                {!isLoading && <FiArrowRight className="w-4 h-4" />}
+                {!isLoading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}
               </button>
             </div>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-800 text-center">
-            <p className="text-[11px] text-slate-500">
+          <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Access restricted to platform operations, revenue analytics, and tenant governance.
             </p>
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">swap_horiz</span>
+                Go to Customer Tenant Login
+              </button>
+            </div>
           </div>
         </div>
       </div>

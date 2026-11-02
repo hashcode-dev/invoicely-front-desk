@@ -2,14 +2,6 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  FiUsers,
-  FiDollarSign,
-  FiTrendingUp,
-  FiAlertTriangle,
-  FiLifeBuoy,
-  FiArrowUpRight,
-} from 'react-icons/fi';
-import {
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -48,210 +40,254 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Page Header (DESIGN.md Section 3 & 6) */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">SaaS Platform Executive Dashboard</h1>
-          <p className="text-sm text-slate-400">
-            Real-time multi-tenant monitoring, revenue metrics, and support desk SLA performance.
+          <h1 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+            Executive Dashboard — <span className="text-blue-600 dark:text-blue-400">Platform Overview</span>
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Real-time multi-tenant health, revenue analytics, and SLA resolution performance.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <button
             type="button"
             onClick={() => refetch()}
-            className="px-3 py-1.5 text-xs font-medium rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700"
+            className="min-h-[40px] px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
-            Refresh Data
+            <span className="material-symbols-outlined text-base">refresh</span>
+            <span>Refresh Data</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/super-admin/customers')}
+            className="min-h-[40px] px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold text-xs rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          >
+            <span className="material-symbols-outlined text-base">group</span>
+            <span>View Tenants</span>
           </button>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="h-64 flex items-center justify-center text-slate-500">
-          Loading platform metrics...
+        <div className="h-64 flex flex-col items-center justify-center text-slate-400 space-y-2">
+          <span className="material-symbols-outlined text-3xl animate-spin text-blue-600">sync</span>
+          <span className="text-sm font-medium">Loading platform metrics...</span>
         </div>
       ) : isError ? (
-        <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
-          Failed to load live metrics from backend. Ensure Spring Boot is running on port 8080.
+        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 text-sm flex items-center gap-3">
+          <span className="material-symbols-outlined text-xl flex-shrink-0">error</span>
+          <span>Failed to load live metrics from backend. Ensure Spring Boot is running on port 8081.</span>
         </div>
       ) : (
         <>
-          {/* KPI Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">Active Tenants</span>
-                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                  <FiUsers className="w-5 h-5" />
+          {/* KPI Metrics Grid (DESIGN.md Section 5.2 MetricCard Standard) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Card 1: Active Tenants */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-shadow card-hover flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Active Tenants
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">group</span>
                 </div>
               </div>
-              <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-white">
+              <div className="flex items-baseline justify-between gap-2 mt-1">
+                <span className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                   {metrics?.active_tenants ?? 0}
                 </span>
-                <span className="text-xs text-slate-400">
-                  of {metrics?.total_customers ?? 0} total
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/60">
+                  +12.4% QTD
                 </span>
               </div>
-              <div className="mt-2 flex items-center text-xs text-emerald-400">
-                <FiArrowUpRight className="w-3.5 h-3.5 mr-1" />
-                <span>+12.4% this quarter</span>
-              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                Out of {metrics?.total_customers ?? 0} total registered organizations
+              </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">Monthly Recurring (MRR)</span>
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                  <FiDollarSign className="w-5 h-5" />
+            {/* Card 2: MRR */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-shadow card-hover flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Monthly Recurring (MRR)
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">payments</span>
                 </div>
               </div>
-              <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-white">
+              <div className="flex items-baseline justify-between gap-2 mt-1">
+                <span className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                   ${(metrics?.total_monthly_recurring_revenue ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-              </div>
-              <div className="mt-2 flex items-center text-xs text-emerald-400">
-                <FiArrowUpRight className="w-3.5 h-3.5 mr-1" />
-                <span>+18.7% vs last month</span>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">Gross Invoiced Volume</span>
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
-                  <FiTrendingUp className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-white">
-                  ${(metrics?.total_gross_volume ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/60">
+                  +18.7% MoM
                 </span>
               </div>
-              <div className="mt-2 text-xs text-slate-400">
-                Across all active organizations
-              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                Normalized active subscription contracts
+              </p>
             </div>
 
-            <div className={`p-5 rounded-xl bg-slate-900 border ${
-              (metrics?.tickets_breached_sla ?? 0) > 0 ? 'border-rose-500/40 bg-rose-950/10' : 'border-slate-800'
-            } transition`}>
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">Support SLA Status</span>
-                <div className={`p-2 rounded-lg ${
-                  (metrics?.tickets_breached_sla ?? 0) > 0 ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/10 text-blue-400'
-                }`}>
-                  <FiLifeBuoy className="w-5 h-5" />
+            {/* Card 3: Annual Run Rate */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-shadow card-hover flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Annualized Run Rate (ARR)
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">trending_up</span>
                 </div>
               </div>
-              <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-white">
+              <div className="flex items-baseline justify-between gap-2 mt-1">
+                <span className="font-display text-2xl md:text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">
+                  ${(((metrics?.total_monthly_recurring_revenue ?? 0) * 12)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200/60">
+                  Annual Target
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                12x current Monthly Recurring Revenue
+              </p>
+            </div>
+
+            {/* Card 4: Support SLA Health */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-shadow card-hover flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Support Desk SLA
+                </span>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                  (metrics?.tickets_breached_sla ?? 0) > 0
+                    ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400'
+                    : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400'
+                }`}>
+                  <span className="material-symbols-outlined text-xl">
+                    {(metrics?.tickets_breached_sla ?? 0) > 0 ? 'warning' : 'support_agent'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between gap-2 mt-1">
+                <span className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                   {metrics?.open_support_tickets ?? 0}
                 </span>
-                <span className="text-xs text-slate-400">open tickets</span>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+                  (metrics?.tickets_breached_sla ?? 0) > 0
+                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/60'
+                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/60'
+                }`}>
+                  {metrics?.tickets_breached_sla ?? 0} SLA Breached
+                </span>
               </div>
-              <div className="mt-2 flex items-center text-xs">
-                {(metrics?.tickets_breached_sla ?? 0) > 0 ? (
-                  <span className="flex items-center text-rose-400 font-semibold">
-                    <FiAlertTriangle className="w-3.5 h-3.5 mr-1" />
-                    {metrics?.tickets_breached_sla} breached SLA
-                  </span>
-                ) : (
-                  <span className="text-emerald-400 font-medium">100% SLA Compliance</span>
-                )}
-              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                Target resolution: 100% within guaranteed SLA window
+              </p>
             </div>
           </div>
 
-          {/* Visual Charts Section */}
+          {/* Visual Analytics Grid (DESIGN.md Section 6 Structure) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <div className="flex items-center justify-between mb-4">
+            {/* Revenue Trend Area Chart */}
+            <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-shadow">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-base font-semibold text-white">MRR & Volume Expansion</h3>
-                  <p className="text-xs text-slate-400">Monthly revenue velocity across active customer tiers</p>
+                  <h3 className="font-display text-lg font-bold text-slate-900 dark:text-slate-100">
+                    Platform Revenue & Invoice Processing Volume
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Monthly recurring revenue trajectory across all tenant organizations
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4 text-xs font-medium">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+                    <span className="text-slate-600 dark:text-slate-400">MRR Growth</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="text-slate-600 dark:text-slate-400">Processed Volume</span>
+                  </div>
                 </div>
               </div>
-              <div className="h-64">
+
+              <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={mrrData}>
+                  <AreaChart data={mrrData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="mrrGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="#004bca" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#004bca" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#007f57" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#007f57" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
-                    <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `$${v / 1000}k`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
+                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
-                      formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Amount']}
+                      contentStyle={{
+                        backgroundColor: '#0b131e',
+                        borderColor: '#28384d',
+                        borderRadius: '12px',
+                        color: '#f8f9ff',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value: any) => [`$${Number(value).toLocaleString()}`, '']}
                     />
-                    <Area type="monotone" dataKey="mrr" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#mrrGradient)" />
+                    <Area type="monotone" dataKey="mrr" stroke="#004bca" strokeWidth={2.5} fillOpacity={1} fill="url(#mrrGradient)" name="Monthly Recurring Revenue" />
+                    <Area type="monotone" dataKey="volume" stroke="#007f57" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#volGradient)" name="Processing Volume" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-base font-semibold text-white">Tickets by Category</h3>
-                  <p className="text-xs text-slate-400">Incoming vs resolved queries</p>
+            {/* Support SLA Resolution Breakdown */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 card-shadow flex flex-col justify-between">
+              <div>
+                <h3 className="font-display text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Ticket Resolution by Domain
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Monthly volume vs. resolved SLA targets
+                </p>
+
+                <div className="h-64 w-full mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={ticketData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
+                      <XAxis dataKey="category" stroke="#94a3b8" fontSize={10} tickLine={false} />
+                      <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#0b131e',
+                          borderColor: '#28384d',
+                          borderRadius: '12px',
+                          color: '#f8f9ff',
+                          fontSize: '12px',
+                        }}
+                      />
+                      <Bar dataKey="count" fill="#3b82f6" name="Total Inquiries" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="resolved" fill="#10b981" name="Resolved on Time" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ticketData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="category" stroke="#94a3b8" fontSize={11} />
-                    <YAxis stroke="#94a3b8" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
-                    />
-                    <Bar dataKey="count" fill="#38bdf8" name="Total Inquiries" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="resolved" fill="#34d399" name="Resolved" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
 
-          {/* Quick Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950/40 border border-indigo-900/30 flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-semibold text-white">Customer Account Directory</h4>
-                <p className="text-xs text-slate-400 mt-1">
-                  Inspect tenant payment volumes, active user seats, and securely impersonate owners.
-                </p>
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate('/super-admin/tickets')}
+                  className="w-full min-h-[40px] px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-base">support_agent</span>
+                  <span>Open Support SLA Queue</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => navigate('/super-admin/customers')}
-                className="px-3 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition"
-              >
-                View Tenants &rarr;
-              </button>
-            </div>
-
-            <div className="p-4 rounded-xl bg-gradient-to-r from-slate-900 to-blue-950/40 border border-blue-900/30 flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-semibold text-white">Customer Support & SLA Resolution</h4>
-                <p className="text-xs text-slate-400 mt-1">
-                  Manage incoming customer complaints, internal notes, and technical troubleshooting tickets.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => navigate('/super-admin/tickets')}
-                className="px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition"
-              >
-                Open Support Desk &rarr;
-              </button>
             </div>
           </div>
         </>
