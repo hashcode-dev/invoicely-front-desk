@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { File } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { ShortcutId } from '$app/common/constants/keyboard-shortcuts';
 import { useEnabled } from '$app/common/guards/guards/enabled';
 import { formatBinding } from '$app/common/helpers/keyboard-shortcuts';
-import { isHosted } from '$app/common/helpers';
+import { endpoint, isHosted } from '$app/common/helpers';
+import { request } from '$app/common/helpers/request';
 import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
 import { useCurrentCompany } from '$app/common/hooks/useCurrentCompany';
 import { useCurrentCompanyUser } from '$app/common/hooks/useCurrentCompanyUser';
@@ -40,18 +42,31 @@ export function useNavigation(): NavigationItem[] {
   const isEmployee = useIsEmployee();
   const shortcutBindings = useResolvedShortcuts();
 
+  const { data: serverNavConfig } = useQuery<
+    Record<string, { is_visible: boolean; display_order?: number; custom_label?: string }>
+  >({
+    queryKey: ['/api/v1/navigation/config', company?.id, isEmployee],
+    queryFn: () =>
+      request('GET', endpoint('/api/v1/navigation/config'))
+        .then((res: any) => res.data?.data || {})
+        .catch(() => ({})),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const tooltipFor = (id: ShortcutId): string | undefined => {
     const binding = shortcutBindings[id];
     return binding ? formatBinding(binding) : undefined;
   };
 
-  return useMemo(() => [
-    {
-      name: t('dashboard'),
-      href: '/dashboard',
-      icon: House,
-      visible: hasPermission('view_dashboard'),
-    },
+  return useMemo(() => {
+    const rawItems: NavigationItem[] = [
+      {
+        id: 'dashboard',
+        name: t('dashboard'),
+        href: '/dashboard',
+        icon: House,
+        visible: hasPermission('view_dashboard'),
+      },
     {
       name: t('clients'),
       href: '/clients',
@@ -350,6 +365,7 @@ export function useNavigation(): NavigationItem[] {
       ],
     },
     {
+      id: 'settings',
       name: t('settings'),
       href:
         companyUser?.is_admin || companyUser?.is_owner
@@ -360,7 +376,19 @@ export function useNavigation(): NavigationItem[] {
         !isEmployee &&
         Boolean(companyUser?.is_admin || companyUser?.is_owner),
     },
-  ], [t, enabled, hasPermission, companyUser, company, isEmployee, shortcutBindings]);
+  ];
+
+    return rawItems
+      .map((item, index) => {
+        const itemKey = item.id || item.href.replace(/^\//, '').split('/')[0];
+        const config = serverNavConfig && itemKey ? serverNavConfig[itemKey] : undefined;
+        const visible = Boolean(item.visible) && (config ? config.is_visible !== false : true);
+        const name = config?.custom_label ? config.custom_label : item.name;
+        const order = config?.display_order !== undefined ? config.display_order : index + 1;
+        return { ...item, id: itemKey, visible, name, order };
+      })
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [t, enabled, hasPermission, companyUser, company, isEmployee, shortcutBindings, serverNavConfig]);
 }
 
 export interface NavigationHandler {

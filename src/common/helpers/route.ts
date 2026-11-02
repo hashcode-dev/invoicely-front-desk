@@ -36,7 +36,5 @@ export function routeWithOrigin(
     url = url.replace(`:${part}`, parts[part] as string);
   }
 
-  console.log(url);
-
   return url;
 }

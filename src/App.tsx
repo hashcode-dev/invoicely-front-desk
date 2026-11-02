@@ -24,6 +24,7 @@ import { LoginPage } from './pages/authentication/LoginPage';
 import { LandingPage } from './pages/landing/LandingPage';
 import { featureRoutes } from './common/routes';
 import { PrivateRoute } from './components/PrivateRoute';
+import { PublicRoute } from './components/PublicRoute';
 import { Toaster } from 'react-hot-toast';
 
 const NotFound = lazy(() => import('./components/NotFound'));
@@ -373,10 +374,12 @@ export function App() {
         {/* Public marketing landing route */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Auth routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/employee-login" element={<LoginPage initialMode="employee" />} />
-        <Route path="/login/employee" element={<LoginPage initialMode="employee" />} />
+        {/* Auth routes guarded against already logged in users */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/employee-login" element={<LoginPage initialMode="employee" />} />
+          <Route path="/login/employee" element={<LoginPage initialMode="employee" />} />
+        </Route>
 
         {/* Protected workspace routes inside Shell layout */}
         <Route element={<PrivateRoute />}>

@@ -35,6 +35,7 @@ import { taskRoutes } from '$app/pages/tasks/routes';
 import { transactionRoutes } from '$app/pages/transactions/routes';
 import { vendorRoutes } from '$app/pages/vendors/routes';
 import { employeeRoutes } from '$app/pages/employees/routes';
+import { superAdminRoutes } from '$app/pages/super-admin/routes';
 import { HostedRoute } from '../components/HostedRoute';
 import { Guard } from './guards/Guard';
 import { enabled } from './guards/guards/enabled';
@@ -76,6 +77,7 @@ export const featureRoutes = (
     {documentsRoutes}
     {settingsRoutes}
     {activityRoutes}
+    {superAdminRoutes}
     <Route
       element={<HostedRoute enabled={isCalendarConnectionAvailable()} />}
     >

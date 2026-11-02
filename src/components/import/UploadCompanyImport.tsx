@@ -433,7 +433,7 @@ export function UploadCompanyImport(props: Props) {
 
       return fileHash;
     } catch (error) {
-      console.log('Chunk upload failed:', error);
+      console.error('Chunk upload failed:', error);
       toast.error('upload_failed');
       setUploadProgress(0);
       throw error;

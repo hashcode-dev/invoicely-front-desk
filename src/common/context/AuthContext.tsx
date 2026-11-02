@@ -16,7 +16,7 @@ export type AuthUser = {
 type AuthContextType = {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (user: AuthUser) => void;
+  login: (user: AuthUser, token?: string, rawUser?: any) => void;
   logout: () => void;
 };
 
@@ -28,14 +28,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
   const reduxUser = useSelector((state: RootState) => state.user);
 
-  const login = (u: AuthUser) => {
+  const login = (u: AuthUser, token?: string, rawUser?: any) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(u));
-    localStorage.setItem('X-NINJA-TOKEN', 'demo-token');
+    const authToken = token || localStorage.getItem('X-NINJA-TOKEN') || 'demo-token';
+    localStorage.setItem('X-NINJA-TOKEN', authToken);
     dispatch(
       authenticate({
         type: AuthenticationTypes.TOKEN,
-        user: { ...u, id: u.is_employee ? 'demo-employee-id' : 'demo-user-id' } as any,
-        token: 'demo-token',
+        user: (rawUser || { ...u, id: u.is_employee ? 'demo-employee-id' : 'demo-user-id' }) as any,
+        token: authToken,
       })
     );
   };

@@ -30,10 +30,12 @@ interface SubNavigationItem {
 }
 
 export interface NavigationItem {
+  id?: string;
   name: string;
   href: string;
   icon: React.ElementType;
   visible: boolean;
+  order?: number;
   rightButton?: {
     icon: React.ElementType;
     to: string;

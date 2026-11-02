@@ -43,3 +43,4 @@ export * from './templates-and-reminders/TemplatesAndReminders';
 export * from './user';
 export * from './users';
 export * from './workflow-settings/WorkflowSettings';
+export * from './navigation/NavigationSettings';

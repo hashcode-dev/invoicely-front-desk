@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { useTurnstile } from 'react-turnstile';
 import { useColorScheme } from '$app/common/colors';
+import { useAuth } from '$app/common/context/AuthContext';
 import { request } from '$app/common/helpers/request';
 import { useTitle } from '$app/common/hooks/useTitle';
 import { GenericValidationBag } from '$app/common/interfaces/validation-bag';
@@ -54,6 +55,7 @@ export function Register() {
   const [isFormBusy, setIsFormBusy] = useState(false);
   const [message, setMessage] = useState('');
   const dispatch = useDispatch();
+  const { login } = useAuth();
 
   const [searchParams] = useSearchParams();
 
@@ -119,16 +121,36 @@ export function Register() {
       ['cf-turnstile']: turnstileToken,
     })
       .then((response: AxiosResponse) => {
+        const firstRecord = response.data?.data?.[0];
+        const token = firstRecord?.token?.token || response.data?.token;
+        const userObj = firstRecord?.user;
+
+        if (token) {
+          localStorage.setItem('X-NINJA-TOKEN', token);
+          login(
+            {
+              email: userObj?.email || values.email,
+              name: `${userObj?.first_name || ''} ${userObj?.last_name || ''}`.trim() || values.email,
+              avatar: (userObj?.first_name || values.email || 'U').slice(0, 2).toUpperCase(),
+              role: 'organization',
+            },
+            token,
+            userObj
+          );
+        }
+
         dispatch(
           register({
-            token: response.data.data[0].token.token,
-            user: response.data.data[0].user,
+            token: token || 'demo-token',
+            user: userObj || { email: values.email },
           })
         );
 
-        dispatch(updateCompanyUsers(response.data.data));
-        dispatch(resetChanges('company'));
-        dispatch(changeCurrentIndex(0));
+        if (response.data?.data) {
+          dispatch(updateCompanyUsers(response.data.data));
+          dispatch(resetChanges('company'));
+          dispatch(changeCurrentIndex(0));
+        }
       })
       .catch((error: AxiosError<GenericValidationBag<RegisterValidation>>) => {
         if (error.response?.status === 422) {

@@ -52,13 +52,9 @@ export function usePrivateSocketEvents() {
       return;
     }
 
-    console.log(`Subscribing to private-company-${company.company_key}`);
-
     const channel = sockets.subscribe(`private-company-${company.company_key}`);
 
     channel.bind_global((eventName: Event, data: unknown) => {
-      console.log(`channel: ${eventName}`);
-
       const callback = callbacks[eventName];
 
       if (callback) {

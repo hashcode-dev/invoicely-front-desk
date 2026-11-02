@@ -121,7 +121,7 @@ export function ChangePlan({ plan, cycle, onSuccess }: ChangePlanProps) {
             onSuccess();
           })
           .catch((error: AxiosError<ValidationBag>) => {
-            console.log(error.response?.data);
+            console.error(error.response?.data);
 
             error.response?.status === 400 || error.response?.status === 422
               ? toast.error(error.response.data.message)

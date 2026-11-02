@@ -36,6 +36,7 @@ import { Exit } from './icons/Exit';
 import { ExpandCollapseChevron } from './icons/ExpandCollapseChevron';
 import { Person } from './icons/Person';
 import { Plus } from './icons/Plus';
+import { FiShield } from 'react-icons/fi';
 
 const SwitcherDiv = styled.button`
   width: 100%;
@@ -307,22 +308,41 @@ export function CompanySwitcher(props: Props = {}) {
               )}
 
               {!isEmployee && (isAdmin || isOwner) && (
-                <SwitcherDiv
-                  type="button"
-                  className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"
-                  theme={{ hoverColor: colors.$20 }}
-                  style={{ height: ACTION_ROW_HEIGHT }}
-                  onClick={() => {
-                    setVisible(false);
-                    preventNavigation({
-                      url: '/settings/account_management',
-                    });
-                  }}
-                >
-                  <Person />
+                <>
+                  <SwitcherDiv
+                    type="button"
+                    className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer"
+                    theme={{ hoverColor: colors.$20 }}
+                    style={{ height: ACTION_ROW_HEIGHT }}
+                    onClick={() => {
+                      setVisible(false);
+                      preventNavigation({
+                        url: '/settings/account_management',
+                      });
+                    }}
+                  >
+                    <Person />
 
-                  <span className="text-sm">{t('account_management')}</span>
-                </SwitcherDiv>
+                    <span className="text-sm">{t('account_management')}</span>
+                  </SwitcherDiv>
+
+                  <SwitcherDiv
+                    type="button"
+                    className="flex items-center space-x-3 px-3 rounded-lg cursor-pointer text-indigo-400 hover:text-indigo-300"
+                    theme={{ hoverColor: colors.$20 }}
+                    style={{ height: ACTION_ROW_HEIGHT }}
+                    onClick={() => {
+                      setVisible(false);
+                      preventNavigation({
+                        url: '/super-admin',
+                      });
+                    }}
+                  >
+                    <FiShield className="w-4 h-4 text-indigo-400" />
+
+                    <span className="text-sm font-semibold text-indigo-400">Platform Admin Portal</span>
+                  </SwitcherDiv>
+                </>
               )}
 
               <SwitcherDiv

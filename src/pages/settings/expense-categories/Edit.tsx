@@ -62,8 +62,6 @@ export function Edit() {
     color: '',
   });
 
-  console.log(expenseCategory?.name);
-
   const handleChange = (
     property: keyof ExpenseCategoryInput,
     value: ExpenseCategoryInput[keyof ExpenseCategoryInput]

@@ -14,6 +14,13 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_BACKEND_URL || `http://127.0.0.1:${process.env.BACKEND_PORT || 8081}`,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     assetsDir: 'react',
@@ -21,12 +28,54 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return id
-              .toString()
-              .split('node_modules/')[1]
-              .split('/')[0]
-              .toString();
+          if (!id.includes('node_modules')) {
+            return;
+          }
+          if (
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/react-router/') ||
+            id.includes('node_modules/react-router-dom/') ||
+            id.includes('node_modules/@reduxjs/') ||
+            id.includes('node_modules/react-redux/') ||
+            id.includes('node_modules/jotai/')
+          ) {
+            return 'vendor-react-core';
+          }
+          if (
+            id.includes('node_modules/antd/') ||
+            id.includes('node_modules/@ant-design/') ||
+            id.includes('node_modules/rc-')
+          ) {
+            return 'vendor-antd';
+          }
+          if (
+            id.includes('node_modules/@tiptap/') ||
+            id.includes('node_modules/prosemirror-')
+          ) {
+            return 'vendor-tiptap';
+          }
+          if (id.includes('node_modules/recharts/')) {
+            return 'vendor-recharts';
+          }
+          if (
+            id.includes('node_modules/@monaco-editor/') ||
+            id.includes('node_modules/monaco-editor/')
+          ) {
+            return 'vendor-monaco';
+          }
+          if (id.includes('node_modules/grapesjs')) {
+            return 'vendor-grapesjs';
+          }
+          if (id.includes('node_modules/@headlessui/')) {
+            return 'vendor-headlessui';
+          }
+          if (
+            id.includes('node_modules/dayjs/') ||
+            id.includes('node_modules/lodash/') ||
+            id.includes('node_modules/axios/')
+          ) {
+            return 'vendor-utils';
           }
         },
       },

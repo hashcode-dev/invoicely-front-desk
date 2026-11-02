@@ -8,11 +8,17 @@
  * @license https://www.elastic.co/licensing/elastic-license
  */
 
-import { Navigate, Outlet } from 'react-router';
+import { useSelector } from 'react-redux';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthenticated } from '../common/hooks/useAuthenticated';
+import { RootState } from '../common/stores/store';
 
 export function PublicRoute() {
   const authenticated = useAuthenticated();
+  const user = useSelector((state: RootState) => state.user);
+  const demoSession = sessionStorage.getItem('invoicely_auth_user');
 
-  return authenticated ? <Navigate to="/dashboard" /> : <Outlet />;
+  const isAuthed = Boolean(demoSession || authenticated || user.user?.id);
+
+  return isAuthed ? <Navigate to="/dashboard" replace /> : <Outlet />;
 }

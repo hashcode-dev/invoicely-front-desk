@@ -53,10 +53,7 @@ export function useCloneToNegativeInvoice() {
       ...(reason && { reason: reason }),
     };
 
-    console.log('Created negative invoice:', negativeInvoice);
-
     setInvoice(negativeInvoice);
-    console.log('Set invoice in atom, navigating to create page');
 
     navigate('/invoices/create?action=clone');
   };

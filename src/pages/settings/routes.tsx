@@ -83,6 +83,7 @@ export const settingsRoutes = (
       </Route>
       <Route path="expense_settings" element={<Settings.ExpenseSettings />} />
       <Route path="workflow_settings" element={<Settings.WorkflowSettings />} />
+      <Route path="navigation_menu" element={<Settings.NavigationSettings />} />
       <Route path="import_export" element={<Settings.ImportExport />} />
       <Route path="account_management" element={<Settings.AccountManagement />}>
         <Route

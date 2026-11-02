@@ -34,27 +34,56 @@ export function LoginPage(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  function handleOrgSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleOrgSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(undefined);
+
+    if (!email.trim() || !password) {
+      setError('Please enter your email and password.');
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulate authentication — replace with real API call
-    setTimeout(() => {
-      if (email && password) {
-        login({
-          email,
-          name: email.split('@')[0],
-          avatar: email.slice(0, 2).toUpperCase(),
+    try {
+      const response: any = await request('POST', endpoint('/api/v1/login'), {
+        email: email.trim(),
+        password,
+      });
+
+      const items = response.data?.data || [];
+      const primaryLink = items[0];
+      const token = primaryLink?.token?.token;
+      const rawUser = {
+        ...primaryLink?.user,
+        company_user: primaryLink,
+      };
+
+      login(
+        {
+          email: primaryLink?.user?.email || email.trim(),
+          name:
+            `${primaryLink?.user?.first_name || ''} ${primaryLink?.user?.last_name || ''}`.trim() ||
+            email.split('@')[0],
+          avatar: (primaryLink?.user?.first_name || email).slice(0, 2).toUpperCase(),
           role: 'organization',
           is_employee: false,
-        });
-        navigate('/dashboard');
+        },
+        token,
+        rawUser
+      );
+      navigate('/dashboard');
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Backend server not reachable on http://localhost:8080');
       } else {
-        setError('Please enter your email and password.');
-        setIsLoading(false);
+        setError('Invalid email or password.');
       }
-    }, 600);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleEmployeeSubmit(e: FormEvent<HTMLFormElement>) {
@@ -77,33 +106,37 @@ export function LoginPage(props: Props) {
     setIsLoading(true);
 
     try {
-      await request('POST', endpoint('/api/v1/auth/employee_login'), {
+      const response: any = await request('POST', endpoint('/api/v1/auth/employee_login'), {
         organization_id: organizationId.trim(),
         employee_id: employeeId.trim(),
         password: employeePassword,
       });
 
-      login({
-        email: employeeId.trim(),
-        name: employeeId.includes('@') ? employeeId.split('@')[0] : `Employee (${employeeId})`,
-        avatar: 'EM',
-        role: 'employee',
-        is_employee: true,
-      });
-      navigate('/dashboard');
-    } catch (err: any) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.code === 'ERR_NETWORK' || !err.response) {
-        // Fallback for standalone frontend simulation
-        login({
+      const items = response.data?.data || [];
+      const primaryLink = items[0];
+      const token = primaryLink?.token?.token;
+      const rawUser = {
+        ...primaryLink?.user,
+        company_user: primaryLink,
+      };
+
+      login(
+        {
           email: employeeId.trim(),
           name: employeeId.includes('@') ? employeeId.split('@')[0] : `Employee (${employeeId})`,
           avatar: 'EM',
           role: 'employee',
           is_employee: true,
-        });
-        navigate('/dashboard');
+        },
+        token,
+        rawUser
+      );
+      navigate('/dashboard');
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Backend server not reachable on http://localhost:8080');
       } else {
         setError('Invalid Organization ID, Employee ID, or password.');
       }

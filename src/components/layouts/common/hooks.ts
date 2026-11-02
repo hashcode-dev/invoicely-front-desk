@@ -104,6 +104,12 @@ export function useSettingsRoutes() {
       enabled: isAdmin || isOwner || false,
     },
     {
+      name: 'Navigation & Menu Customizer',
+      href: '/settings/navigation_menu',
+      current: location.pathname.startsWith('/settings/navigation_menu'),
+      enabled: isAdmin || isOwner || false,
+    },
+    {
       name: t('account_management'),
       href: '/settings/account_management',
       current: location.pathname.startsWith('/settings/account_management'),

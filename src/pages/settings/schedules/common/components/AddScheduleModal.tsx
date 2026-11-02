@@ -70,7 +70,6 @@ export function AddScheduleModal(props: Props) {
       return remainingAmount;
     }
 
-    console.log('isAmountMode', isAmountMode);
     const totalAmount = selectedInvoice.amount;
 
     const scheduledAmount =
