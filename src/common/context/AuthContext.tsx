@@ -1,4 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AuthenticationTypes } from '$app/common/dtos/authentication';
+import { authenticate, logout as logoutAction } from '$app/common/stores/slices/user';
+import { RootState } from '$app/common/stores/store';
 
 export type AuthUser = {
   email: string;
@@ -21,29 +25,53 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const SESSION_KEY = 'invoicely_auth_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    try {
-      const stored = sessionStorage.getItem(SESSION_KEY);
-      return stored ? (JSON.parse(stored) as AuthUser) : null;
-    } catch {
-      return null;
-    }
-  });
+  const dispatch = useDispatch();
+  const reduxUser = useSelector((state: RootState) => state.user);
 
-  function login(u: AuthUser) {
+  const login = (u: AuthUser) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(u));
     localStorage.setItem('X-NINJA-TOKEN', 'demo-token');
-    setUser(u);
-  }
+    dispatch(
+      authenticate({
+        type: AuthenticationTypes.TOKEN,
+        user: { ...u, id: u.is_employee ? 'demo-employee-id' : 'demo-user-id' } as any,
+        token: 'demo-token',
+      })
+    );
+  };
 
-  function logout() {
+  const logout = () => {
     sessionStorage.removeItem(SESSION_KEY);
     localStorage.removeItem('X-NINJA-TOKEN');
-    setUser(null);
+    dispatch(logoutAction());
+  };
+
+  let sessionUser: AuthUser | null = null;
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (raw) sessionUser = JSON.parse(raw);
+  } catch {
+    // Ignore invalid JSON
   }
 
+  const currentUser: AuthUser | null =
+    reduxUser.authenticated && reduxUser.user?.email
+      ? {
+          email: reduxUser.user.email,
+          name:
+            `${reduxUser.user.first_name || ''} ${reduxUser.user.last_name || ''}`.trim() ||
+            reduxUser.user.email,
+          avatar: (reduxUser.user.first_name || reduxUser.user.email || 'U').slice(0, 2).toUpperCase(),
+          picture: reduxUser.user.avatar,
+          role: reduxUser.user.is_employee ? 'employee' : 'organization',
+          is_employee: Boolean(reduxUser.user.is_employee),
+        }
+      : sessionUser;
+
+  const isAuthenticated = reduxUser.authenticated || Boolean(sessionUser);
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: user !== null, login, logout }}>
+    <AuthContext.Provider value={{ user: currentUser, isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

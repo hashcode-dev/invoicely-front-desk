@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, lazy } from 'react';
 import {
   NavLink,
-  Navigate,
+  Outlet,
   Route,
   Routes,
   useLocation,
@@ -22,8 +22,11 @@ import { Tooltip } from './components/Tooltip';
 import { useNavigation } from './components/layouts/common/navigation';
 import { LoginPage } from './pages/authentication/LoginPage';
 import { LandingPage } from './pages/landing/LandingPage';
-import { routes } from './common/routes';
+import { featureRoutes } from './common/routes';
+import { PrivateRoute } from './components/PrivateRoute';
 import { Toaster } from 'react-hot-toast';
+
+const NotFound = lazy(() => import('./components/NotFound'));
 
 export const refreshEntityDataBannerAtom = atom({
   refetchEntityId: '',
@@ -31,12 +34,7 @@ export const refreshEntityDataBannerAtom = atom({
   visible: false,
 });
 
-function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate replace to="/login" />;
-}
-
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children }: { children?: React.ReactNode }) {
   useAuthenticated();
   useFetchReactSettings();
   const { user, logout } = useAuth();
@@ -361,7 +359,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="page-content">{children}</main>
+        <main className="page-content">{children ?? <Outlet />}</main>
       </div>
     </div>
   );
@@ -372,23 +370,22 @@ export function App() {
     <>
       <Toaster position="top-right" />
       <Routes>
-        {/* Landing page — public marketing route */}
-        <Route element={<LandingPage />} path="/" />
+        {/* Public marketing landing route */}
+        <Route path="/" element={<LandingPage />} />
 
         {/* Auth routes */}
-        <Route element={<LoginPage />} path="/login" />
-        <Route element={<LoginPage initialMode="employee" />} path="/employee-login" />
-        <Route element={<LoginPage initialMode="employee" />} path="/login/employee" />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/employee-login" element={<LoginPage initialMode="employee" />} />
+        <Route path="/login/employee" element={<LoginPage initialMode="employee" />} />
 
-        {/* Protected app routes — wrapped in Shell + RequireAuth */}
-        <Route
-          path="/*"
-          element={
-            <RequireAuth>
-              <Shell>{routes}</Shell>
-            </RequireAuth>
-          }
-        />
+        {/* Protected workspace routes inside Shell layout */}
+        <Route element={<PrivateRoute />}>
+          <Route element={<Shell><Outlet /></Shell>}>
+            {featureRoutes}
+          </Route>
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

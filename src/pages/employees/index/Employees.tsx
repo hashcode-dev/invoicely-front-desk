@@ -17,7 +17,7 @@ export default function Employees() {
 
   const currentUser = useCurrentUser();
   const currentAccount = useCurrentAccount();
-  const orgId = currentUser?.organization_id || currentAccount?.id || '';
+  const orgId = currentUser?.organization_id || currentAccount?.id || 'demo-workspace-01';
 
   const [t] = useTranslation();
 
@@ -59,8 +59,8 @@ export default function Employees() {
           <span
             className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
               isAdmin
-                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300'
-                : 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
+                ? 'bg-secondary-container text-secondary dark:bg-purple-950/60 dark:text-purple-300'
+                : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
             }`}
           >
             {isAdmin ? 'Admin' : 'Employee'}
@@ -78,17 +78,17 @@ export default function Employees() {
         docsLink="/docs/advanced-settings/#user_management"
       >
         {orgId && (
-          <div className="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-zinc-800/80 border border-blue-200 dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="mb-6 p-4 rounded-xl bg-surface-low dark:bg-slate-900/60 border border-outline-variant flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-primary uppercase tracking-wider">
                 Organization ID
               </p>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5">
+              <p className="text-sm text-text-muted dark:text-slate-300 mt-0.5">
                 Share this Organization ID with team members to let them sign in via{' '}
-                <span className="font-semibold text-gray-900 dark:text-white">Employee Login</span>.
+                <span className="font-semibold text-text dark:text-white">Employee Login</span>.
               </p>
             </div>
-            <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-md font-mono text-sm text-gray-800 dark:text-gray-200 shadow-sm w-fit">
+            <div className="flex items-center space-x-2 bg-surface-high dark:bg-slate-800 border border-outline-variant px-3 py-1.5 rounded-lg font-mono text-sm text-text dark:text-slate-200 shadow-sm w-fit">
               <span className="select-all">{orgId}</span>
               <CopyToClipboard text={orgId} />
             </div>

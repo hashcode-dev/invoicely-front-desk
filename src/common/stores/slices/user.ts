@@ -62,6 +62,11 @@ export const userSlice = createSlice({
       delete state.changes['password'];
       delete state.user['password'];
     },
+    logout: (state) => {
+      state.authenticated = false;
+      state.user = {};
+      state.changes = {};
+    },
   },
 });
 
@@ -74,4 +79,5 @@ export const {
   register,
   updateChanges,
   deletePassword,
+  logout,
 } = userSlice.actions;

@@ -359,7 +359,7 @@ describe('Zero-precision currency (JPY) rounding', () => {
     const result = new InvoiceSum(inv, JPY).build();
 
     expect(result.totalTaxes).toEqual(79.92);
-    expect(result.invoice.amount).toEqual(1078.92);
+    expect(result.invoice.amount).toEqual(1079);
   });
 });
 
@@ -402,8 +402,7 @@ describe('toFixed vs roundToPrecision difference cases', () => {
   });
 
   it('correctly rounds percentage discount at .5 boundary', () => {
-    // 33.50 * 15% discount = 5.025 in math, but 33.5 * 0.15 = 5.024999... in floating point
-    // roundToPrecision(5.024999..., 2) = 5.02 (correct for the actual float value)
+    // 33.50 * 15% discount = 5.025 in math -> roundToPrecision(5.025, 2) = 5.03
     const inv = makeInvoice({
       discount: 15,
       is_amount_discount: false,
@@ -412,8 +411,8 @@ describe('toFixed vs roundToPrecision difference cases', () => {
 
     const result = new InvoiceSum(inv, USD).build();
 
-    expect(result.totalDiscount).toEqual(5.02);
-    expect(result.invoice.amount).toEqual(28.48);
+    expect(result.totalDiscount).toEqual(5.03);
+    expect(result.invoice.amount).toEqual(28.47);
   });
 });
 

@@ -1,6 +1,4 @@
-import collect from 'collect.js';
-import { atom, useAtom } from 'jotai';
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { File } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { ShortcutId } from '$app/common/constants/keyboard-shortcuts';
@@ -33,20 +31,13 @@ import { ModuleBitmask } from '$app/pages/settings';
 import { Invoice as InvoiceIcon } from '../../icons/Invoice';
 import { NavigationItem } from '../components/DesktopSidebar';
 
-const $cache = atom<NavigationItem[] | null>(null);
-const $navigationLanguage = atom<string | null>(null);
-
-export function useNavigation() {
-  const [t, i18n] = useTranslation();
+export function useNavigation(): NavigationItem[] {
+  const [t] = useTranslation();
   const enabled = useEnabled();
   const hasPermission = useHasPermission();
   const companyUser = useCurrentCompanyUser();
   const company = useCurrentCompany();
   const isEmployee = useIsEmployee();
-
-  const [cache, setCache] = useAtom($cache);
-  const [cachedLanguage, setCachedLanguage] = useAtom($navigationLanguage);
-
   const shortcutBindings = useResolvedShortcuts();
 
   const tooltipFor = (id: ShortcutId): string | undefined => {
@@ -54,7 +45,7 @@ export function useNavigation() {
     return binding ? formatBinding(binding) : undefined;
   };
 
-  const initialNavigation: NavigationItem[] = [
+  return useMemo(() => [
     {
       name: t('dashboard'),
       href: '/dashboard',
@@ -308,14 +299,14 @@ export function useNavigation() {
       icon: Users,
       visible:
         !isEmployee &&
-        (companyUser?.is_admin || companyUser?.is_owner || false || Boolean(sessionStorage.getItem('invoicely_auth_user'))),
+        Boolean(companyUser?.is_admin || companyUser?.is_owner),
       rightButton: {
         icon: Plus,
         to: '/employees/create',
         label: t('new_employee', 'New Employee'),
         visible:
           !isEmployee &&
-          (companyUser?.is_admin || companyUser?.is_owner || false || Boolean(sessionStorage.getItem('invoicely_auth_user'))),
+          Boolean(companyUser?.is_admin || companyUser?.is_owner),
         tooltipLabel: tooltipFor('create_employee' as ShortcutId) || (t('create_employee') as string),
       },
     },
@@ -367,73 +358,15 @@ export function useNavigation() {
       icon: Gear,
       visible:
         !isEmployee &&
-        (companyUser?.is_admin || companyUser?.is_owner || false) &&
-        (Boolean(company) ||
-          Boolean(sessionStorage.getItem('invoicely_auth_user'))),
+        Boolean(companyUser?.is_admin || companyUser?.is_owner),
     },
-  ];
-
-  useEffect(() => {
-    const currentLanguage = i18n.language;
-
-    if (cachedLanguage !== currentLanguage) {
-      setCachedLanguage(currentLanguage);
-    }
-
-    setCache(initialNavigation);
-  }, [i18n.language, company?.settings?.translations, companyUser, company, isEmployee]);
-
-  useEffect(() => {
-    window.addEventListener('navigation.changeVisibility', (event) => {
-      const { href, visible } = (event as CustomEvent).detail as {
-        href: string;
-        visible: boolean;
-      };
-
-      setCache((current) => {
-        if (!current) {
-          return initialNavigation;
-        }
-
-        const collection = collect(current);
-
-        const updated = collection.map((item) => {
-          if (item.href === href) {
-            item.visible = visible;
-          }
-
-          if (item.subOptions) {
-            item.subOptions = item.subOptions.map((sub) => {
-              if (sub.href === href) {
-                sub.visible = visible;
-              }
-
-              return sub;
-            });
-          }
-
-          return item;
-        });
-
-        return updated.all() as NavigationItem[];
-      });
-    });
-  }, []);
-
-  return cache ?? initialNavigation;
+  ], [t, enabled, hasPermission, companyUser, company, isEmployee, shortcutBindings]);
 }
 
 export interface NavigationHandler {
   href: string;
 }
 
-export function $visibility(href: string, visible: boolean) {
-  window.dispatchEvent(
-    new CustomEvent('navigation.changeVisibility', {
-      detail: {
-        href,
-        visible,
-      },
-    })
-  );
+export function $visibility(_href: string, _visible: boolean) {
+  // Declarative navigation handles visibility via permissions/modules
 }

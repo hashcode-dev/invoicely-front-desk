@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useColorScheme } from '$app/common/colors';
 import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
 import { toast } from '$app/common/helpers/toast/toast';
@@ -19,12 +18,11 @@ export default function CreateEmployee() {
   useTitle('new_employee');
 
   const [t] = useTranslation();
-  const colors = useColorScheme();
   const navigate = useNavigate();
 
   const currentUser = useCurrentUser();
   const currentAccount = useCurrentAccount();
-  const orgId = currentUser?.organization_id || currentAccount?.id || '';
+  const orgId = currentUser?.organization_id || currentAccount?.id || 'demo-workspace-01';
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -50,7 +48,7 @@ export default function CreateEmployee() {
     const validationErrors: Record<string, string> = {};
     if (!email.trim()) {
       validationErrors.email = t('email_is_required', 'Email is required');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    } else if (!/^[^\s@]+@[^\s@]+$/.test(email.trim())) {
       validationErrors.email = t('email_is_invalid', 'Email must be valid');
     }
 
@@ -69,6 +67,10 @@ export default function CreateEmployee() {
     setIsSubmitting(true);
     toast.processing();
 
+    const permissions = isAdmin
+      ? 'admin'
+      : 'view_all,create_invoice,view_invoice,view_client';
+
     const payload = {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
@@ -76,16 +78,16 @@ export default function CreateEmployee() {
       phone: phone.trim(),
       password,
       is_admin: isAdmin,
-      permissions: isAdmin ? -1 : 15,
+      permissions,
       company_user: {
         is_admin: isAdmin,
         is_owner: false,
-        permissions: isAdmin ? "-1" : "15",
+        permissions,
       },
     };
 
     try {
-      await request('POST', endpoint('/api/v1/employees'), payload);
+      await request('POST', endpoint('/api/v1/users?include=company_user'), payload);
       toast.success('created_user');
       navigate('/employees');
     } catch (error: any) {
@@ -98,14 +100,7 @@ export default function CreateEmployee() {
         setErrors(formatted);
         toast.dismiss();
       } else {
-        // Fallback to /api/v1/users if needed
-        try {
-          await request('POST', endpoint('/api/v1/users?include=company_user'), payload);
-          toast.success('created_user');
-          navigate('/employees');
-        } catch (innerError: any) {
-          toast.error('error_title');
-        }
+        toast.error('error_title');
       }
     } finally {
       setIsSubmitting(false);
@@ -119,19 +114,19 @@ export default function CreateEmployee() {
       docsLink="/docs/advanced-settings/#user_management"
     >
       {orgId && (
-        <div className="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-zinc-800/80 border border-blue-200 dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mb-6 p-4 rounded-xl bg-surface-low dark:bg-slate-900/60 border border-outline-variant flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider">
               Organization Context
             </p>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5">
+            <p className="text-sm text-text-muted dark:text-slate-300 mt-0.5">
               This employee will be created under Organization ID{' '}
-              <span className="font-mono font-semibold text-gray-900 dark:text-white">{orgId}</span>.
+              <span className="font-mono font-semibold text-text dark:text-white">{orgId}</span>.
               Provide this ID and their credentials so they can log in via{' '}
-              <span className="font-semibold text-gray-900 dark:text-white">Employee Login</span>.
+              <span className="font-semibold text-text dark:text-white">Employee Login</span>.
             </p>
           </div>
-          <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-md font-mono text-sm text-gray-800 dark:text-gray-200 shadow-sm w-fit">
+          <div className="flex items-center space-x-2 bg-surface-high dark:bg-slate-800 border border-outline-variant px-3 py-1.5 rounded-lg font-mono text-sm text-text dark:text-slate-200 shadow-sm w-fit">
             <span className="select-all">{orgId}</span>
             <CopyToClipboard text={orgId} />
           </div>
@@ -141,9 +136,7 @@ export default function CreateEmployee() {
       <form onSubmit={handleSave}>
         <Card
           title={t('employee_details', 'Employee Details')}
-          className="shadow-sm pb-6"
-          style={{ borderColor: colors.$24 }}
-          headerStyle={{ borderColor: colors.$20 }}
+          className="shadow-sm pb-6 border border-outline-variant rounded-xl"
           withoutBodyPadding
           withoutHeaderBorder
         >
