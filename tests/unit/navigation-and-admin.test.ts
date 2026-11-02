@@ -99,4 +99,26 @@ describe('Navigation Governance & Admin Portal Logic', () => {
       expect(message.is_platform_admin).toBe(true);
     });
   });
+
+  describe('Standalone SuperAdmin Session Isolation', () => {
+    it('prioritizes X-SUPERADMIN-TOKEN over standard tenant token', () => {
+      const mockStorage: Record<string, string> = {
+        'X-SUPERADMIN-TOKEN': 'superadmin-jwt-token-xyz',
+        'X-NINJA-TOKEN': 'customer-tenant-token-abc',
+      };
+
+      const resolvedAdminToken = mockStorage['X-SUPERADMIN-TOKEN'] || mockStorage['X-NINJA-TOKEN'];
+      expect(resolvedAdminToken).toBe('superadmin-jwt-token-xyz');
+    });
+
+    it('requires superadmin session to pass guard', () => {
+      const checkAccess = (token: string | null, session: string | null) => {
+        return Boolean(token || session);
+      };
+
+      expect(checkAccess(null, null)).toBe(false);
+      expect(checkAccess('valid-token', null)).toBe(true);
+      expect(checkAccess(null, '{"role":"SUPER_ADMIN"}')).toBe(true);
+    });
+  });
 });

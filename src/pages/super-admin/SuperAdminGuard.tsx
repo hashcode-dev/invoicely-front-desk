@@ -2,11 +2,11 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 export function SuperAdminGuard() {
-  const token = localStorage.getItem('X-NINJA-TOKEN');
-  const sessionUser = sessionStorage.getItem('invoicely_auth_user');
+  const superAdminToken = localStorage.getItem('X-SUPERADMIN-TOKEN');
+  const superAdminSession = sessionStorage.getItem('invoicely_superadmin_session');
 
-  if (!token && !sessionUser) {
-    return <Navigate to="/login" replace />;
+  if (!superAdminToken && !superAdminSession) {
+    return <Navigate to="/super-admin/login" replace />;
   }
 
   return <Outlet />;

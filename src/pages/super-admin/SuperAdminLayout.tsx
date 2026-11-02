@@ -1,9 +1,23 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { FiActivity, FiUsers, FiLifeBuoy, FiArrowLeft, FiShield } from 'react-icons/fi';
+import { FiActivity, FiUsers, FiLifeBuoy, FiShield, FiLogOut, FiUser } from 'react-icons/fi';
+import { adminApi, SuperAdminUser } from './common/admin-api';
 
 export function SuperAdminLayout() {
   const navigate = useNavigate();
+
+  let adminSession: SuperAdminUser | null = null;
+  try {
+    const raw = sessionStorage.getItem('invoicely_superadmin_session');
+    if (raw) adminSession = JSON.parse(raw);
+  } catch {
+    // Ignore invalid JSON
+  }
+
+  const handleLogout = () => {
+    adminApi.logout();
+    navigate('/super-admin/login', { replace: true });
+  };
 
   const navLinks = [
     { to: '/super-admin/dashboard', label: 'Metrics & Revenue', icon: FiActivity },
@@ -45,19 +59,32 @@ export function SuperAdminLayout() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="flex items-center space-x-4">
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Connected: Platform DB V4
+                Connected: Platform Engine
               </span>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700 transition"
-              >
-                <FiArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to App</span>
-              </button>
+
+              <div className="flex items-center space-x-3 pl-3 border-l border-slate-800">
+                <div className="flex items-center space-x-2 text-xs text-slate-300">
+                  <div className="p-1.5 rounded-full bg-slate-800 text-indigo-400">
+                    <FiUser className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-medium hidden md:inline">
+                    {adminSession?.name || adminSession?.email || 'Super Admin'}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-md border border-rose-500/30 transition"
+                  title="Sign out of Operator Console"
+                >
+                  <FiLogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

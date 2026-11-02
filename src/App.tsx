@@ -23,6 +23,7 @@ import { useNavigation } from './components/layouts/common/navigation';
 import { LoginPage } from './pages/authentication/LoginPage';
 import { LandingPage } from './pages/landing/LandingPage';
 import { featureRoutes } from './common/routes';
+import { superAdminRoutes } from './pages/super-admin/routes';
 import { PrivateRoute } from './components/PrivateRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { Toaster } from 'react-hot-toast';
@@ -373,6 +374,9 @@ export function App() {
       <Routes>
         {/* Public marketing landing route */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Dedicated Super-Admin HQ Portal with its own login and password flow */}
+        {superAdminRoutes}
 
         {/* Auth routes guarded against already logged in users */}
         <Route element={<PublicRoute />}>

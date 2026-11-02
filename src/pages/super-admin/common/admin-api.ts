@@ -52,30 +52,55 @@ export interface SupportTicketMessage {
   created_at: string;
 }
 
+export interface SuperAdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
+export function getAdminHeaders(): Record<string, string> {
+  const token = localStorage.getItem('X-SUPERADMIN-TOKEN') || localStorage.getItem('X-NINJA-TOKEN') || '';
+  return {
+    'X-Api-Token': token,
+    Authorization: token ? `Bearer ${token}` : '',
+  };
+}
+
 export const adminApi = {
+  login: async (email: string, password: string): Promise<{ token: string; admin: SuperAdminUser }> => {
+    const res = await request('POST', endpoint('/api/v1/admin/login'), { email, password }, { skipIntercept: true });
+    return (res.data?.data || res.data) as { token: string; admin: SuperAdminUser };
+  },
+
+  logout: () => {
+    localStorage.removeItem('X-SUPERADMIN-TOKEN');
+    sessionStorage.removeItem('invoicely_superadmin_session');
+  },
+
   getMetrics: async (): Promise<AdminMetrics> => {
-    const res = await request('GET', endpoint('/api/v1/admin/metrics'));
+    const res = await request('GET', endpoint('/api/v1/admin/metrics'), undefined, { headers: getAdminHeaders() });
     return (res.data?.data || res.data) as AdminMetrics;
   },
 
   getCustomers: async (page = 1, perPage = 50): Promise<AdminCustomer[]> => {
-    const res = await request('GET', endpoint(`/api/v1/admin/customers?page=${page}&per_page=${perPage}`));
+    const res = await request('GET', endpoint(`/api/v1/admin/customers?page=${page}&per_page=${perPage}`), undefined, { headers: getAdminHeaders() });
     return (res.data?.data || res.data || []) as AdminCustomer[];
   },
 
   getCustomerDetails: async (companyId: string): Promise<AdminCustomer> => {
-    const res = await request('GET', endpoint(`/api/v1/admin/customers/${companyId}`));
+    const res = await request('GET', endpoint(`/api/v1/admin/customers/${companyId}`), undefined, { headers: getAdminHeaders() });
     return (res.data?.data || res.data) as AdminCustomer;
   },
 
   impersonateCustomer: async (companyId: string): Promise<string> => {
-    const res = await request('POST', endpoint(`/api/v1/admin/customers/${companyId}/impersonate`));
+    const res = await request('POST', endpoint(`/api/v1/admin/customers/${companyId}/impersonate`), undefined, { headers: getAdminHeaders() });
     return res.data?.token;
   },
 
   getSupportTickets: async (status?: string, page = 1, perPage = 30): Promise<SupportTicket[]> => {
     const query = status && status !== 'ALL' ? `?status=${encodeURIComponent(status)}&page=${page}&per_page=${perPage}` : `?page=${page}&per_page=${perPage}`;
-    const res = await request('GET', endpoint(`/api/v1/admin/support/tickets${query}`));
+    const res = await request('GET', endpoint(`/api/v1/admin/support/tickets${query}`), undefined, { headers: getAdminHeaders() });
     return (res.data?.data || res.data || []) as SupportTicket[];
   },
 
@@ -87,12 +112,12 @@ export const adminApi = {
     category: string;
     message: string;
   }): Promise<SupportTicket> => {
-    const res = await request('POST', endpoint('/api/v1/admin/support/tickets'), data);
+    const res = await request('POST', endpoint('/api/v1/admin/support/tickets'), data, { headers: getAdminHeaders() });
     return (res.data?.data || res.data) as SupportTicket;
   },
 
   getTicketMessages: async (ticketId: string): Promise<SupportTicketMessage[]> => {
-    const res = await request('GET', endpoint(`/api/v1/admin/support/tickets/${ticketId}/messages`));
+    const res = await request('GET', endpoint(`/api/v1/admin/support/tickets/${ticketId}/messages`), undefined, { headers: getAdminHeaders() });
     return (res.data?.data || res.data || []) as SupportTicketMessage[];
   },
 
@@ -100,7 +125,7 @@ export const adminApi = {
     ticketId: string,
     payload: { message: string; is_internal_note: boolean; status?: string }
   ): Promise<SupportTicketMessage> => {
-    const res = await request('POST', endpoint(`/api/v1/admin/support/tickets/${ticketId}/reply`), payload);
+    const res = await request('POST', endpoint(`/api/v1/admin/support/tickets/${ticketId}/reply`), payload, { headers: getAdminHeaders() });
     return (res.data?.data || res.data) as SupportTicketMessage;
   },
 };
